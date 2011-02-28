@@ -292,20 +292,24 @@ class MappingFactory
                 throw MappingException::duplicateXmlNameBinding($className, $class->getXmlName());
             }
             // (somewhat expensive, does some duplicate work)
-            foreach ($class->getFieldMappings() as $fieldName => $mapping) {
-                if (Type::hasType($mapping['type'])) {
-                    continue;
-                }
+            $fieldMappings = $class->getFieldMappings();
+            if (!empty($fieldMappings)) {
 
-                // Support type as a mapped class?
-                if (!$this->hasMappingForClass($mapping['type']) && !$this->getMappingForClass($mapping['type'])) {
-                    throw MappingException::fieldTypeNotFound($className, $fieldName, $mapping['type']);
-                }
+                foreach ($fieldMappings as $fieldName => $mapping) {
+                    if (Type::hasType($mapping['type'])) {
+                        continue;
+                    }
 
-                // Mapped classes must have binding node type XML_ELEMENT
-                $fieldBinding = $class->getFieldBinding($fieldName);
-                if ($fieldBinding['node'] !== Mapping::XML_ELEMENT) {
-                    throw MappingException::customTypeWithoutNodeElement($className, $fieldName);
+                    // Support type as a mapped class?
+                    if (!$this->hasMappingForClass($mapping['type']) && !$this->getMappingForClass($mapping['type'])) {
+                        throw MappingException::fieldTypeNotFound($className, $fieldName, $mapping['type']);
+                    }
+
+                    // Mapped classes must have binding node type XML_ELEMENT
+                    $fieldBinding = $class->getFieldBinding($fieldName);
+                    if ($fieldBinding['node'] !== Mapping::XML_ELEMENT) {
+                        throw MappingException::customTypeWithoutNodeElement($className, $fieldName);
+                    }
                 }
             }
 

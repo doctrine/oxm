@@ -90,7 +90,7 @@ class SimpleXmlMarshaller implements Marshaller
                         
             $fieldValue = $classMapping->getFieldValue($mappedObject, $fieldName);
 
-            if ($classMapping->isFieldRequired($fieldName) && $fieldValue == null) {
+            if ($classMapping->isFieldRequired($fieldName) && $fieldValue === null) {
                 throw MarshallerException::fieldRequired($className, $fieldName);
             }
 
@@ -98,31 +98,34 @@ class SimpleXmlMarshaller implements Marshaller
             $fieldXmlName = $classMapping->getFieldXmlName($fieldName);
 
             $fieldType = $classMapping->getTypeOfField($fieldName);
-//            print_r($fieldType);
-            if (!Type::hasType($fieldType) && $fieldXmlType === Mapping::XML_ELEMENT) {
-                // check for native type
-                if ($mappingFactory->hasMappingForClass($fieldType)) {
-                    if ($classMapping->isFieldCollection($fieldName) && is_array($fieldValue)) {
-                        foreach ($fieldValue as $value) {
-                            $this->marshalImpl($mappingFactory, $value, $xml);
+
+            if ($fieldValue !== null || $classMapping->isFieldNillable($fieldName)) {
+
+                if (!Type::hasType($fieldType) && $fieldXmlType === Mapping::XML_ELEMENT) {
+                    // check for native type
+                    if ($mappingFactory->hasMappingForClass($fieldType)) {
+                        if ($classMapping->isFieldCollection($fieldName)) {
+                            foreach ($fieldValue as $value) {
+                                $this->marshalImpl($mappingFactory, $value, $xml);
+                            }
+                        } else {
+                            $this->marshalImpl($mappingFactory, $fieldValue, $xml);
                         }
-                    } else {
-                        $this->marshalImpl($mappingFactory, $fieldValue, $xml);
                     }
-                }
-            } else {
-                $type = Type::getType($fieldType);
+                } else {
+                    $type = Type::getType($fieldType);
 
-                if ($fieldValue != null || $classMapping->isFieldNillable($fieldName)) {
-                    switch ($fieldXmlType) {
-                        case Mapping::XML_ATTRIBUTE:
-                            $xml->addAttribute($fieldXmlName, $type->convertToXmlValue($fieldValue));
-                            break;
 
-                        case Mapping::XML_TEXT:
-                            $xml->addChild($fieldXmlName, $type->convertToXmlValue($fieldValue));
-                            break;
-                    }
+                        switch ($fieldXmlType) {
+                            case Mapping::XML_ATTRIBUTE:
+                                $xml->addAttribute($fieldXmlName, $type->convertToXmlValue($fieldValue));
+                                break;
+
+                            case Mapping::XML_TEXT:
+                                $xml->addChild($fieldXmlName, $type->convertToXmlValue($fieldValue));
+                                break;
+                        }
+
                 }
             }
         }
