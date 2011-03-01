@@ -35,17 +35,20 @@ use \SimpleXmlElement,
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class SimpleXmlMarshaller implements Marshaller
+class SimpleXmlMarshaller extends AbstractMarshaller
 {
+
+
+
     /**
      *
      */
-    public function marshal(ClassMetadataFactory $mappingFactory, $mappedObject)
+    public function marshal($mappedObject)
     {
         // Since the SimpleXML API is silly, we'll wrap the object in a parent "dummy"
         // element to make adding children more happy with recursion
-        $dummyParent = new \SimpleXMLElement('<dummy-parent/>');
-        $this->marshalImpl($mappingFactory, $mappedObject, $dummyParent);
+        $dummyParent = new SimpleXMLElement('<dummy-parent/>');
+        $this->doMarshal($mappedObject, $dummyParent);
 
 
         // first child should be our mapped object
@@ -56,83 +59,80 @@ class SimpleXmlMarshaller implements Marshaller
     }
 
     /**
-     * @param Mapping $mapping
+     * @param object $mappedObject
      * @param SimpleXMLElement $parent
      * @return void
      */
-    private function marshalImpl(ClassMetadataFactory $mappingFactory, $mappedObject, \SimpleXMLElement &$parent)
+    private function doMarshal($mappedObject, SimpleXMLElement &$parent)
     {
         $className = get_class($mappedObject);
-        $classMapping = $mappingFactory->getMetadataFor($className);
+        $classMetadata = $this->classMetadataFactory->getMetadataFor($className);
 //        print_r($classMapping);
         
-        if (!$mappingFactory->hasMetadataFor($className)) {
+        if (!$this->classMetadataFactory->hasMetadataFor($className)) {
             throw new MarshallerException("A mapping does not exist for class '$className'");
         }
 
         // PreMarshall Hook
-        if ($classMapping->hasLifecycleCallbacks(Events::preMarshal)) {
-            $classMapping->invokeLifecycleCallbacks(Events::preMarshal, $mappedObject);
+        if ($classMetadata->hasLifecycleCallbacks(Events::preMarshal)) {
+            $classMetadata->invokeLifecycleCallbacks(Events::preMarshal, $mappedObject);
         }
 
 
         $refClass = new \ReflectionClass($mappedObject);
         
         // Add to the parent element
-        $xml = $parent->addChild($classMapping->getXmlName());
+        $xml = $parent->addChild($classMetadata->getXmlName());
         
-        foreach ($classMapping->getReflectionProperties() as $property) {
+        foreach ($classMetadata->getReflectionProperties() as $property) {
             $fieldName = $property->getName();
             
             if (!$refClass->hasProperty($fieldName)) {
                 continue;
             }
                         
-            $fieldValue = $classMapping->getFieldValue($mappedObject, $fieldName);
+            $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
 
-            if ($classMapping->isRequired($fieldName) && $fieldValue === null) {
+            if ($classMetadata->isRequired($fieldName) && $fieldValue === null) {
                 throw MarshallerException::fieldRequired($className, $fieldName);
             }
 
-            $fieldXmlType = $classMapping->getFieldXmlNode($fieldName);
-            $fieldXmlName = $classMapping->getFieldXmlName($fieldName);
+            $fieldXmlType = $classMetadata->getFieldXmlNode($fieldName);
+            $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
 
-            $fieldType = $classMapping->getTypeOfField($fieldName);
+            $fieldType = $classMetadata->getTypeOfField($fieldName);
 
-            if ($fieldValue !== null || $classMapping->isNillable($fieldName)) {
-
+            if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
                 if (!Type::hasType($fieldType) && $fieldXmlType === ClassMetadataInfo::XML_ELEMENT) {
                     // check for native type
-                    if ($mappingFactory->hasMetadataFor($fieldType)) {
-                        if ($classMapping->isCollection($fieldName)) {
+                    if ($this->classMetadataFactory->hasMetadataFor($fieldType)) {
+                        if ($classMetadata->isCollection($fieldName)) {
                             foreach ($fieldValue as $value) {
-                                $this->marshalImpl($mappingFactory, $value, $xml);
+                                $this->doMarshal($value, $xml);
                             }
                         } else {
-                            $this->marshalImpl($mappingFactory, $fieldValue, $xml);
+                            $this->doMarshal($fieldValue, $xml);
                         }
                     }
                 } else {
                     $type = Type::getType($fieldType);
 
+                    switch ($fieldXmlType) {
+                        case ClassMetadataInfo::XML_ATTRIBUTE:
+                            $xml->addAttribute($fieldXmlName, $type->convertToXmlValue($fieldValue));
+                            break;
 
-                        switch ($fieldXmlType) {
-                            case ClassMetadataInfo::XML_ATTRIBUTE:
-                                $xml->addAttribute($fieldXmlName, $type->convertToXmlValue($fieldValue));
-                                break;
-
-                            case ClassMetadataInfo::XML_TEXT:
-                                $xml->addChild($fieldXmlName, $type->convertToXmlValue($fieldValue));
-                                break;
-                        }
-
+                        case ClassMetadataInfo::XML_TEXT:
+                            $xml->addChild($fieldXmlName, $type->convertToXmlValue($fieldValue));
+                            break;
+                    }
                 }
             }
         }
 
         // PostMarshal hook
-        if ($classMapping->hasLifecycleCallbacks(Events::postMarshal)) {
-            $classMapping->invokeLifecycleCallbacks(Events::postMarshal, $mappedObject);
+        if ($classMetadata->hasLifecycleCallbacks(Events::postMarshal)) {
+            $classMetadata->invokeLifecycleCallbacks(Events::postMarshal, $mappedObject);
         }
     }
 
@@ -140,128 +140,108 @@ class SimpleXmlMarshaller implements Marshaller
      * @param string $xml
      * @return object
      */
-    public function unmarshal(ClassMetadataFactory $mappingFactory, $xml)
+    public function unmarshal($xml)
     {
-        return $this->unmarshalImpl($mappingFactory, new \SimpleXMLElement($xml));
+        return $this->doUnmarshal(new \SimpleXMLElement($xml));
     }
 
     /**
      * @throws \Doctrine\OXM\Mapping\MappingException
-     * @param \Doctrine\OXM\Mapping\MappingFactory $mappingFactory
      * @param \SimpleXmlElement $xml
      * @return object
      */
-    private function unmarshalImpl(ClassMetadataFactory $mappingFactory, \SimpleXMLElement $xml)
+    private function doUnmarshal(\SimpleXMLElement $xml)
     {
-
         $elementName = $xml->getName();
-        $allMappedXmlNodes = $mappingFactory->getAllXmlNodes();
+        $allMappedXmlNodes = $this->classMetadataFactory->getAllXmlNodes();
         $knownMappedNodes = array_keys($allMappedXmlNodes);
-
 
         if (!in_array($elementName, $knownMappedNodes)) {
             throw MappingException::invalidMapping($elementName);
         }
 
+        $classMetadata = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$elementName]);
 
-        $mapping = $mappingFactory->getMetadataFor($allMappedXmlNodes[$elementName]);
-//        print_r($mapping);
-
-        $mappedObject = $mapping->newInstance();
+        $mappedObject = $classMetadata->newInstance();
 
         // Pre Unmarshal hook
-        if ($mapping->hasLifecycleCallbacks(Events::preUnmarshal)) {
-            $mapping->invokeLifecycleCallbacks(Events::preUnmarshal, $mappedObject);
+        if ($classMetadata->hasLifecycleCallbacks(Events::preUnmarshal)) {
+            $classMetadata->invokeLifecycleCallbacks(Events::preUnmarshal, $mappedObject);
         }
 
         // Handle attributes first
         $attributes = $xml->attributes();
         foreach ($attributes as $attributeKey => $attributeValue) {
-            if ($mapping->hasXmlField($attributeKey)) {
-                $fieldName = $mapping->getFieldName($attributeKey);
-                $fieldMapping = $mapping->getFieldMapping($fieldName);
+            if ($classMetadata->hasXmlField($attributeKey)) {
+                $fieldName = $classMetadata->getFieldName($attributeKey);
+                $fieldMapping = $classMetadata->getFieldMapping($fieldName);
                 $type = Type::getType($fieldMapping['type']);
 
                 // todo ensure this is an attribute mapping
 
-                if ($mapping->isFieldRequired($fieldName) && $attributeValue === null) {
-                    throw MappingException::fieldRequired($mapping->className, $fieldName);
+                if ($classMetadata->isRequired($fieldName) && $attributeValue === null) {
+                    throw MappingException::fieldRequired($classMetadata->name, $fieldName);
                 }
 
                 // simplexml cast to string for value, TODO - should type convert result
                 $fieldValue = (string) $attributeValue;
 
-                $mapping->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($fieldValue));
+                $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($fieldValue));
             }
         }
 
         // Handle children
         $children = $xml->children();
 
-
         if (count($children) > 0) {
             $collectionElements = array();
 
             foreach ($children as $child) {
                 $childNodeName = $child->getName();
-//                print_r($childNodeName);
-//                print_r("\n");
-//
-//                print_r($mapping);
-//                print_r("\n");
-                if ($mapping->hasXmlField($childNodeName)) {
 
-                    $fieldName = $mapping->getFieldName($childNodeName);
+                if ($classMetadata->hasXmlField($childNodeName)) {
 
-
+                    $fieldName = $classMetadata->getFieldName($childNodeName);
 
                     // todo - check for collection
                     // todo - add support for collection wrapper element
 
                     // Check for mapped entity as child, add recursively
-                    $fieldMapping = $mapping->getFieldMapping($fieldName);
-                    if ($mappingFactory->hasMetadataFor($fieldMapping['type'])) {
-
-
-
+                    $fieldMapping = $classMetadata->getFieldMapping($fieldName);
+                    if ($this->classMetadataFactory->hasMetadataFor($fieldMapping['type'])) {
                         // todo ensure this is an element node
 
 
-                        $fieldValue = $this->unmarshalImpl($mappingFactory, $child);
+                        $fieldValue = $this->doUnmarshal($child);
 
-                        if ($mapping->isFieldCollection($fieldName)) {
+                        if ($classMetadata->isCollection($fieldName)) {
                             $collectionElements[$fieldName][] = $fieldValue;
                         } else {                            
-                            $mapping->setFieldValue($mappedObject, $fieldName, $fieldValue);
+                            $classMetadata->setFieldValue($mappedObject, $fieldName, $fieldValue);
                         }
-
                     } else {
                         $type = Type::getType($fieldMapping['type']);
-
                         // todo ensure this is a text node
 
                         // Check for text node of current object
                         // simplexml cast via string, 
                         $textNode = (string) $xml->$childNodeName;
 
-                        $mapping->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($textNode));
-
+                        $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($textNode));
                     }
                 }
             }
 
             if (!empty($collectionElements)) {
                 foreach ($collectionElements as $fieldName => $elements) {
-                    $mapping->setFieldValue($mappedObject, $fieldName, $elements);
+                    $classMetadata->setFieldValue($mappedObject, $fieldName, $elements);
                 }
             }
-
-
         }
 
         // PostUnmarshall hook
-        if ($mapping->hasLifecycleCallbacks(Events::postUnmarshal)) {
-            $mapping->invokeLifecycleCallbacks(Events::postUnmarshal, $mappedObject);
+        if ($classMetadata->hasLifecycleCallbacks(Events::postUnmarshal)) {
+            $classMetadata->invokeLifecycleCallbacks(Events::postUnmarshal, $mappedObject);
         }
 
 

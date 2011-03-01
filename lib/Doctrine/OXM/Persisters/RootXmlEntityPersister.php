@@ -9,7 +9,16 @@
 
 namespace Doctrine\OXM\Persisters;
 
+use \Doctrine\OXM\XmlEntityManager,
+    \Doctrine\OXM\Mapping\ClassMetadata,
+    \Doctrine\OXM\Mapping\ClassMetadataFactory;
+
 class RootXmlEntityPersister
 {
 
+
+    public function __construct(XmlEntityManager $xem, ClassMetadata $metadata)
+    {
+
+    }
 }

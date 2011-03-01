@@ -35,15 +35,12 @@ interface Marshaller
      * @param object $mappedObject
      * @return string
      */
-    function marshal(ClassMetadataFactory $mappingFactory, $mappedObject);
+    function marshal($mappedObject);
 
     /**
      * @param string $xml
-     * @return void
+     * @return object
      */
-    function unmarshal(ClassMetadataFactory $mappingFactory, $xml);
-
-
-    // todo discuss a static implementation of marshal and unmarshal which support no mappings... simple introspection only
+    function unmarshal($xml);
 }
  

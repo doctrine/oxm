@@ -66,6 +66,8 @@ class ClassMetadata extends ClassMetadataInfo
         parent::__construct($documentName);
         $this->reflClass = new \ReflectionClass($documentName);
         $this->namespace = $this->reflClass->getNamespaceName();
+
+        // todo - move to Inflector of some kind
         $this->xmlName = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $this->reflClass->getShortName()));
     }
 

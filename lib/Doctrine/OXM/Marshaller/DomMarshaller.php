@@ -28,7 +28,7 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory;
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class DomMarshaller implements Marshaller
+class DomMarshaller extends AbstractMarshaller
 {
     /**
      * @param string $xml

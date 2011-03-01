@@ -84,6 +84,23 @@ class Configuration
         $this->_attributes['mappingCacheImpl'] = $cacheImpl;
     }
 
+    /**
+     *
+     */
+    public function setStoragePath($path)
+    {
+        $this->_attributes['storagePath'] = $path;
+    }
+
+    /**
+     * 
+     */
+    public function getStoragePath()
+    {
+        return isset($this->_attributes['storagePath']) ?
+                $this->_attributes['storagePath'] : null;
+    }
+
 
     /**
      * Add a new default annotation driver with a correctly configured annotation reader.

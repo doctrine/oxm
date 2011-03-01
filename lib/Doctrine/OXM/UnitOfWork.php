@@ -176,6 +176,13 @@ class UnitOfWork implements PropertyChangedListener
      */
     private $evm;
 
+    /**
+     * The entity persister instances used to persist entity instances.
+     *
+     * @var array
+     */
+    private $persisters = array();
+
 
 
     /**

@@ -29,7 +29,7 @@ use \ReflectionException,
     \Doctrine\OXM\Types\Type;
 
 /**
- * The MappingFactory is used to create Mapping objects that contain all the
+ * The ClassMetadataFactory is used to create Mapping objects that contain all the
  * metadata mapping informations of a class which describes how a class should be mapped
  * to a xml node.
  *
@@ -77,6 +77,12 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      * @var bool
      */
     private $initialized = false;
+
+
+    public function __construct()
+    {
+        //todo make DIC first class for feeding to marshaller
+    }
 
     /**
      * @param \Doctrine\OXM\XmlEntityManager $$em
@@ -167,11 +173,16 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         $this->initialized = true;
     }
 
+    public function setDriver(Driver $driver)
+    {
+        $this->driver = $driver;
+    }
+
     /**
      * Gets the class metadata descriptor for a class.
      *
      * @param string $className The name of the class.
-     * @return ClassMetadataInfo
+     * @return \Doctrine\OXM\Mapping\ClassMetadata
      */
     public function getMetadataFor($className)
     {
