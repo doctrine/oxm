@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Marshaller;
 
-use \Doctrine\OXM\Mapping\MappingFactory;
+use \Doctrine\OXM\Mapping\ClassMetadataFactory;
 /**
  *
  * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
@@ -34,7 +34,7 @@ class DomMarshaller implements Marshaller
      * @param string $xml
      * @return void
      */
-    function unmarshal(MappingFactory $mappingFactory, $xml)
+    function unmarshal(ClassMetadataFactory $mappingFactory, $xml)
     {
         // TODO: Implement unmarshal() method.
     }
@@ -43,7 +43,7 @@ class DomMarshaller implements Marshaller
      * @param  $mappedObject
      * @return string
      */
-    function marshal(MappingFactory $mappingFactory, $mappedObject)
+    function marshal(ClassMetadataFactory $mappingFactory, $mappedObject)
     {
         // TODO: Implement marshal() method.
     }

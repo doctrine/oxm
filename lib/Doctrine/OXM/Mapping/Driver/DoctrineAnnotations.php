@@ -22,40 +22,48 @@ namespace Doctrine\OXM\Mapping;
 use Doctrine\Common\Annotations\Annotation;
 
 /* Annotations for OXM Entities */
-final class XmlEntity extends Annotation {
-    public $name;            // implied
-    public $extends;         // implied
-//    public $autoComplete;
-}
-final class XmlMapTo extends Annotation {
-    public $xml;
+class XmlEntity extends Annotation {
+    public $xml;        // implied
     public $nsUrl;
     public $nsPrefix;
+}
+final class XmlRoot extends XmlEntity {
+    public $repositoryClass;
+}
+final class XmlMappedSuperclass extends Annotation {}
 
-}
-final class XmlField extends Annotation {
-    public $name;      // required
-    public $type;      // required
-    public $handler;   // implied
-    public $required;
-    public $direct;
-//    public $lazy;    // todo support lazy evaluation on fields
-    public $transient;
-    public $nillable;  // (controls if Null fields should be marshalled as empty elements)
-    public $container;
-    public $getMethod;         // implied
-    public $setMethod;         // implied
-//    public $createMethod;      // implied
-    public $collection;
-}
-final class XmlBinding extends Annotation {
-    public $name;       // implied
-    public $node;       // implied (through type)
-    public $reference;  // boolean
+class XmlField extends Annotation {
+    public $type;       // required
+    public $name;       // implied (xml element name)
+    public $node;       // implied (attribute, text, element)
+    public $direct = false;
+    public $nillable = false;
+    public $required = false;
+    public $collection = false;
+    public $getMethod;  // implied
+    public $setMethod;  // implied
 }
 
-// todo - perhaps boolean field definitions should have their own annotation?
-// todo - getters and setters get an annotation on the "actual" getter and setter?  perhaps referencing field
+final class XmlAttribute extends XmlField {
+    public $node = "attribute";
+}
+final class XmlElement extends XmlField {
+    public $node = "element";
+}
+final class XmlText extends XmlField {
+    public $node = "text";
+}
+final class XmlCollection extends XmlField {
+    public $node = "element";
+    public $collection = true;
+    public $wrapper;
+}
+
+final class XmlReferences extends Annotation {
+    public $entityName;
+}
+
+final class XmlId extends Annotation {}
 
 /* Annotations for lifecycle callbacks */
 final class HasLifecycleCallbacks extends Annotation {}

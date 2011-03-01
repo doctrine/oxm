@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Mapping\Driver;
 
-use \Doctrine\OXM\Mapping\Mapping;
+use \Doctrine\OXM\Mapping\ClassMetadataInfo;
 
 /**
  *
@@ -51,7 +51,7 @@ class StaticPHPDriver extends AbstractFileDriver
      * @param string $className
      * @param Mapping $mapping
      */
-    public function loadMappingForClass($className, Mapping $mapping)
+    public function loadMappingForClass($className, ClassMetadataInfo $mapping)
     {
         call_user_func_array(array($className, 'loadMapping'), array($mapping));
     }

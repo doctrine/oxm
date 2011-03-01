@@ -59,7 +59,7 @@ class MappingException extends OXMException
 
     public static function customTypeWithoutNodeElement($className, $fieldName)
     {
-        return new self("Custom types on field '$fieldName' of class '$className' can only be used with xml binding type '" . Mapping::XML_ELEMENT . "'");
+        return new self("Custom types on field '$fieldName' of class '$className' can only be used with xml binding type '" . ClassMetadataInfo::XML_ELEMENT . "'");
     }
 
     public static function xmlBindingTypeUnknown($fieldName, $bindingType)

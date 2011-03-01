@@ -21,7 +21,7 @@ namespace Doctrine\OXM\Mapping\Driver;
 
 use \Doctrine\Common\Cache\ArrayCache,
     \Doctrine\Common\Annotations\AnnotationReader,
-    \Doctrine\OXM\Mapping\Mapping,
+    \Doctrine\OXM\Mapping\ClassMetadataInfo,
     \Doctrine\OXM\Mapping\MappingException,
     \Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
 
@@ -123,7 +123,7 @@ class AnnotationDriver implements DriverInterface
     /**
      * {@inheritdoc}
      */
-    public function loadMappingForClass($className, Mapping $classMapping)
+    public function loadMappingForClass($className, ClassMetadataInfo $classMapping)
     {
         $class = $classMapping->getReflectionClass();
 
@@ -133,7 +133,7 @@ class AnnotationDriver implements DriverInterface
         if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlEntity'];
 
-            $classMapping->setClassName($class->getName());
+            $classMapping->setName($class->getName());
             
 
 //            if ($entityAnnot->autoComplete) {

@@ -17,33 +17,27 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Marshaller;
+namespace Doctrine\OXM\Id;
 
-use \Doctrine\OXM\Mapping\ClassMetadataFactory;
-    
+use Doctrine\OXM\XmlEntityManager;
+use Doctrine\OXM\Mapping\ClassMetadata;
+
 /**
+ * AbstractIdGenerator
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @version $Revision$
- * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
+ * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @link        www.doctrine-project.com
+ * @since       1.0
+ * @author      Jonathan H. Wage <jonwage@gmail.com>
+ * @author      Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-interface Marshaller
+abstract class AbstractIdGenerator
 {
     /**
-     * @param object $mappedObject
-     * @return string
+     * Generates an identifier for an xml entity.
+     *
+     * @param Doctrine\OXM\XmlEntityManager $xem
+     * @return mixed
      */
-    function marshal(ClassMetadataFactory $mappingFactory, $mappedObject);
-
-    /**
-     * @param string $xml
-     * @return void
-     */
-    function unmarshal(ClassMetadataFactory $mappingFactory, $xml);
-
-
-    // todo discuss a static implementation of marshal and unmarshal which support no mappings... simple introspection only
+    abstract public function generate(XmlEntityManager $xem, $xmlEntity);
 }
- 

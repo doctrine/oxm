@@ -17,12 +17,15 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Mapping\Metadata\Driver;
+namespace Doctrine\OXM\Event;
 
-use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface,
-    Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\Common\EventArgs;
+
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\XmlEntityManager;
 
 /**
+ * Class that holds event arguments for a loadMapping event.
  *
  * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link    www.doctrine-project.org
@@ -30,42 +33,42 @@ use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface,
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class PHPDriver implements DriverInterface
+class LoadClassMetadataEventArgs extends EventArgs
 {
     /**
-     * Whether the class with the specified name should have its metadata loaded.
-     * This is only the case if it is either mapped as an XmlEntity
-     *
-     * @param string $className
-     * @return boolean
+     * @var Mapping
      */
-    function isTransient($className)
-    {
-        // TODO: Implement isTransient() method.
-        throw new \Exception("Not yet implemented");
-    }
+    private $mapping;
 
     /**
-     * Gets the names of all mapped classes known to this driver.
-     *
-     * @return array The names of all mapped classes known to this driver.
+     * @var XmlEntityManager
      */
-    public function getAllClassNames()
-    {
-        // TODO: Implement getAllClassNames() method.
-        throw new \Exception("Not yet implemented");
-    }
+    private $xem;
 
     /**
-     * Loads the mapping for the specified class into the provided container.
-     *
-     * @param string $className
      * @param Mapping $mapping
+     * @param EntityManager $xem
      */
-    public function loadMappingForClass($className, ClassMetadataInfo $mapping)
+    public function __construct(ClassMetadataInfo $mapping, XmlEntityManager $xem)
     {
-        // TODO: Implement loadMappingForClass() method.
-        throw new \Exception("Not yet implemented");
+        $this->mapping = $mapping;
+        $this->xem = $xem;
     }
 
+    /**
+     * @return Mapping
+     */
+    public function getMapping()
+    {
+        return $this->mapping;
+    }
+
+    /**
+     * @return XmlEntityManager
+     */
+    public function getEntityManager()
+    {
+        return $this->xem;
+    }
 }
+

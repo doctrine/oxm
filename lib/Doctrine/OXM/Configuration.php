@@ -149,17 +149,17 @@ class Configuration
      */
     public function setMappingFactoryName($cmfName)
     {
-        $this->_attributes['mappingFactoryName'] = $cmfName;
+        $this->_attributes['classMetadataFactoryName'] = $cmfName;
     }
 
     /**
      * @return string
      */
-    public function getMappingFactoryName()
+    public function getClassMetadataFactoryName()
     {
-        if (!isset($this->_attributes['mappingFactoryName'])) {
-            $this->_attributes['mappingFactoryName'] = 'Doctrine\OXM\Mapping\MappingFactory';
+        if (!isset($this->_attributes['classMetadataFactoryName'])) {
+            $this->_attributes['classMetadataFactoryName'] = 'Doctrine\OXM\Mapping\ClassMetadataFactory';
         }
-        return $this->_attributes['mappingFactoryName'];
+        return $this->_attributes['classMetadataFactoryName'];
     }
 }

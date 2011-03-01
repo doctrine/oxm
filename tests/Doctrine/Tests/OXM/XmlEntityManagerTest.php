@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-use \Doctrine\OXM\Mapping\Mapping,
+use \Doctrine\OXM\Mapping\ClassMetadataInfo,
     \Doctrine\Common\Util\Debug,
     \Doctrine\OXM\XmlEntityManager,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,

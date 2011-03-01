@@ -25,6 +25,7 @@ use \ReflectionException,
     \Doctrine\Common\Util\Debug,
     \Doctrine\OXM\Events,
     \Doctrine\Common\Cache\Cache,
+    \Doctrine\Common\Persistence\Mapping\ClassMetadataFactory as BaseClassMetadataFactory,
     \Doctrine\OXM\Types\Type;
 
 /**
@@ -38,7 +39,7 @@ use \ReflectionException,
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class MappingFactory
+class ClassMetadataFactory implements BaseClassMetadataFactory
 {
     /**
      * @var \Doctrine\OXM\XmlEntityManager
@@ -61,9 +62,9 @@ class MappingFactory
     private $cacheDriver;
 
     /**
-     * @var Mapping[]
+     * @var \Doctrine\Common\Persistance\Mapping\ClassMetadata[]
      */
-    private $loadedMappings = array();
+    private $loadedMetadata = array();
 
     /**
      * Keys are mapped xml node names
@@ -71,7 +72,6 @@ class MappingFactory
      * @var array
      */
     private $xmlToClassMap = array();
-
 
     /**
      * @var bool
@@ -114,9 +114,9 @@ class MappingFactory
         return $this->cacheDriver;
     }
     
-    public function getLoadedMappings()
+    public function getLoadedMetadata()
     {
-        return $this->loadedMappings;
+        return $this->loadedMetadata;
     }
     
     /**
@@ -125,7 +125,7 @@ class MappingFactory
      * 
      * @return array The ClassMetadata instances of all mapped classes.
      */
-    public function getAllMappings()
+    public function getAllMetadata()
     {
         if ( ! $this->initialized) {
             $this->initialize();
@@ -133,7 +133,7 @@ class MappingFactory
 
         $mappings = array();
         foreach ($this->driver->getAllClassNames() as $className) {
-            $mappings[] = $this->getMappingForClass($className);
+            $mappings[] = $this->getMetadataFor($className);
         }
 
         return $mappings;
@@ -151,7 +151,7 @@ class MappingFactory
         }
         // Load all metadata
         // todo:  there should be a better way to access the metadata about a mapped xml node than instantiating all of them
-        $this->getAllMappings();
+        $this->getAllMetadata();
 
         return $this->xmlToClassMap;
     }
@@ -171,11 +171,11 @@ class MappingFactory
      * Gets the class metadata descriptor for a class.
      *
      * @param string $className The name of the class.
-     * @return Mapping
+     * @return ClassMetadataInfo
      */
-    public function getMappingForClass($className)
+    public function getMetadataFor($className)
     {
-        if ( ! isset($this->loadedMappings[$className])) {
+        if ( ! isset($this->loadedMetadata[$className])) {
             $realClassName = $className;
 
             // Check for namespace alias
@@ -183,21 +183,21 @@ class MappingFactory
                 list($namespaceAlias, $simpleClassName) = explode(':', $className);
                 $realClassName = $this->xem->getConfiguration()->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
 
-                if (isset($this->loadedMappings[$realClassName])) {
+                if (isset($this->loadedMetadata[$realClassName])) {
                     // We do not have the alias name in the map, include it
-                    $this->loadedMappings[$className] = $this->loadedMappings[$realClassName];
+                    $this->loadedMetadata[$className] = $this->loadedMetadata[$realClassName];
 
-                    return $this->loadedMappings[$realClassName];
+                    return $this->loadedMetadata[$realClassName];
                 }
             }
 
             if ($this->cacheDriver) {
-                if (($cached = $this->cacheDriver->fetch("$realClassName\$CLASSMAPPING")) !== false) {
-                    $this->loadedMappings[$realClassName] = $cached;
+                if (($cached = $this->cacheDriver->fetch("$realClassName\$XMLCLASSMETADATA")) !== false) {
+                    $this->loadedMetadata[$realClassName] = $cached;
                 } else {
                     foreach ($this->loadMapping($realClassName) as $loadedClassName) {
                         $this->cacheDriver->save(
-                            "$loadedClassName\$CLASSMAPPING", $this->loadedMappings[$loadedClassName], null
+                            "$loadedClassName\$XMLCLASSMETADATA", $this->loadedMetadata[$loadedClassName], null
                         );
                     }
                 }
@@ -207,11 +207,11 @@ class MappingFactory
 
             if ($className != $realClassName) {
                 // We do not have the alias name in the map, include it
-                $this->loadedMappings[$className] = $this->loadedMappings[$realClassName];
+                $this->loadedMetadata[$className] = $this->loadedMetadata[$realClassName];
             }
         }
 
-        return $this->loadedMappings[$className];
+        return $this->loadedMetadata[$className];
     }
 
     /**
@@ -220,9 +220,9 @@ class MappingFactory
      * @param string $className
      * @return boolean TRUE if the metadata of the class in question is already loaded, FALSE otherwise.
      */
-    public function hasMappingForClass($className)
+    public function hasMetadataFor($className)
     {
-        return isset($this->loadedMappings[$className]);
+        return isset($this->loadedMetadata[$className]);
     }
 
     /**
@@ -233,9 +233,9 @@ class MappingFactory
      * @param string $className
      * @param ClassMapping $class
      */
-    public function setMappingForClass($className, $class)
+    public function setMetadataFor($className, $class)
     {
-        $this->loadedMappings[$className] = $class;
+        $this->loadedMetadata[$className] = $class;
     }
 
     /**
@@ -271,21 +271,42 @@ class MappingFactory
 
         $loaded = array();
 
-//        $parentClasses = $this->getParentClasses($name);
-//        $parentClasses[] = $name;
+        $parentClasses = $this->getParentClasses($name);
+        $parentClasses[] = $name;
 
         // Move down the hierarchy of parent classes, starting from the topmost class
-        // TODO support parent classes and subclasses
         $parent = null;
         $visited = array();
+        foreach ($parentClasses as $className) {
+            if (isset($this->loadedMetadata[$className])) {
+                $parent = $this->loadedMetadata[$className];
+                if (!$parent->isMappedSuperclass) {
+                    array_unshift($visited, $className);
+                }
+                continue;
+            }
 
-        $className = $name;
+            $class = $this->newClassMetadataInstance($className);
 
-        $class = $this->newMappingInstance($className);
-        
-        // Invoke driver
-        try {
-            $this->driver->loadMappingForClass($className, $class);
+            if ($parent) {
+                if (!$parent->isMappedSuperclass) {
+                    $class->setInheritanceType($parent->inheritanceType);
+                    $class->setDiscriminatorField($parent->discriminatorField);
+                    $class->setDiscriminatorMap($parent->discriminatorMap);
+                }
+                $class->setIdGeneratorType($parent->generatorType);
+                $this->addInheritedFields($class, $parent);
+                $class->setIdentifier($parent->identifier);
+                $class->setLifecycleCallbacks($parent->lifecycleCallbacks);
+                $class->setChangeTrackingPolicy($parent->changeTrackingPolicy);
+            }
+
+            // Invoke driver
+            try {
+                $this->driver->loadMetadataForClass($className, $class);
+            } catch (ReflectionException $e) {
+                throw MappingException::reflectionFailure($className, $e);
+            }
 
             // Post loading validation
             if (in_array($class->getXmlName(), array_keys($this->xmlToClassMap))) {
@@ -301,43 +322,68 @@ class MappingFactory
                     }
 
                     // Support type as a mapped class?
-                    if (!$this->hasMappingForClass($mapping['type']) && !$this->getMappingForClass($mapping['type'])) {
+                    if (!$this->hasMetadataFor($mapping['type']) && !$this->getMetadataFor($mapping['type'])) {
                         throw MappingException::fieldTypeNotFound($className, $fieldName, $mapping['type']);
                     }
 
                     // Mapped classes must have binding node type XML_ELEMENT
                     $fieldBinding = $class->getFieldBinding($fieldName);
-                    if ($fieldBinding['node'] !== Mapping::XML_ELEMENT) {
+                    if ($fieldBinding['node'] !== ClassMetadataInfo::XML_ELEMENT) {
                         throw MappingException::customTypeWithoutNodeElement($className, $fieldName);
                     }
                 }
             }
 
-        } catch (ReflectionException $e) {
-            throw MappingException::reflectionFailure($className, $e);
+            if ($this->evm->hasListeners(Events::loadClassMetadata)) {
+                $eventArgs = new \Doctrine\OXM\Event\LoadClassMetadataEventArgs($class, $this->xem);
+                $this->evm->dispatchEvent(Events::loadClassMetadata, $eventArgs);
+            }
+
+            $this->loadedMetadata[$className] = $class;
+            $this->xmlToClassMap[$class->getXmlName()] = $className;
+
+            $parent = $class;
+
+            if ( ! $class->isMappedSuperclass) {
+                array_unshift($visited, $className);
+            }
+
+            $loaded[] = $className;
         }
-
-        if ($this->evm->hasListeners(Events::loadClassMetadata)) {
-            $eventArgs = new \Doctrine\OXM\Event\LoadMappingEventArgs($class, $this->xem);
-            $this->evm->dispatchEvent(Events::loadClassMetadata, $eventArgs);
-        }
-
-        $this->loadedMappings[$className] = $class;
-        $this->xmlToClassMap[$class->getXmlName()] = $className;
-
-        $loaded[] = $className;
 
         return $loaded;
+    }
+
+    /**
+     * Adds inherited fields to the subclass mapping.
+     *
+     * @param ClassMetadata $subClass
+     * @param ClassMetadata $parentClass
+     */
+    private function addInheritedFields(ClassMetadata $subClass, ClassMetadata $parentClass)
+    {
+        foreach ($parentClass->fieldMappings as $fieldName => $mapping) {
+            if ( ! isset($mapping['inherited']) && ! $parentClass->isMappedSuperclass) {
+                $mapping['inherited'] = $parentClass->name;
+            }
+            if ( ! isset($mapping['declared'])) {
+                $mapping['declared'] = $parentClass->name;
+            }
+            $subClass->addInheritedFieldMapping($mapping);
+        }
+        foreach ($parentClass->reflFields as $name => $field) {
+            $subClass->reflFields[$name] = $field;
+        }
     }
 
     /**
      * Creates a new Mapping instance for the given class name.
      *
      * @param string $className
-     * @return Mapping
+     * @return ClassMetadata
      */
-    protected function newMappingInstance($className)
+    protected function newClassMetadataInstance($className)
     {
-        return new Mapping($className);
+        return new ClassMetadata($className);
     }
 }

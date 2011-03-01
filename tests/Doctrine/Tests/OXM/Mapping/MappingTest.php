@@ -9,7 +9,7 @@
 
 namespace Doctrine\Tests\OXM\Mapping;
 
-use Doctrine\OXM\Mapping\Mapping;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
 
 class MappingTest extends \PHPUnit_Framework_TestCase
 {
@@ -20,7 +20,7 @@ class MappingTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->mapping = new Mapping('Doctrine\Tests\OXM\Mapping\User');
+        $this->mapping = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\User');
     }
 
 

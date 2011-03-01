@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Mapping\Driver;
 
-use Doctrine\OXM\Mapping\Mapping;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
     
 /**
  *
@@ -38,7 +38,7 @@ interface Driver
      * @param string $className
      * @param Mapping $mapping
      */
-    public function loadMappingForClass($className, Mapping $mapping);
+    public function loadMetadataForClass($className, ClassMetadataInfo $mapping);
 
     /**
      * Gets the names of all mapped classes known to this driver.

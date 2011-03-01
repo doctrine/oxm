@@ -21,8 +21,8 @@ namespace Doctrine\OXM\Marshaller;
 
 use \SimpleXmlElement,
     \Doctrine\Common\Util\Debug,
-    \Doctrine\OXM\Mapping\Mapping,
-    \Doctrine\OXM\Mapping\MappingFactory,
+    \Doctrine\OXM\Mapping\ClassMetadataInfo,
+    \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\OXM\Mapping\MappingException,
     \Doctrine\OXM\Types\Type,
     \Doctrine\OXM\Events;
@@ -40,7 +40,7 @@ class SimpleXmlMarshaller implements Marshaller
     /**
      *
      */
-    public function marshal(MappingFactory $mappingFactory, $mappedObject)
+    public function marshal(ClassMetadataFactory $mappingFactory, $mappedObject)
     {
         // Since the SimpleXML API is silly, we'll wrap the object in a parent "dummy"
         // element to make adding children more happy with recursion
@@ -60,13 +60,13 @@ class SimpleXmlMarshaller implements Marshaller
      * @param SimpleXMLElement $parent
      * @return void
      */
-    private function marshalImpl(MappingFactory $mappingFactory, $mappedObject, \SimpleXMLElement &$parent)
+    private function marshalImpl(ClassMetadataFactory $mappingFactory, $mappedObject, \SimpleXMLElement &$parent)
     {
         $className = get_class($mappedObject);
-        $classMapping = $mappingFactory->getMappingForClass($className);
+        $classMapping = $mappingFactory->getMetadataFor($className);
 //        print_r($classMapping);
         
-        if (!$mappingFactory->hasMappingForClass($className)) {
+        if (!$mappingFactory->hasMetadataFor($className)) {
             throw new MarshallerException("A mapping does not exist for class '$className'");
         }
 
@@ -90,7 +90,7 @@ class SimpleXmlMarshaller implements Marshaller
                         
             $fieldValue = $classMapping->getFieldValue($mappedObject, $fieldName);
 
-            if ($classMapping->isFieldRequired($fieldName) && $fieldValue === null) {
+            if ($classMapping->isRequired($fieldName) && $fieldValue === null) {
                 throw MarshallerException::fieldRequired($className, $fieldName);
             }
 
@@ -99,12 +99,12 @@ class SimpleXmlMarshaller implements Marshaller
 
             $fieldType = $classMapping->getTypeOfField($fieldName);
 
-            if ($fieldValue !== null || $classMapping->isFieldNillable($fieldName)) {
+            if ($fieldValue !== null || $classMapping->isNillable($fieldName)) {
 
-                if (!Type::hasType($fieldType) && $fieldXmlType === Mapping::XML_ELEMENT) {
+                if (!Type::hasType($fieldType) && $fieldXmlType === ClassMetadataInfo::XML_ELEMENT) {
                     // check for native type
-                    if ($mappingFactory->hasMappingForClass($fieldType)) {
-                        if ($classMapping->isFieldCollection($fieldName)) {
+                    if ($mappingFactory->hasMetadataFor($fieldType)) {
+                        if ($classMapping->isCollection($fieldName)) {
                             foreach ($fieldValue as $value) {
                                 $this->marshalImpl($mappingFactory, $value, $xml);
                             }
@@ -117,11 +117,11 @@ class SimpleXmlMarshaller implements Marshaller
 
 
                         switch ($fieldXmlType) {
-                            case Mapping::XML_ATTRIBUTE:
+                            case ClassMetadataInfo::XML_ATTRIBUTE:
                                 $xml->addAttribute($fieldXmlName, $type->convertToXmlValue($fieldValue));
                                 break;
 
-                            case Mapping::XML_TEXT:
+                            case ClassMetadataInfo::XML_TEXT:
                                 $xml->addChild($fieldXmlName, $type->convertToXmlValue($fieldValue));
                                 break;
                         }
@@ -140,7 +140,7 @@ class SimpleXmlMarshaller implements Marshaller
      * @param string $xml
      * @return object
      */
-    public function unmarshal(MappingFactory $mappingFactory, $xml)
+    public function unmarshal(ClassMetadataFactory $mappingFactory, $xml)
     {
         return $this->unmarshalImpl($mappingFactory, new \SimpleXMLElement($xml));
     }
@@ -151,7 +151,7 @@ class SimpleXmlMarshaller implements Marshaller
      * @param \SimpleXmlElement $xml
      * @return object
      */
-    private function unmarshalImpl(MappingFactory $mappingFactory, \SimpleXMLElement $xml)
+    private function unmarshalImpl(ClassMetadataFactory $mappingFactory, \SimpleXMLElement $xml)
     {
 
         $elementName = $xml->getName();
@@ -164,7 +164,7 @@ class SimpleXmlMarshaller implements Marshaller
         }
 
 
-        $mapping = $mappingFactory->getMappingForClass($allMappedXmlNodes[$elementName]);
+        $mapping = $mappingFactory->getMetadataFor($allMappedXmlNodes[$elementName]);
 //        print_r($mapping);
 
         $mappedObject = $mapping->newInstance();
@@ -220,7 +220,7 @@ class SimpleXmlMarshaller implements Marshaller
 
                     // Check for mapped entity as child, add recursively
                     $fieldMapping = $mapping->getFieldMapping($fieldName);
-                    if ($mappingFactory->hasMappingForClass($fieldMapping['type'])) {
+                    if ($mappingFactory->hasMetadataFor($fieldMapping['type'])) {
 
 
 

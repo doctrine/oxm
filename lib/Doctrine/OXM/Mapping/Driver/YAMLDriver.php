@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Mapping\Driver;
 
-use \Doctrine\OXM\Mapping\Mapping;
+use \Doctrine\OXM\Mapping\ClassMetadataInfo;
     
 /**
  *
@@ -61,7 +61,7 @@ class YAMLDriver extends AbstractFileDriver
      * @param string $className
      * @param Mapping $mapping
      */
-    public function loadMappingForClass($className, Mapping $mapping)
+    public function loadMappingForClass($className, ClassMetadataInfo $mapping)
     {
         // TODO: Implement loadMappingForClass() method.
         throw new \Exception("Not yet implemented");

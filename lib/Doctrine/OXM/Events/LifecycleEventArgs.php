@@ -15,60 +15,50 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the LGPL. For more information, see
  * <http://www.doctrine-project.org>.
- */
+*/
 
-namespace Doctrine\OXM\Event;
+namespace Doctrine\ODM\MongoDB\Event;
 
 use Doctrine\Common\EventArgs;
 
-use Doctrine\OXM\Mapping\Mapping;
-use Doctrine\OXM\XmlEntityManager;
-
 /**
- * Class that holds event arguments for a loadMapping event.
+ * Lifecycle Events are triggered by the Marshaller during lifecycle transitions
+ * of xml mapped entities.
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @version $Revision$
- * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
+ * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @link        www.doctrine-project.com
+ * @since       1.0
+ * @author      Jonathan H. Wage <jonwage@gmail.com>
+ * @author      Roman Borschel <roman@code-factory.org>
  */
-class LoadMappingEventArgs extends EventArgs
+class LifecycleEventArgs extends EventArgs
 {
-    /**
-     * @var Mapping
-     */
-    private $mapping;
-
     /**
      * @var XmlEntityManager
      */
     private $xem;
 
     /**
-     * @param Mapping $mapping
-     * @param EntityManager $xem
+     * @var object
      */
-    public function __construct(Mapping $mapping, XmlEntityManager $xem)
+    private $entity;
+    
+    public function __construct($entity, $xem)
     {
-        $this->mapping = $mapping;
+        $this->$entity = $entity;
         $this->xem = $xem;
     }
-
-    /**
-     * @return Mapping
-     */
-    public function getMapping()
+    
+    public function getXmlEntity()
     {
-        return $this->mapping;
+        return $this->entity;
     }
 
     /**
-     * @return XmlEntityManager
+     * @return DocumentManager
      */
-    public function getEntityManager()
+    public function getXmlEntityManager()
     {
         return $this->xem;
     }
 }
-

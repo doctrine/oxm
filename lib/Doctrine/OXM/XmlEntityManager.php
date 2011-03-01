@@ -20,12 +20,13 @@
 namespace Doctrine\OXM;
 
 use \Doctrine\OXM\Marshaller\Marshaller,
-    \Doctrine\Common\EventManager;
+    \Doctrine\Common\EventManager,
+    \Doctrine\Common\Persistence\ObjectManager;
 
 /**
  *
  */
-class XmlEntityManager
+class XmlEntityManager implements ObjectManager
 {
     /**
      * The used Configuration.
@@ -35,9 +36,9 @@ class XmlEntityManager
     private $config;
 
     /**
-     * @var Mapping\MappingFactory
+     * @var Mapping\ClassMetadataFactory
      */
-    private $mappingFactory;
+    private $metadataFactory;
 
     /**
      * @var Marshaller\Marshaller
@@ -50,8 +51,24 @@ class XmlEntityManager
     private $eventManager;
 
     /**
-     * Creates a new EntityManager that uses the given Configuration and EventManager implementations.
+     * The UnitOfWork used to coordinate object-level transactions.
      *
+     * @var Doctrine\OXM\UnitOfWork
+     */
+    private $unitOfWork;
+
+
+    /**
+     * The XmlEntityRepository instances.
+     *
+     * @var array
+     */
+    private $repositories = array();
+
+    /**
+     * Creates a new XmlEntityManager that uses the given Configuration and EventManager implementations.
+     *
+     * @param Marshaller\Marshaller $marshaller
      * @param Configuration $config
      * @param \Doctrine\Common\EventManager $eventManager
      */
@@ -65,10 +82,12 @@ class XmlEntityManager
         }
         $this->eventManager = $eventManager;
 
-        $metadataFactoryClassName = $config->getMappingFactoryName();
-        $this->mappingFactory = new $metadataFactoryClassName;
-        $this->mappingFactory->setXmlEntityManager($this);
-        $this->mappingFactory->setCacheDriver($this->config->getMappingCacheImpl());
+        $metadataFactoryClassName = $config->getClassMetadataFactoryName();
+        $this->metadataFactory = new $metadataFactoryClassName;
+        $this->metadataFactory->setXmlEntityManager($this);
+        $this->metadataFactory->setCacheDriver($this->config->getMappingCacheImpl());
+
+        $this->unitOfWork = new UnitOfWork($this);
     }
 
 
@@ -80,7 +99,7 @@ class XmlEntityManager
      */
     public function marshal($object)
     {
-        return $this->marshaller->marshal($this->mappingFactory, $object);
+        return $this->marshaller->marshal($this->metadataFactory, $object);
     }
 
     /**
@@ -91,7 +110,7 @@ class XmlEntityManager
      */
     public function unmarshal($xml)
     {
-        return $this->marshaller->unmarshal($this->mappingFactory, $xml);
+        return $this->marshaller->unmarshal($this->metadataFactory, $xml);
     }
 
     /**
@@ -100,24 +119,6 @@ class XmlEntityManager
     public function getEventManager()
     {
         return $this->eventManager;
-    }
-
-    /**
-     * Gets the metadata factory used to gather the metadata of classes.
-     *
-     * @return Mapping\MappingFactory
-     */
-    public function getMappingFactory()
-    {
-        return $this->mappingFactory;
-    }
-
-    /**
-     * @return Mapping\Driver\Driver
-     */
-    public function getMappingDriverImpl()
-    {
-        return $this->config->getMappingDriverImpl();
     }
 
     /**
@@ -137,6 +138,16 @@ class XmlEntityManager
     }
 
     /**
+     * Gets the metadata factory used to gather the metadata of classes.
+     *
+     * @return Doctrine\Common\Persistence\Mapping\ClassMetadataFactory
+     */
+    public function getMetadataFactory()
+    {
+        return $this->metadataFactory;
+    }
+
+    /**
      * Returns the OXM mapping descriptor for a class.
      *
      * The class name must be the fully-qualified class name without a leading backslash
@@ -146,11 +157,168 @@ class XmlEntityManager
      * MyProject\Domain\User
      * sales:PriceRequest
      *
-     * @return Mapping\Mapping
+     * @return ClassMetadata
      * @internal Performance-sensitive method.
      */
-    public function getMapping($className)
+    public function getClassMetadata($className)
     {
-        return $this->mappingFactory->getMappingForClass($className);
+        return $this->metadataFactory->getMetadataFor($className);
     }
+
+    /**
+     * Gets the repository for a class.
+     *
+     * @param string $className
+     * @return \Doctrine\Common\Persistence\ObjectRepository
+     */
+    public function getRepository($entityName)
+    {
+        $entityName = ltrim($entityName, '\\');
+        if (isset($this->repositories[$entityName])) {
+            return $this->repositories[$entityName];
+        }
+
+        $metadata = $this->getClassMetadata($entityName);
+        $customRepositoryClassName = $metadata->customRepositoryClassName;
+
+        if ($customRepositoryClassName !== null) {
+            $repository = new $customRepositoryClassName($this, $metadata);
+        } else {
+            $repository = new XmlEntityRepository($this, $metadata);
+        }
+
+        $this->repositories[$entityName] = $repository;
+
+        return $repository;
+    }
+
+    /**
+     * Flushes all changes to objects that have been queued up to now to the filesystem.
+     * This effectively synchronizes the in-memory state of managed objects with the
+     * filesystem.
+     *
+     * @throws Doctrine\OXM\OptimisticLockException If a version check on an entity that
+     *         makes use of optimistic locking fails.
+     */
+    public function flush()
+    {
+        $this->errorIfClosed();
+        $this->unitOfWork->commit();
+    }
+
+    /**
+     * Refreshes the persistent state of an entity from the filesystem,
+     * overriding any local changes that have not yet been persisted.
+     *
+     * @param object $entity The entity to refresh.
+     */
+    public function refresh($entity)
+    {
+        if ( ! is_object($entity)) {
+            throw new \InvalidArgumentException(gettype($entity));
+        }
+        $this->errorIfClosed();
+        $this->unitOfWork->refresh($entity);
+    }
+
+    /**
+     * Detaches an entity from the XmlEntityManager, causing a managed entity to
+     * become detached.  Unflushed changes made to the entity if any
+     * (including removal of the entity), will not be synchronized to the filesystem.
+     * Entities which previously referenced the detached entity will continue to
+     * reference it.
+     *
+     * @param object $entity The entity to detach.
+     */
+    public function detach($entity)
+    {
+        if ( ! is_object($entity)) {
+            throw new \InvalidArgumentException(gettype($entity));
+        }
+        $this->unitOfWork->detach($entity);
+    }
+
+    /**
+     * Merges the state of a detached entity into the persistence context
+     * of this XmlEntityManager and returns the managed copy of the entity.
+     * The entity passed to merge will not become associated/managed with this XmlEntityManager.
+     *
+     * @param object $entity The detached entity to merge into the persistence context.
+     * @return object The managed copy of the entity.
+     */
+    public function merge($entity)
+    {
+        if ( ! is_object($entity)) {
+            throw new \InvalidArgumentException(gettype($entity));
+        }
+        $this->errorIfClosed();
+        return $this->unitOfWork->merge($entity);
+    }
+
+    /**
+     * Removes an entity instance.
+     *
+     * A removed entity will be removed from the filesystem at or before transaction commit
+     * or as a result of the flush operation.
+     *
+     * @param object $entity The entity instance to remove.
+     */
+    public function remove($entity)
+    {
+        if ( ! is_object($entity)) {
+            throw new \InvalidArgumentException(gettype($entity));
+        }
+        $this->errorIfClosed();
+        $this->unitOfWork->remove($entity);
+    }
+
+    /**
+     * Tells the XmlEntityManager to make an instance managed and persistent.
+     *
+     * The entity will be entered into the filesystem at or before transaction
+     * commit or as a result of the flush operation.
+     *
+     * NOTE: The persist operation always considers entities that are not yet known to
+     * this XmlEntityManager as NEW. Do not pass detached entities to the persist operation.
+     *
+     * @param object $object The instance to make managed and persistent.
+     */
+    public function persist($entity)
+    {
+        if ( ! is_object($entity)) {
+            throw new \InvalidArgumentException(gettype($entity));
+        }
+        $this->errorIfClosed();
+        $this->unitOfWork->persist($entity);
+    }
+
+    /**
+     * Finds an Entity by its identifier.
+     *
+     * This is just a convenient shortcut for getRepository($entityName)->find($id).
+     *
+     * @param string $entityName
+     * @param mixed $identifier
+     * @param int $lockMode
+     * @param int $lockVersion
+     * @return object
+     */
+    public function find($entityName, $identifier, $lockMode = LockMode::NONE, $lockVersion = null)
+    {
+        return $this->getRepository($entityName)->find($identifier, $lockMode, $lockVersion);
+    }
+
+
+
+    /**
+     * Gets the UnitOfWork used by the EntityManager to coordinate operations.
+     *
+     * @return Doctrine\OXM\UnitOfWork
+     */
+    public function getUnitOfWork()
+    {
+        return $this->unitOfWork;
+    }
+
+
 }
