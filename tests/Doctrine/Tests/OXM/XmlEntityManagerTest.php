@@ -34,10 +34,10 @@ class XmlEntityManagerTest extends \PHPUnit_Framework_TestCase
     public function setup()
     {
         $this->config = new Configuration();
-        $this->config->setMappingDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
-        $this->config->setMappingCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
+        $this->config->setClassMetadataDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
+        $this->config->setClassMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
 
-        $this->xm = new XmlEntityManager(new SimpleXmlMarshaller(), $this->config, new EventManager());
+        $this->xm = new XmlEntityManager($this->config, new EventManager());
     }
 
     public function testMarshaller()
@@ -60,6 +60,9 @@ class XmlEntityManagerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(strlen($xml) > 0);
 
         $otherUser = $this->xm->unmarshal($xml);
+
+
+//        print_r($otherUser);
 
         $this->assertInstanceOf('Doctrine\Tests\OXM\Entities\User', $otherUser);
 

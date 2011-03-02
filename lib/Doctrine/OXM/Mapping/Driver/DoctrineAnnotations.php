@@ -27,7 +27,7 @@ class XmlEntity extends Annotation {
     public $nsUrl;
     public $nsPrefix;
 }
-final class XmlRoot extends XmlEntity {
+final class XmlRootEntity extends XmlEntity {
     public $repositoryClass;
 }
 final class XmlMappedSuperclass extends Annotation {}

@@ -14,13 +14,15 @@ use Exception, InvalidArgumentException, UnexpectedValueException,
     Doctrine\Common\Collections\Collection,
     Doctrine\Common\NotifyPropertyChanged,
     Doctrine\Common\PropertyChangedListener,
-    Doctrine\OXM\Event\LifecycleEventArgs,
-    Doctrine\OXM\Mapping\ClassMetadata,
-    Doctrine\OXM\Proxy\Proxy;
+    Doctrine\OXM\Mapping\ClassMetadata;
 
 /**
  * The UnitOfWork is responsible for tracking changes to objects during an
  * "object-level" transaction and for writing out changes to the filesystem
+ *
+ * This UnitOfWork is only capable of persisting xml class which are mapped via
+ * the @XmlRoot element.  This ensures that @XmlId fields exist, and the persister
+ * knows how to save the files correctly.
  *
  * @since       2.0
  * @author      Richard Fullmer <richard.fullmer@opensoftdev.com>

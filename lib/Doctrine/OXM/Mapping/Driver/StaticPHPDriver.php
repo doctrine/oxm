@@ -51,7 +51,7 @@ class StaticPHPDriver extends AbstractFileDriver
      * @param string $className
      * @param Mapping $mapping
      */
-    public function loadMappingForClass($className, ClassMetadataInfo $mapping)
+    public function loadMetadataForClass($className, ClassMetadataInfo $mapping)
     {
         call_user_func_array(array($className, 'loadMapping'), array($mapping));
     }

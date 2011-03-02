@@ -17,15 +17,14 @@ class CustomerContact
     /**
      * @var string
      *
-     * @XmlField(direct=true, type="string")
-     * @XmlBinding(node="attribute", name="emailAddress")
+     * @XmlAttribute(type="string", direct=true, name="emailAddress")
      */
     private $emailAddress;
 
     /**
      * @var string
      *
-     * @XmlField(direct=true, type="string")
+     * @XmlAttribute(type="string", direct=true)
      */
     private $phoneNumber;
 

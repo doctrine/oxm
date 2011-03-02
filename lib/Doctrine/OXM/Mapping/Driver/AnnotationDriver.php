@@ -43,26 +43,26 @@ class AnnotationDriver implements DriverInterface
      *
      * @var AnnotationReader
      */
-    private $_reader;
+    private $reader;
 
     /**
      * The paths where to look for mapping files.
      *
      * @var array
      */
-    protected $_paths = array();
+    protected $paths = array();
 
     /**
      * The file extension of mapping documents.
      *
      * @var string
      */
-    protected $_fileExtension = '.php';
+    protected $fileExtension = '.php';
 
     /**
      * @param array
      */
-    protected $_classNames;
+    protected $classNames;
     
     /**
      * Initializes a new AnnotationDriver that uses the given AnnotationReader for reading
@@ -73,7 +73,7 @@ class AnnotationDriver implements DriverInterface
      */
     public function __construct(AnnotationReader $reader, $paths = null)
     {
-        $this->_reader = $reader;
+        $this->reader = $reader;
         if ($paths) {
             $this->addPaths((array) $paths);
         }
@@ -86,7 +86,7 @@ class AnnotationDriver implements DriverInterface
      */
     public function addPaths(array $paths)
     {
-        $this->_paths = array_unique(array_merge($this->_paths, $paths));
+        $this->paths = array_unique(array_merge($this->paths, $paths));
     }
 
     /**
@@ -96,7 +96,7 @@ class AnnotationDriver implements DriverInterface
      */
     public function getPaths()
     {
-        return $this->_paths;
+        return $this->paths;
     }
 
     /**
@@ -106,7 +106,7 @@ class AnnotationDriver implements DriverInterface
      */
     public function getFileExtension()
     {
-        return $this->_fileExtension;
+        return $this->fileExtension;
     }
 
     /**
@@ -117,139 +117,93 @@ class AnnotationDriver implements DriverInterface
      */
     public function setFileExtension($fileExtension)
     {
-        $this->_fileExtension = $fileExtension;
+        $this->fileExtension = $fileExtension;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function loadMappingForClass($className, ClassMetadataInfo $classMapping)
+    public function loadMetadataForClass($className, ClassMetadataInfo $class)
     {
-        $class = $classMapping->getReflectionClass();
+        $reflClass = $class->getReflectionClass();
 
-        $classAnnotations = $this->_reader->getClassAnnotations($class);
-
-        // Evaluate XmlEntity annotation
-        if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity'])) {
+        $classAnnotations = $this->reader->getClassAnnotations($reflClass);
+        if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'])) {
+            $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'];
+        } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlEntity'];
-
-            $classMapping->setName($class->getName());
-            
-
-//            if ($entityAnnot->autoComplete) {
-//                $classMapping->setAutoComplete($entityAnnot->autoComplete);
-//            }
-
-//            // todo support extends field
-//            if ($entityAnnot->extends) {
-//                $classMapping->setExtends($entityAnnot->extends);
-//            }
-            
+        } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass'])) {
+            $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass'];
+            $class->isMappedSuperclass = true;
         } else {
             throw MappingException::classIsNotAValidXmlEntity($className);
         }
 
-
-        $xmlMapTo = array();
-
-        if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlMapTo'])) {
-            $mapToAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlMapTo'];
-
-            if ($mapToAnnot->xml) {
-                $xmlMapTo['xml'] = $mapToAnnot->xml;
-            }
-
-            if ($mapToAnnot->nsUrl) {
-                $xmlMapTo['nsUrl'] = $mapToAnnot->nsUrl;
-            }
-
-            if ($mapToAnnot->nsPrefix) {
-                $xmlMapTo['nsPrefix'] = $mapToAnnot->nsPrefix;
-            }
+        $class->setName($reflClass->getName());
+        if (isset($entityAnnot->xml)) {
+            $class->setXmlName($entityAnnot->xml);
+        } else {
+            // TODO - use inflector here or perhaps delay
+            $class->setXmlName(strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $reflClass->getShortName())));
+        }
+        if (isset($entityAnnot->nsUrl)) {
+            $class->setXmlNamespaceUrl($entityAnnot->nsUrl);
+        }
+        if (isset($entityAnnot->nsPrefix)) {
+            $class->setXmlNamespacePrefix($entityAnnot->nsPrefix);
+        }
+        if (isset($entityAnnot->repositoryClass)) {
+            $class->setCustomRepositoryClass($entityAnnot->repositoryClass);
         }
 
-        $classMapping->mapTo($xmlMapTo);
+        foreach ($reflClass->getProperties() as $property) {
+            if ($class->isMappedSuperclass && ! $property->isPrivate()
+                || $class->isInheritedField($property->name)) {
+                continue;
+            }
 
-        // Evaluate annotations on properties/fields
-        foreach ($class->getProperties() as $property) {
-
-            $fieldBinding = array();
             $mapping = array();
-            $mapping['name'] = $property->getName();
+            $mapping['fieldName'] = $property->getName();
 
-            // Field can only be annotated with one of:
-            // @XmlField
-            if ($fieldAnnot = $this->_reader->getPropertyAnnotation($property, 'Doctrine\OXM\Mapping\XmlField')) {
-                
+            if ($idAnnot = $this->reader->getPropertyAnnotation($property, 'Doctrine\OXM\Mapping\XmlId')) {
+                $mapping['id']  = true;
+            }
+            $referenceAnnot = $this->reader->getPropertyAnnotation($property, 'Doctrine\OXM\Mapping\XmlReferences');
+            if (isset($referenceAnnot->entityName)) {
+                $mapping['references']  = $referenceAnnot->entityName;
+            }
+            foreach ($this->reader->getPropertyAnnotations($property) as $fieldAnnot) {
+                if ($fieldAnnot instanceof \Doctrine\OXM\Mapping\XmlField) {
+                    if ($fieldAnnot->type == null) {
+                        throw MappingException::propertyTypeIsRequired($className, $property->getName());
+                    }                    
 
-                $mapping['type'] = $fieldAnnot->type;
-                $mapping['required'] = $fieldAnnot->required;
-                $mapping['direct'] = $fieldAnnot->direct;
-//                $mapping['lazy'] = $fieldAnnot->lazy;
-                $mapping['transient'] = $fieldAnnot->transient;
-                $mapping['nillable'] = $fieldAnnot->nillable;
-                $mapping['container'] = $fieldAnnot->container;
-                $mapping['collection'] = $fieldAnnot->collection;  // todo support Doctrine ArrayCollection?
-
-                if ($fieldAnnot->handler) {
-                    $mapping['handler'] = $fieldAnnot->handler;
+                    $mapping = array_merge($mapping, (array) $fieldAnnot);
+                    $class->mapField($mapping);
                 }
-
-                if ($fieldAnnot->getMethod) {
-                    $mapping['getMethod'] = $fieldAnnot->getMethod;
-                }
-
-                if ($fieldAnnot->setMethod) {
-                    $mapping['setMethod'] = $fieldAnnot->setMethod;
-                }
-//                if ($fieldAnnot->createMethod) {
-//                    $mapping['createMethod'] = $fieldAnnot->creatMethod;
-//                }
-
-                $classMapping->mapField($mapping);
-
-                // Fields with @OxmField also can have a @XmlBinding definition
-                if ($bindXmlAnnot = $this->_reader->getPropertyAnnotation($property, 'Doctrine\OXM\Mapping\XmlBinding')) {
-
-                    if ($bindXmlAnnot->name) {
-                        $fieldBinding['name'] = $bindXmlAnnot->name;
-                    }
-
-                    if ($bindXmlAnnot->node) {
-                        $fieldBinding['node'] = $bindXmlAnnot->node;
-                    }
-
-                    // todo support reference and referenceable
-                    if ($bindXmlAnnot->reference) {
-                        $fieldBinding['reference'] = $bindXmlAnnot->reference;
-                    }
-                }
-
-                $classMapping->mapBindingToField($property->getName(), $fieldBinding);
-
             }
         }
 
-        // Evaluate @HasLifecycleCallbacks annotation
+        // Evaluate @HasLifecycleCallbacks annotations
         if (isset($classAnnotations['Doctrine\OXM\Mapping\HasLifecycleCallbacks'])) {
-            foreach ($class->getMethods() as $method) {
+            foreach ($reflClass->getMethods() as $method) {
                 if ($method->isPublic()) {
-                    $annotations = $this->_reader->getMethodAnnotations($method);
+                    $annotations = $this->reader->getMethodAnnotations($method);
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PreMarshal'])) {
-                        $classMapping->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preMarshal);
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preMarshal);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostMarshal'])) {
-                        $classMapping->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postMarshal);
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postMarshal);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PreUnmarshal'])) {
-                        $classMapping->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preUnmarshal);
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preUnmarshal);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostUnmarshal'])) {
-                        $classMapping->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUnmarshal);
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUnmarshal);
                     }
                 }
             }
@@ -261,18 +215,18 @@ class AnnotationDriver implements DriverInterface
      */
     public function getAllClassNames()
     {
-        if ($this->_classNames !== null) {
-            return $this->_classNames;
+        if ($this->classNames !== null) {
+            return $this->classNames;
         }
 
-        if (!$this->_paths) {
+        if (!$this->paths) {
             throw MappingException::pathRequired();
         }
 
         $classes = array();
         $includedFiles = array();
 
-        foreach ($this->_paths as $path) {
+        foreach ($this->paths as $path) {
             if ( ! is_dir($path)) {
                 throw MappingException::fileMappingDriversRequireConfiguredDirectoryPath($path);
             }
@@ -283,7 +237,7 @@ class AnnotationDriver implements DriverInterface
             );
 
             foreach ($iterator as $file) {
-                if (($fileName = $file->getBasename($this->_fileExtension)) == $file->getBasename()) {
+                if (($fileName = $file->getBasename($this->fileExtension)) == $file->getBasename()) {
                     continue;
                 }
 
@@ -303,7 +257,7 @@ class AnnotationDriver implements DriverInterface
             }
         }
 
-        $this->_classNames = $classes;
+        $this->classNames = $classes;
 
         return $classes;
     }
@@ -319,9 +273,11 @@ class AnnotationDriver implements DriverInterface
      */
     public function isTransient($className)
     {
-        $classAnnotations = $this->_reader->getClassAnnotations(new \ReflectionClass($className));
+        $classAnnotations = $this->reader->getClassAnnotations(new \ReflectionClass($className));
 
-        return !isset($classAnnotations['Doctrine\OXM\Mapping\OxmEntity']);
+        return ! isset($classAnnotations['Doctrine\ORM\Mapping\XmlEntity']) &&
+               ! isset($classAnnotations['Doctrine\ORM\Mapping\XmlRootEntity']) &&
+               ! isset($classAnnotations['Doctrine\ORM\Mapping\XmlMappedSuperclass']);
     }
 
     /**

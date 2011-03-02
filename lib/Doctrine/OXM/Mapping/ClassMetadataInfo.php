@@ -441,24 +441,6 @@ class ClassMetadataInfo implements BaseClassMetadata
         $this->customRepositoryClassName = $repositoryClassName;
     }
 
-    public function mapText(array $mapping)
-    {
-        $mapping['node'] = self::XML_TEXT;
-        return $this->mapField($mapping);
-    }
-
-    public function mapElement(array $mapping)
-    {
-        $mapping['node'] = self::XML_ELEMENT;
-        return $this->mapField($mapping);
-    }
-
-    public function mapAttribute(array $mapping)
-    {
-        $mapping['node'] = self::XML_ATTRIBUTE;
-        return $this->mapField($mapping);
-    }
-
     /**
      * @param array
      * @return void
@@ -469,133 +451,81 @@ class ClassMetadataInfo implements BaseClassMetadata
         if (!isset($mapping['fieldName']) || strlen($mapping['fieldName']) == 0) {
             throw MappingException::missingFieldName($this->name);
         }
-
         if (isset($this->fieldMappings[$mapping['fieldName']])) {
             throw MappingException::duplicateFieldMapping($this->name, $mapping['fieldName']);
         }
-
         if (!isset($mapping['type']) || strlen($mapping['type']) == 0) {
             throw MappingException::missingFieldType($this->name, $mapping['fieldName']);
         }
 
-//        // validate type
-//        if (!Type::hasType($mapping['type'])) {
-//            // delay validation until factory, have to check if type is mapped class or not
-//            $this->_fieldTypeValidations[] = $mapping['name'];
-//        }
-
-        // todo - handler field (what's this for?)
-        if (!isset($mapping['handler'])) {
-            $mapping['handler'] = null;
-        }
-
-        // Field is required?  default false
-        if (!isset($mapping['required'])) {
-            $mapping['required'] = false;
-        }
-
-
-        // Direct field access (default to false unless autocomplete)
-        if (!isset($mapping['direct'])) {
-//        if (!isset($mapping['direct']) && $this->autoComplete == false) {
-            $mapping['direct'] = false;
+        if (!isset($mapping['name'])) {
+            $mapping['name'] = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $mapping['fieldName']));
         } else {
-            $mapping['direct'] = true;
+            if ($mapping['name'][0] == '`') {
+                $mapping['name'] = trim($mapping['name'], '`');
+                $mapping['quoted'] = true;
+            }
+        }
+        if (isset($this->xmlFieldMap[$mapping['name']])) {
+            throw MappingException::duplicateXmlFieldName($this->name, $mapping['name']);
         }
 
-        // Field is transient?  default false
-        if (!isset($mapping['transient'])) {
-            $mapping['transient'] = false;
+        if (!isset($mapping['node'])) {
+            if (Type::hasType($mapping['type'])) {
+                // Map object and array to "text", everything else to "attribute"
+                if (in_array($mapping['type'], array(Type::OBJECT, Type::TARRAY))) {
+                    $mapping['node'] = self::XML_TEXT;
+                } else {
+                    $mapping['node'] = self::XML_ATTRIBUTE;
+                }
+            } else {
+                $mapping['node'] = self::XML_ELEMENT;
+            }
+        }
+        if (!in_array($mapping['node'], self::getXmlNodeTypes())) {
+            throw MappingException::xmlBindingTypeUnknown($mapping['fieldName'], $mapping['node']);
         }
 
-        // Field is nillable?  defaults to false (means the field won't be handled if its empty)
+        if (!isset($mapping['direct'])) {
+            $mapping['direct'] = false;
+        }
+
         if (!isset($mapping['nillable'])) {
             $mapping['nillable'] = false;
         }
 
-        // Field is container field?  defaults to false
+        if (!isset($mapping['required'])) {
+            $mapping['required'] = false;
+        }
+
         if (!isset($mapping['container'])) {
             $mapping['container'] = false;
-            // requires xml bind type of 'element'
         }
-
-        if (!$mapping['direct']) {
-            // get Method handling
-            if (!isset($mapping['getMethod'])) {  // run through loop, and check a few
-                $proposedSetter = $this->inferGetter($mapping['name']);
-                if ($this->reflClass->hasMethod($proposedSetter)) {
-                    $mapping['getMethod'] = $proposedSetter;
-                } else {
-                    throw MappingException::couldNotInferGetterMethod($this->name, $mapping['name']);
-                }
-            }
-            if (!$this->reflClass->hasMethod($mapping['getMethod'])) {
-                throw MappingException::fieldGetMethodDoesNotExist($this->name, $mapping['name'], $mapping['getMethod']);
-            }
-
-            // set Method handling
-            if (!isset($mapping['setMethod'])) {  // run through loop, and check a few
-                $proposedSetter = $this->inferSetter($mapping['name']);
-                if ($this->reflClass->hasMethod($proposedSetter)) {
-                    $mapping['setMethod'] = $proposedSetter;
-                } else {
-                    throw MappingException::couldNotInferSetterMethod($this->name, $mapping['name']);
-                }
-            }
-            if (!$this->reflClass->hasMethod($mapping['setMethod'])) {
-                throw MappingException::fieldSetMethodDoesNotExist($this->name, $mapping['name'], $mapping['setMethod']);
-            }
-        }
-
-        // Complete binding name
-        if ( ! isset($binding['name'])) {
-            $binding['name'] = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $fieldName));
-        } else {
-            if ($binding['name'][0] == '`') {
-                $binding['name'] = trim($binding['name'], '`');
-                $binding['quoted'] = true;
-            }
-        }
-        if (isset($this->fieldBindings[$binding['name']])) {
-            throw MappingException::duplicateXmlFieldName($this->name, $binding['name']);
-        }
-
-        // Valid node types
-        if (!isset($binding['node'])) {
-            if (Type::hasType($this->fieldMappings[$fieldName]['type'])) {
-
-                // Map object and array to "text", everything else to "attribute"
-                if (in_array($this->fieldMappings[$fieldName]['type'], array(Type::OBJECT, Type::TARRAY))) {
-                    $binding['node'] = self::XML_TEXT;
-                } else {
-                    $binding['node'] = self::XML_ATTRIBUTE;
-                }
-            } else {
-                $binding['node'] = self::XML_ELEMENT;
-            }
-        }
-
-        if (!in_array($binding['node'], self::getXmlNodeTypes())) {
-            throw MappingException::xmlBindingTypeUnknown($fieldName, $binding['node']);
-        }
-
-        // todo - support references
-        if (!isset($binding['reference'])) {
-            $binding['reference'] = false;
-        }
-
-//        // createMethod
-//        if (!isset($mapping['createMethod'])) {
-//            $mapping['createMethod'] = null;
-//        }
-
-        // Field is collection? default false
+        
         if (!isset($mapping['collection'])) {
             $mapping['collection'] = false;
         }
 
-        $this->xmlFieldMap[$binding['name']] = $fieldName;
-        $this->fieldMappings[$mapping['name']] = $mapping;
+        if (!isset($mapping['getMethod'])) {
+            $proposedGetter = $this->inferGetter($mapping['fieldName']);
+            if ($this->reflClass->hasMethod($proposedGetter)) {
+                $mapping['getMethod'] = $proposedGetter;
+            }
+        }
+
+        if (!isset($mapping['setMethod'])) {
+            $proposedSetter = $this->inferSetter($mapping['fieldName']);
+            if ($this->reflClass->hasMethod($proposedSetter)) {
+                $mapping['setMethod'] = $proposedSetter;
+            }
+        }
+
+        if (!isset($mapping['id'])) {
+            $mapping['id'] = false;
+        }
+
+        $this->xmlFieldMap[$mapping['name']] = $mapping['fieldName'];
+        $this->fieldMappings[$mapping['fieldName']] = $mapping;
         return $mapping;
     }
 
@@ -706,11 +636,6 @@ class ClassMetadataInfo implements BaseClassMetadata
         return $this->fieldMappings;
     }
 
-    public function getFieldBinding($fieldName)
-    {
-        return isset($this->fieldBindings[$fieldName]) ?
-                $this->fieldBindings[$fieldName] : null;
-    }
 
     /**
      * Gets the type of a field.
@@ -735,8 +660,17 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     public function getFieldXmlNode($fieldName)
     {
-        return isset($this->fieldBindings[$fieldName]) ?
-                $this->fieldBindings[$fieldName]['node'] : null;
+        return isset($this->fieldMappings[$fieldName]) ?
+                $this->fieldMappings[$fieldName]['node'] : null;
+    }
+
+    /**
+     * 
+     */
+    public function getFieldXmlName($fieldName)
+    {
+        return isset($this->fieldMappings[$fieldName]) ?
+                $this->fieldMappings[$fieldName]['name'] : null;
     }
 
 
@@ -796,6 +730,16 @@ class ClassMetadataInfo implements BaseClassMetadata
             throw MappingException::mappingNotFound($this->name, $fieldName);
         }
         return $this->fieldMappings[$fieldName]['direct'] ? true : false;
+    }
+
+    /**
+     * Checks whether a mapped field is inherited from an entity superclass.
+     *
+     * @return boolean TRUE if the field is inherited, FALSE otherwise.
+     */
+    public function isInheritedField($fieldName)
+    {
+        return isset($this->fieldMappings[$fieldName]['inherited']);
     }
 
     /**

@@ -44,9 +44,9 @@ class Configuration
      * @todo Force parameter to be a Closure to ensure lazy evaluation
      *       (as soon as a metadata cache is in effect, the driver never needs to initialize).
      */
-    public function setMappingDriverImpl(Driver $driverImpl)
+    public function setClassMetadataDriverImpl(Driver $driverImpl)
     {
-        $this->_attributes['mappingDriverImpl'] = $driverImpl;
+        $this->_attributes['classMetadataDriverImpl'] = $driverImpl;
     }
 
     /**
@@ -55,10 +55,10 @@ class Configuration
      * @throws ORMException
      * @return Mapping\Driver\Driver
      */
-    public function getMappingDriverImpl()
+    public function getClassMetadataDriverImpl()
     {
-        return isset($this->_attributes['mappingDriverImpl']) ?
-                $this->_attributes['mappingDriverImpl'] : null;
+        return isset($this->_attributes['classMetadataDriverImpl']) ?
+                $this->_attributes['classMetadataDriverImpl'] : null;
     }
 
 
@@ -68,10 +68,10 @@ class Configuration
      *
      * @return \Doctrine\Common\Cache\Cache
      */
-    public function getMappingCacheImpl()
+    public function getClassMetadataCacheImpl()
     {
-        return isset($this->_attributes['mappingCacheImpl']) ?
-                $this->_attributes['mappingCacheImpl'] : null;
+        return isset($this->_attributes['classMetadataCacheImpl']) ?
+                $this->_attributes['classMetadataCacheImpl'] : null;
     }
 
     /**
@@ -79,9 +79,30 @@ class Configuration
      *
      * @param \Doctrine\Common\Cache\Cache $cacheImpl
      */
-    public function setMappingCacheImpl(Cache $cacheImpl)
+    public function setClassMetadataCacheImpl(Cache $cacheImpl)
     {
-        $this->_attributes['mappingCacheImpl'] = $cacheImpl;
+        $this->_attributes['classMetadataCacheImpl'] = $cacheImpl;
+    }
+
+    /**
+     * @return \Doctrine\OXM\Marshaller\Marshaller
+     */
+    public function getMarshallerClassName()
+    {
+        if (!isset($this->_attributes['marshallerclassName'])) {
+            // todo - put most efficient marshaller here
+            $this->_attributes['marshallerclassName'] = 'Doctrine\OXM\Marshaller\SimpleXmlMarshaller';
+        }
+        return $this->_attributes['marshallerclassName'];
+    }
+
+    /**
+     * @param string $marshallerClassName
+     * @return void
+     */
+    public function setMarshallerClassName($marshallerClassName)
+    {
+        $this->_attributes['marshallerclassName'] = $marshallerClassName;
     }
 
     /**
@@ -154,7 +175,7 @@ class Configuration
      */
     public function ensureProductionSettings()
     {
-        if ( !$this->getMappingCacheImpl()) {
+        if ( !$this->getClassMetadataCacheImpl()) {
             throw OXMException::mappingCacheNotConfigured();
         }
     }

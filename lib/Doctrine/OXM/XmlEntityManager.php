@@ -68,13 +68,11 @@ class XmlEntityManager implements ObjectManager
     /**
      * Creates a new XmlEntityManager that uses the given Configuration and EventManager implementations.
      *
-     * @param Marshaller\Marshaller $marshaller
      * @param Configuration $config
      * @param \Doctrine\Common\EventManager $eventManager
      */
-    public function __construct(Marshaller $marshaller, Configuration $config, EventManager $eventManager = null)
+    public function __construct(Configuration $config, EventManager $eventManager = null)
     {
-        $this->marshaller = $marshaller;
         $this->config = $config;
 
         if (null === $eventManager) {
@@ -83,9 +81,11 @@ class XmlEntityManager implements ObjectManager
         $this->eventManager = $eventManager;
 
         $metadataFactoryClassName = $config->getClassMetadataFactoryName();
-        $this->metadataFactory = new $metadataFactoryClassName;
-        $this->metadataFactory->setXmlEntityManager($this);
-        $this->metadataFactory->setCacheDriver($this->config->getMappingCacheImpl());
+        $this->metadataFactory = new $metadataFactoryClassName($config, $this->eventManager);
+        $this->metadataFactory->setCacheDriver($this->config->getClassMetadataCacheImpl());
+
+        $marshallerClassName = $config->getMarshallerClassName();
+        $this->marshaller = new $marshallerClassName($this->metadataFactory);
 
         $this->unitOfWork = new UnitOfWork($this);
     }
@@ -99,7 +99,7 @@ class XmlEntityManager implements ObjectManager
      */
     public function marshal($object)
     {
-        return $this->marshaller->marshal($this->metadataFactory, $object);
+        return $this->marshaller->marshal($object);
     }
 
     /**
@@ -110,7 +110,7 @@ class XmlEntityManager implements ObjectManager
      */
     public function unmarshal($xml)
     {
-        return $this->marshaller->unmarshal($this->metadataFactory, $xml);
+        return $this->marshaller->unmarshal($xml);
     }
 
     /**

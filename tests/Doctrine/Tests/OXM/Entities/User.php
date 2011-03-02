@@ -10,25 +10,25 @@
 namespace Doctrine\Tests\OXM\Entities;
 
 /**
- * @XmlEntity
+ *
+ * 
+ *
+ * @XmlRootEntity(xml="User")
  * @HasLifecycleCallbacks
- * @XmlMapTo(xml="User")
  */
 class User
 {
     /**
      * @var integer
      *
-     * @XmlField(direct=true, type="integer")
-     * @XmlBinding(node="attribute")
+     * @XmlAttribute(type="integer", direct=true)
      */
     private $id;
 
     /**
      * @var string
      *
-     * @XmlField(type="string")
-     * @XmlBinding(node="text")
+     * @XmlText(type="string")
      */
     private $firstNameNickname;
 
@@ -36,16 +36,14 @@ class User
     /**
      * @var string
      *
-     * @XmlField(type="string")
-     * @XmlBinding(name="LastName")
+     * @XmlAttribute(type="string", name="LastName")
      */
     private $lastName;
 
     /**
      * @var Address
      *
-     * @XmlField(type="Doctrine\Tests\OXM\Entities\Address")
-     * @XmlBinding(node="element")
+     * @XmlElement(type="Doctrine\Tests\OXM\Entities\Address")
      */
     private $address;
 
@@ -53,8 +51,7 @@ class User
     /**
      * @var CustomerContact[]
      *
-     * @XmlField(type="Doctrine\Tests\OXM\Entities\CustomerContact", collection=true, direct=true)
-     * @XmlBinding(node="element", name="customer-contact")
+     * @XmlCollection(type="Doctrine\Tests\OXM\Entities\CustomerContact", direct=true, name="customer-contact")
      */
     private $contacts;
 

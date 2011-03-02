@@ -61,7 +61,7 @@ class YAMLDriver extends AbstractFileDriver
      * @param string $className
      * @param Mapping $mapping
      */
-    public function loadMappingForClass($className, ClassMetadataInfo $mapping)
+    public function loadMetadataForClass($className, ClassMetadataInfo $mapping)
     {
         // TODO: Implement loadMappingForClass() method.
         throw new \Exception("Not yet implemented");

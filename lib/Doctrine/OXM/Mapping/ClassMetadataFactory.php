@@ -21,10 +21,11 @@ namespace Doctrine\OXM\Mapping;
 
 use \ReflectionException,
     \Doctrine\OXM\OXMException,
-    \Doctrine\OXM\XmlEntityManager,
+    \Doctrine\OXM\Configuration,
     \Doctrine\Common\Util\Debug,
     \Doctrine\OXM\Events,
     \Doctrine\Common\Cache\Cache,
+    \Doctrine\Common\EventManager,
     \Doctrine\Common\Persistence\Mapping\ClassMetadataFactory as BaseClassMetadataFactory,
     \Doctrine\OXM\Types\Type;
 
@@ -42,12 +43,12 @@ use \ReflectionException,
 class ClassMetadataFactory implements BaseClassMetadataFactory
 {
     /**
-     * @var \Doctrine\OXM\XmlEntityManager
+     * @var \Doctrine\OXM\Configuration
      */
-    private $xem;
+    private $configuration;
     
     /**
-     * @var Driver\Driver
+     * @var \Doctrine\OXM\Mapping\Driver\Driver
      */
     private $driver;
 
@@ -62,7 +63,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     private $cacheDriver;
 
     /**
-     * @var \Doctrine\Common\Persistance\Mapping\ClassMetadata[]
+     * @var \Doctrine\OXM\Mapping\ClassMetadata[]
      */
     private $loadedMetadata = array();
 
@@ -78,19 +79,17 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      */
     private $initialized = false;
 
-
-    public function __construct()
-    {
-        //todo make DIC first class for feeding to marshaller
-    }
-
     /**
-     * @param \Doctrine\OXM\XmlEntityManager $$em
+     * @param Configuration $configuration
+     * @param EventManager|null $evm
+     * @return null
      */
-    public function setXmlEntityManager(XmlEntityManager $xem)
+    public function __construct(Configuration $configuration, EventManager $evm = null)
     {
-        $this->xem = $xem;
+        $this->configuration = $configuration;
+        $this->evm = $evm;
     }
+
 
     /**
      * Sets the cache driver used by the factory to cache Mapping instances.
@@ -103,14 +102,6 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     }
 
     /**
-     * @return \Doctrine\Common\EventManager
-     */
-    public function getEventManager()
-    {
-        return $this->xem->getEventManager();
-    }
-
-    /**
      * Gets the cache driver used by the factory to cache ClassMetadata instances.
      *
      * @return Doctrine\Common\Cache\Cache
@@ -119,7 +110,10 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     {
         return $this->cacheDriver;
     }
-    
+
+    /**
+     * @return array
+     */
     public function getLoadedMetadata()
     {
         return $this->loadedMetadata;
@@ -168,14 +162,14 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      */
     private function initialize()
     {
-        $this->driver = $this->xem->getMappingDriverImpl();
-        $this->evm = $this->xem->getEventManager();
-        $this->initialized = true;
-    }
+        $this->cacheDriver = $this->configuration->getClassMetadataCacheImpl();
+        $this->driver = $this->configuration->getClassMetadataDriverImpl();
 
-    public function setDriver(Driver $driver)
-    {
-        $this->driver = $driver;
+        if (null === $this->evm) {
+            $this->evm = new EventManager();
+        }
+        
+        $this->initialized = true;
     }
 
     /**
@@ -338,8 +332,8 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                     }
 
                     // Mapped classes must have binding node type XML_ELEMENT
-                    $fieldBinding = $class->getFieldBinding($fieldName);
-                    if ($fieldBinding['node'] !== ClassMetadataInfo::XML_ELEMENT) {
+                    $fieldMapping = $class->getFieldMapping($fieldName);
+                    if ($fieldMapping['node'] !== ClassMetadataInfo::XML_ELEMENT) {
                         throw MappingException::customTypeWithoutNodeElement($className, $fieldName);
                     }
                 }

@@ -18,22 +18,21 @@ class Address
     /**
      * @var string
      *
-     * @XmlField(type="string")
+     * @XmlAttribute(type="string")
      */
     private $street;
 
     /**
      * @var string
      *
-     * @XmlField(type="string")
-     * @XmlBinding(node="text")
+     * @XmlText(type="string")
      */
     private $city;
 
     /**
      * @var string
      *
-     * @XmlField(type="string")
+     * @XmlAttribute(type="string")
      */
     private $state;
 
