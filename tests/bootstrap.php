@@ -16,5 +16,5 @@ $classLoader->register();
 $classLoader = new \Doctrine\Common\ClassLoader('Doctrine\OXM', realpath('lib'));
 $classLoader->register();
 
-$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\Tests\OXM', realpath('tests'));
+$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\Tests', realpath('tests'));
 $classLoader->register();

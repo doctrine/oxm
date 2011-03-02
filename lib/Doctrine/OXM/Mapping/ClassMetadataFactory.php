@@ -162,8 +162,8 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      */
     private function initialize()
     {
-        $this->cacheDriver = $this->configuration->getClassMetadataCacheImpl();
-        $this->driver = $this->configuration->getClassMetadataDriverImpl();
+        $this->cacheDriver = $this->configuration->getMetadataCacheImpl();
+        $this->driver = $this->configuration->getMetadataDriverImpl();
 
         if (null === $this->evm) {
             $this->evm = new EventManager();
@@ -338,6 +338,8 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                     }
                 }
             }
+
+            // Todo - ensure that root elements have an ID mapped
 
             if ($this->evm->hasListeners(Events::loadClassMetadata)) {
                 $eventArgs = new \Doctrine\OXM\Event\LoadClassMetadataEventArgs($class, $this->xem);

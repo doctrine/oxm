@@ -44,7 +44,7 @@ class Configuration
      * @todo Force parameter to be a Closure to ensure lazy evaluation
      *       (as soon as a metadata cache is in effect, the driver never needs to initialize).
      */
-    public function setClassMetadataDriverImpl(Driver $driverImpl)
+    public function setMetadataDriverImpl(Driver $driverImpl)
     {
         $this->_attributes['classMetadataDriverImpl'] = $driverImpl;
     }
@@ -55,7 +55,7 @@ class Configuration
      * @throws ORMException
      * @return Mapping\Driver\Driver
      */
-    public function getClassMetadataDriverImpl()
+    public function getMetadataDriverImpl()
     {
         return isset($this->_attributes['classMetadataDriverImpl']) ?
                 $this->_attributes['classMetadataDriverImpl'] : null;
@@ -68,7 +68,7 @@ class Configuration
      *
      * @return \Doctrine\Common\Cache\Cache
      */
-    public function getClassMetadataCacheImpl()
+    public function getMetadataCacheImpl()
     {
         return isset($this->_attributes['classMetadataCacheImpl']) ?
                 $this->_attributes['classMetadataCacheImpl'] : null;
@@ -79,7 +79,7 @@ class Configuration
      *
      * @param \Doctrine\Common\Cache\Cache $cacheImpl
      */
-    public function setClassMetadataCacheImpl(Cache $cacheImpl)
+    public function setMetadataCacheImpl(Cache $cacheImpl)
     {
         $this->_attributes['classMetadataCacheImpl'] = $cacheImpl;
     }
@@ -175,7 +175,7 @@ class Configuration
      */
     public function ensureProductionSettings()
     {
-        if ( !$this->getClassMetadataCacheImpl()) {
+        if ( !$this->getMetadataCacheImpl()) {
             throw OXMException::mappingCacheNotConfigured();
         }
     }

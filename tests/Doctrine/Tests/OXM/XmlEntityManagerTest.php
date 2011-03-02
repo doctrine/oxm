@@ -7,24 +7,24 @@
  * To change this template use File | Settings | File Templates.
  */
 
+namespace Doctrine\Tests\OXM;
+
 use \Doctrine\OXM\Mapping\ClassMetadataInfo,
+    \Doctrine\Tests\OxmTestCase,
     \Doctrine\Common\Util\Debug,
     \Doctrine\OXM\XmlEntityManager,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\OXM\Marshaller\SimpleXmlMarshaller,
     \Doctrine\OXM\Configuration,
     \Doctrine\Common\EventManager,
-    \Doctrine\Tests\OXM\Entities\User,
-    \Doctrine\Tests\OXM\Entities\CustomerContact,
-    \Doctrine\Tests\OXM\Entities\Address,
-    \Doctrine\Tests\OXM\Entities\Autocomplete\Order;
+    \Doctrine\Tests\OXM\Entities\Order;
 
-class XmlEntityManagerTest extends \PHPUnit_Framework_TestCase
+class XmlEntityManagerTest extends OxmTestCase
 {
     /**
      * @var \Doctrine\OXM\XmlEntityManager
      */
-    private $xm;
+    private $xem;
 
     /**
      * @var \Doctrine\OXM\Configuration
@@ -33,53 +33,38 @@ class XmlEntityManagerTest extends \PHPUnit_Framework_TestCase
 
     public function setup()
     {
-        $this->config = new Configuration();
-        $this->config->setClassMetadataDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
-        $this->config->setClassMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
-
-        $this->xm = new XmlEntityManager($this->config, new EventManager());
+        $this->xem = $this->_getTestXmlEntityManager();
     }
 
-    public function testMarshaller()
+    public function testPersisting()
     {
-        $user = new User();
-        $user->setFirstNameNickname('Malcolm');
-        $user->setLastName('Reynolds');
-        $user->setAddress(new Address('123 Waverly Way', 'New Haven', 'Insanity'));
-        $user->addContact(new CustomerContact('no@way.com'));
-        $user->addContact(new CustomerContact('other@way.com'));
-        
-        $xml = $this->xm->marshal($user);
+        $order = new Order(1, 'business cards', new \DateTime());
 
-        $dom = new DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($xml);
-//        print_r($dom->saveXML());
+        $this->xem->persist($order);
+        $this->xem->flush();
 
-        $this->assertTrue(strlen($xml) > 0);
+        $expectedFileName = __DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml';
+        $this->assertTrue(is_file($expectedFileName));
 
-        $otherUser = $this->xm->unmarshal($xml);
+        unlink($expectedFileName);
+    }
 
 
-//        print_r($otherUser);
+    public function testPersistMultipleObjects()
+    {
+        $order = new Order(3, 'business cards', new \DateTime());
+        $order2 = new Order(4, 'post cards', new \DateTime());
 
-        $this->assertInstanceOf('Doctrine\Tests\OXM\Entities\User', $otherUser);
+        $this->xem->persist($order);
+        $this->xem->persist($order2);
+        $this->xem->flush();
 
-        $this->assertEquals('Malcolm', $otherUser->getFirstNameNickname());
-        $this->assertEquals('Reynolds', $otherUser->getLastName());
+        $this->assertTrue(is_file(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/3.xml'));
+        $this->assertTrue(is_file(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/4.xml'));
 
-        $this->assertEquals('123 Waverly Way', $otherUser->getAddress()->getStreet());
-        $this->assertEquals('New Haven', $otherUser->getAddress()->getCity());
-        $this->assertEquals('Insanity', $otherUser->getAddress()->getState());
 
-        $this->assertEquals(2, count($otherUser->getContacts()));
-
-//        print_r($otherUser);
-
-//        print_r(1);
-//        print_r($this->config->getMappingCacheImpl());
-//        print_r(1);
+        unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/3.xml');
+        unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/4.xml');
     }
 
 

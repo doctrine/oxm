@@ -29,8 +29,8 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $config = new Configuration();
-        $config->setClassMetadataDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
-        $config->setClassMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
+        $config->setMetadataDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
+        $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
 
         $metadataFactory = new ClassMetadataFactory($config);
 
@@ -54,6 +54,22 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $dom->formatOutput = true;
         $dom->loadXML($xml);
 //        print_r($dom->saveXML());
+
+        $otherUser = $this->marshaller->unmarshal($xml);
+
+
+//        print_r($otherUser);
+
+        $this->assertInstanceOf('Doctrine\Tests\OXM\Entities\User', $otherUser);
+
+        $this->assertEquals('Malcolm', $otherUser->getFirstNameNickname());
+        $this->assertEquals('Reynolds', $otherUser->getLastName());
+
+        $this->assertEquals('123 Waverly Way', $otherUser->getAddress()->getStreet());
+        $this->assertEquals('New Haven', $otherUser->getAddress()->getCity());
+        $this->assertEquals('Insanity', $otherUser->getAddress()->getState());
+
+        $this->assertEquals(2, count($otherUser->getContacts()));
     }
 
     public function testItShouldAutocompleteFields()

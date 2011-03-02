@@ -128,10 +128,11 @@ class AnnotationDriver implements DriverInterface
         $reflClass = $class->getReflectionClass();
 
         $classAnnotations = $this->reader->getClassAnnotations($reflClass);
-        if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'])) {
-            $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'];
-        } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity'])) {
+        if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlEntity'];
+        } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'])) {
+            $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'];
+            $class->isRoot = true;
         } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass'];
             $class->isMappedSuperclass = true;
@@ -204,6 +205,38 @@ class AnnotationDriver implements DriverInterface
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostUnmarshal'])) {
                         $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUnmarshal);
+                    }
+                    
+                    if (isset($annotations['Doctrine\OXM\Mapping\PrePersist'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::prePersist);
+                    }
+
+                    if (isset($annotations['Doctrine\OXM\Mapping\PostPersist'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postPersist);
+                    }
+
+                    if (isset($annotations['Doctrine\OXM\Mapping\PreUpdate'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preUpdate);
+                    }
+
+                    if (isset($annotations['Doctrine\OXM\Mapping\PostUpdate'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUpdate);
+                    }
+
+                    if (isset($annotations['Doctrine\OXM\Mapping\PreRemove'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preRemove);
+                    }
+
+                    if (isset($annotations['Doctrine\OXM\Mapping\PostRemove'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postRemove);
+                    }
+
+                    if (isset($annotations['Doctrine\OXM\Mapping\PreLoad'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preLoad);
+                    }
+                    
+                    if (isset($annotations['Doctrine\OXM\Mapping\PostLoad'])) {
+                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postLoad);
                     }
                 }
             }

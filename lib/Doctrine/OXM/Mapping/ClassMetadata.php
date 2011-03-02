@@ -135,8 +135,19 @@ class ClassMetadata extends ClassMetadataInfo
                 throw MappingException::fieldGetMethodDoesNotExist($this->name, $fieldName, $getter);
             }
         }
-
     }
+
+    /**
+     * Gets the document identifier.
+     *
+     * @param object $xmlEntity
+     * @return string $id
+     */
+    public function getIdentifierValue($xmlEntity)
+    {
+        return (string) $this->reflFields[$this->identifier]->getValue($xmlEntity);
+    }
+
 
     /**
      * Map a field.

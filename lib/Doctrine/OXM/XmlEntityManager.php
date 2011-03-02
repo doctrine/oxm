@@ -57,6 +57,11 @@ class XmlEntityManager implements ObjectManager
      */
     private $unitOfWork;
 
+    /**
+     * Whether the XmlEntityManager is closed or not.
+     */
+    private $closed = false;
+
 
     /**
      * The XmlEntityRepository instances.
@@ -82,7 +87,7 @@ class XmlEntityManager implements ObjectManager
 
         $metadataFactoryClassName = $config->getClassMetadataFactoryName();
         $this->metadataFactory = new $metadataFactoryClassName($config, $this->eventManager);
-        $this->metadataFactory->setCacheDriver($this->config->getClassMetadataCacheImpl());
+        $this->metadataFactory->setCacheDriver($this->config->getMetadataCacheImpl());
 
         $marshallerClassName = $config->getMarshallerClassName();
         $this->marshaller = new $marshallerClassName($this->metadataFactory);
@@ -157,12 +162,35 @@ class XmlEntityManager implements ObjectManager
      * MyProject\Domain\User
      * sales:PriceRequest
      *
-     * @return ClassMetadata
+     * @return \Doctrine\OXM\Mapping\ClassMetadata
      * @internal Performance-sensitive method.
      */
     public function getClassMetadata($className)
     {
         return $this->metadataFactory->getMetadataFor($className);
+    }
+
+
+    /**
+     * Throws an exception if the EntityManager is closed or currently not active.
+     *
+     * @throws ORMException If the EntityManager is closed.
+     */
+    private function errorIfClosed()
+    {
+        if ($this->closed) {
+            throw ORMException::entityManagerClosed();
+        }
+    }
+
+    /**
+     * Check if the Entity manager is open or closed.
+     *
+     * @return bool
+     */
+    public function isOpen()
+    {
+        return (!$this->closed);
     }
 
     /**
@@ -190,6 +218,34 @@ class XmlEntityManager implements ObjectManager
         $this->repositories[$entityName] = $repository;
 
         return $repository;
+    }
+
+
+    /**
+     * Clears the EntityManager. All entities that are currently managed
+     * by this EntityManager become detached.
+     *
+     * @param string $entityName
+     */
+    public function clear($entityName = null)
+    {
+        if ($entityName === null) {
+            $this->unitOfWork->clear();
+        } else {
+            //TODO
+            throw new ORMException("EntityManager#clear(\$entityName) not yet implemented.");
+        }
+    }
+
+    /**
+     * Closes the EntityManager. All entities that are currently managed
+     * by this EntityManager become detached. The EntityManager may no longer
+     * be used after it is closed.
+     */
+    public function close()
+    {
+        $this->clear();
+        $this->closed = true;
     }
 
     /**

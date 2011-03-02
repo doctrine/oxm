@@ -18,6 +18,7 @@ class Order
 {
     /**
      * @XmlField(type="integer")
+     * @XmlId
      */
     private $id;
 

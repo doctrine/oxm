@@ -235,6 +235,15 @@ class ClassMetadataInfo implements BaseClassMetadata
     public $isRoot = false;
 
     /**
+     * READ-ONLY: The name of the entity class that is at the root of the mapped entity inheritance
+     * hierarchy. If the entity is not part of a mapped inheritance hierarchy this is the same
+     * as {@link $entityName}.
+     *
+     * @var string
+     */
+    public $rootXmlEntityName;
+
+    /**
      * READ-ONLY: Whether this class describes the mapping of a mapped superclass.
      *
      * @var boolean
@@ -250,6 +259,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     public function __construct($entityName)
     {
         $this->name = $entityName;
+        $this->rootXmlEntityName = $entityName;
     }
 
     /**
@@ -522,6 +532,8 @@ class ClassMetadataInfo implements BaseClassMetadata
 
         if (!isset($mapping['id'])) {
             $mapping['id'] = false;
+        } else {
+            $this->identifier = $mapping['fieldName'];
         }
 
         $this->xmlFieldMap[$mapping['name']] = $mapping['fieldName'];
