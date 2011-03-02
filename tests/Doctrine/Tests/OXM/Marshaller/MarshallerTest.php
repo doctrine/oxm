@@ -15,6 +15,7 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\OXM\Marshaller\SimpleXmlMarshaller,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\Tests\OXM\Entities\User,
+    \Doctrine\Tests\OXM\Entities\Order,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
     \Doctrine\Tests\OXM\Entities\Address;
 
@@ -53,5 +54,26 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $dom->formatOutput = true;
         $dom->loadXML($xml);
 //        print_r($dom->saveXML());
+    }
+
+    public function testItShouldAutocompleteFields()
+    {
+        $order = new Order(1, 'business cards', new \DateTime());
+
+        $xml = $this->marshaller->marshal($order);
+
+        $dom = new \DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML($xml);
+//        print_r($dom->saveXML());
+
+        $this->assertTrue(strlen($xml) > 0);
+
+        $otherOrder = $this->marshaller->unmarshal($xml);
+//        print_r($otherOrder);
+
+        $this->assertEquals(1, $otherOrder->getId());
+        $this->assertEquals('business cards', $otherOrder->getProductType());
     }
 }

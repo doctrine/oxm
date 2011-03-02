@@ -7,12 +7,12 @@
  * To change this template use File | Settings | File Templates.
  */
 
-namespace Doctrine\Tests\OXM\Entities\Autocomplete;
+namespace Doctrine\Tests\OXM\Entities;
 
-use DateTime;
+use \DateTime;
 
 /**
- * @XmlEntity
+ * @XmlRootEntity
  */
 class Order
 {
@@ -29,7 +29,6 @@ class Order
     /**
      * @var \DateTime
      * @XmlField(type="datetime")
-     * @XmlBinding(name="timeStampz", node="text")
      */
     private $timestamp;
 

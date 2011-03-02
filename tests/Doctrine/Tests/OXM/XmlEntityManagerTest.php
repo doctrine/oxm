@@ -82,29 +82,5 @@ class XmlEntityManagerTest extends \PHPUnit_Framework_TestCase
 //        print_r(1);
     }
 
-    public function testItShouldAutocompleteFields()
-    {
-        $order = new Order(1, 'business cards', new DateTime());
 
-        $xml = $this->xm->marshal($order);
-
-        $dom = new DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($xml);
-//        print_r($dom->saveXML());
-
-        $this->assertTrue(strlen($xml) > 0);
-
-
-        $otherOrder = $this->xm->unmarshal($xml);
-//        print_r($otherOrder);
-
-        $this->assertEquals(1, $otherOrder->getId());
-        $this->assertEquals('business cards', $otherOrder->getProductType());
-
-//        print_r(1);
-//        print_r($this->config->getMappingCacheImpl());
-//        print_r(1);
-    }
 }
