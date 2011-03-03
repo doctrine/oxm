@@ -2,7 +2,7 @@
 
 Doctrine OXM is a PHP 5.3 project for PHP object to XML mapping that provides support for persisting the XML to a file system via common Doctrine techniques.  
 
-=============================
+
 ## XmlEntityManager
 
 Based on the EntityManager of the Doctrine 2 ORM project.  Objects mapped as an @XmlRootEntity may be managed by the XmlEntityManager.  As these objects are persisted, they are saved in XML format to the file system under a user configured directory and naming scheme.
@@ -19,7 +19,7 @@ The XmlEntityManager also allows access to repository type objects for loading e
 
     $user = $em->getRepository("User")->findById(1);
 
-=============================
+
 ## Xml Marshallers
 
 OXM also provides first class support for the Marshalling and Unmarshalling of PHP Objects to XML and vice-versa based on ideas within the Java Castor XML mapping project.  Class metadata for mapped class may be configured via @Annotations, XML, Yaml, or even PHP itself.  Marshallers will uses this class metadata to convert your defined objects to XML, as well as reading in XML and converting them to objects.
@@ -38,5 +38,5 @@ Example use case:
 
     $this->sendToExternalService($xml);
 
-=============================
-API DOCUMENTATION - todo
+
+### API DOCUMENTATION - todo
