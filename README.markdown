@@ -12,7 +12,7 @@ Based on the EntityManager of the Doctrine 2 ORM project.  Objects mapped as an 
     $user = new User();
     $user->setId(1);
     $user->setName("Malcolm Reynolds");
-    $user-> setOccupation("Space Cowboy");
+    $user->setOccupation("Space Cowboy");
 
     $em->persist($user);
     $em->flush();            // saves marshalled user object as XML to the file system.
