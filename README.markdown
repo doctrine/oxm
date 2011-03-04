@@ -27,6 +27,8 @@ The XmlEntityManager also allows access to repository type objects for loading e
 
 OXM also provides first class support for the Marshalling and Unmarshalling of PHP Objects to XML and vice-versa based on ideas within the Java Castor XML mapping project.  Class metadata for mapped class may be configured via @Annotations, XML, Yaml, or even PHP itself.  Marshallers will uses this class metadata to convert your defined objects to XML, as well as reading in XML and converting them to objects.
 
+The behavior of the marshalling and unmarshalling process is completely configurable by the defined class metadata.  You can specify the exact xml names for each element, and how they map to the fields of your class.  XML attributes, elements, and "text" nodes are all supported, as well as collections.
+
 Marshallers are utilized by the XmlEntityManager internally, but are also provided to be used as first class citizens within your code for whatever you need.  This makes working with XML in your application so much easier because you don't really have to think about it anymore!
 
 Example use case:
