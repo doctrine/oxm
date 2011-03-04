@@ -35,13 +35,13 @@ class OxmTestCase extends \PHPUnit_Framework_TestCase
 
         $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver());
 
-        $config->setStoragePath(__DIR__ .'/Workspace');
-
+        $storage = new \Doctrine\OXM\Storage\FileSystemStorage(__DIR__ .'/Workspace');
+        
 //        $config->setProxyDir(__DIR__ . '/Proxies');
 //        $config->setProxyNamespace('Doctrine\Tests\Proxies');
         $eventManager = new \Doctrine\Common\EventManager();
 
-        return \Doctrine\Tests\Mocks\XmlEntityManagerMock::create($config, $eventManager);
+        return \Doctrine\Tests\Mocks\XmlEntityManagerMock::create($storage, $config, $eventManager);
     }
 
     private static function getSharedMetadataCacheImpl()
@@ -50,5 +50,14 @@ class OxmTestCase extends \PHPUnit_Framework_TestCase
             self::$_metadataCacheImpl = new \Doctrine\Common\Cache\ArrayCache;
         }
         return self::$_metadataCacheImpl;
+    }
+
+    /**
+     * @param string $entityName
+     * @return \Doctrine\OXM\Mapping\ClassMetadataInfo
+     */
+    protected function _getClassMetadataMock($entityName)
+    {
+        return new \Doctrine\Tests\Mocks\ClassMetadataInfoMock($entityName);
     }
 }

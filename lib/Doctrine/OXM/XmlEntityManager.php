@@ -20,6 +20,7 @@
 namespace Doctrine\OXM;
 
 use \Doctrine\OXM\Marshaller\Marshaller,
+    \Doctrine\OXM\Storage\Storage,
     \Doctrine\Common\EventManager,
     \Doctrine\Common\Persistence\ObjectManager;
 
@@ -34,6 +35,11 @@ class XmlEntityManager implements ObjectManager
      * @var Configuration
      */
     private $config;
+
+    /**
+     * @var \Doctrine\OXM\Storage\Storage
+     */
+    private $storage;
 
     /**
      * @var Mapping\ClassMetadataFactory
@@ -73,11 +79,13 @@ class XmlEntityManager implements ObjectManager
     /**
      * Creates a new XmlEntityManager that uses the given Configuration and EventManager implementations.
      *
+     * @param Storage $storage
      * @param Configuration $config
      * @param \Doctrine\Common\EventManager $eventManager
      */
-    public function __construct(Configuration $config, EventManager $eventManager = null)
+    public function __construct(Storage $storage, Configuration $config, EventManager $eventManager = null)
     {
+        $this->storage = $storage;
         $this->config = $config;
 
         if (null === $eventManager) {
@@ -116,6 +124,14 @@ class XmlEntityManager implements ObjectManager
     public function unmarshal($xml)
     {
         return $this->marshaller->unmarshal($xml);
+    }
+
+    /**
+     * @return \Doctrine\OXM\Storage\XmlStorage
+     */
+    public function getStorage()
+    {
+        return $this->storage;
     }
 
     /**

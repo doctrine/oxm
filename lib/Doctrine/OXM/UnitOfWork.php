@@ -404,7 +404,7 @@ class UnitOfWork implements PropertyChangedListener
     public function persist($xmlEntity)
     {
         $class = $this->xem->getClassMetadata(get_class($xmlEntity));
-//        print_r($class);
+
         if ($class->isMappedSuperclass) {
             throw OXMException::cannotPersistMappedSuperclass($class->name);
         }

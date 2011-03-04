@@ -10,8 +10,7 @@
 namespace Doctrine\OXM\Persisters;
 
 use \Doctrine\OXM\XmlEntityManager,
-    \Doctrine\OXM\Mapping\ClassMetadata,
-    \Doctrine\OXM\Mapping\ClassMetadataFactory;
+    \Doctrine\OXM\Mapping\ClassMetadata;
 
 class RootXmlEntityPersister extends AbstractPersister
 {
@@ -25,16 +24,24 @@ class RootXmlEntityPersister extends AbstractPersister
      */
     private $xem;
 
-    private $fileExtension = 'xml';
+    /**
+     * @var \Doctrine\OXM\Storage\XmlStorage
+     */
+    private $storage;
 
+    /**
+     * @param \Doctrine\OXM\XmlEntityManager $xem
+     * @param \Doctrine\OXM\Mapping\ClassMetadata
+     */
     public function __construct(XmlEntityManager $xem, ClassMetadata $metadata)
     {
         $this->xem = $xem;
         $this->marshaller = $xem->getMarshaller();
+        $this->storage = $xem->getStorage();
     }
 
     /**
-     * Inserts this xml entity into the filesystem
+     * Inserts this xml entity into the storage system
      *
      * @param  $xmlEntity
      * @return bool|int
@@ -42,37 +49,27 @@ class RootXmlEntityPersister extends AbstractPersister
     public function insert($xmlEntity)
     {
         $classMetadata = $this->xem->getClassMetadata(get_class($xmlEntity));
-
-//        print_r($classMetadata);
-
-        // build filepath
-        $basePath = $this->xem->getConfiguration()->getStoragePath();
-//        print_r(__DIR__);
-//        print_r($basePath);
-
-        $filePath = $basePath . '/' . implode('/', explode("\\", $classMetadata->rootXmlEntityName));
-
-        if (!file_exists($filePath)) {
-            mkdir($filePath, 01777, true);
-        }
-
         $identifier = $classMetadata->getIdentifierValue($xmlEntity);
 
-        $filePath .= '/' . $identifier . "." . $this->fileExtension;
-
-//        print_r($filePath);
-
-
         $xml = $this->marshaller->marshal($xmlEntity);
-        
 
+        // this should probably be a marshaller option... formatOutput = true
         $dom = new \DOMDocument('1.0');
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
         $dom->loadXML($xml);
-//        print_r($dom->saveXML());
 
-        return file_put_contents($filePath, $dom->saveXML());
+        return $this->storage->insert($classMetadata, $identifier, $dom->saveXML());
+    }
+
+    /**
+     * @param object $xmlEntity
+     * @return boolean
+     */
+    public function exists($xmlEntity)
+    {
+        $classMetadata = $this->xem->getClassMetadata(get_class($xmlEntity));
+        return $this->storage->exists($classMetadata, $classMetadata->getIdentifierValue($xmlEntity));
     }
 
 }

@@ -51,26 +51,28 @@ class XmlEntityManagerMock extends \Doctrine\OXM\XmlEntityManager
     }
 
     /**
-     * Mock factory method to create an EntityManager.
-     *
-     * @param unknown_type $conn
-     * @param unknown_type $name
-     * @param Doctrine_Configuration $config
-     * @param Doctrine_EventManager $eventManager
-     * @return Doctrine\ORM\EntityManager
+     * @static
+     * @param \Doctrine\OXM\Storage\Storage|null $storage
+     * @param \Doctrine\OXM\Configuration|null $config
+     * @param \Doctrine\Common\EventManager|null $eventManager
+     * @return XmlEntityManagerMock
      */
-    public static function create(\Doctrine\OXM\Configuration $config = null,
+    public static function create(\Doctrine\OXM\Storage\Storage $storage = null,
+            \Doctrine\OXM\Configuration $config = null,
             \Doctrine\Common\EventManager $eventManager = null)
     {
+        if (is_null($storage)) {
+            $storage = new \Doctrine\OXM\Storage\FileSystemStorage(__DIR__ . '/../Workspace');
+        }
         if (is_null($config)) {
-            $config = new \Doctrine\ORM\Configuration();
-            $config->setMetadataDriverImpl(\Doctrine\ORM\Mapping\Driver\AnnotationDriver::create());
+            $config = new \Doctrine\OXM\Configuration();
+            $config->setMetadataDriverImpl(\Doctrine\OXM\Mapping\Driver\AnnotationDriver::create());
         }
         if (is_null($eventManager)) {
             $eventManager = new \Doctrine\Common\EventManager();
         }
         
-        return new XmlEntityManagerMock($config, $eventManager);
+        return new XmlEntityManagerMock($storage, $config, $eventManager);
     }
 /*
     public function setIdGenerator($className, $generator)

@@ -65,6 +65,11 @@ class XmlEntityManagerTest extends OxmTestCase
 
         unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/3.xml');
         unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/4.xml');
+        @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order');
+        @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities');
+        @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests/OXM');
+        @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests');
+        @rmdir(__DIR__ . '/../Workspace/Doctrine');
     }
 
 

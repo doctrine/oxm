@@ -59,12 +59,12 @@ class ClassMetadata extends ClassMetadataInfo
      * Initializes a new ClassMetadata instance that will hold the object-document mapping
      * metadata of the class with the given name.
      *
-     * @param string $documentName The name of the document class the new instance is used for.
+     * @param string $entityName The name of the document class the new instance is used for.
      */
-    public function __construct($documentName)
+    public function __construct($entityName)
     {
-        parent::__construct($documentName);
-        $this->reflClass = new \ReflectionClass($documentName);
+        parent::__construct($entityName);
+        $this->reflClass = new \ReflectionClass($entityName);
         $this->namespace = $this->reflClass->getNamespaceName();
 
         // todo - move to Inflector of some kind
