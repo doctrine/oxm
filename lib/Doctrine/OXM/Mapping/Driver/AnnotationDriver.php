@@ -123,43 +123,49 @@ class AnnotationDriver implements DriverInterface
     /**
      * {@inheritdoc}
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $class)
+    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
     {
-        $reflClass = $class->getReflectionClass();
+        $reflClass = $metadata->getReflectionClass();
 
         $classAnnotations = $this->reader->getClassAnnotations($reflClass);
         if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlEntity'];
         } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'];
-            $class->isRoot = true;
+            $metadata->isRoot = true;
         } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass'];
-            $class->isMappedSuperclass = true;
+            $metadata->isMappedSuperclass = true;
         } else {
             throw MappingException::classIsNotAValidXmlEntity($className);
         }
 
-        $class->setName($reflClass->getName());
+        $metadata->setName($reflClass->getName());
         if (isset($entityAnnot->xml)) {
-            $class->setXmlName($entityAnnot->xml);
+            $metadata->setXmlName($entityAnnot->xml);
         } else {
             // TODO - use inflector here or perhaps delay
-            $class->setXmlName(strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $reflClass->getShortName())));
+            $metadata->setXmlName(strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $reflClass->getShortName())));
         }
         if (isset($entityAnnot->nsUrl)) {
-            $class->setXmlNamespaceUrl($entityAnnot->nsUrl);
+            $metadata->setXmlNamespaceUrl($entityAnnot->nsUrl);
         }
         if (isset($entityAnnot->nsPrefix)) {
-            $class->setXmlNamespacePrefix($entityAnnot->nsPrefix);
+            $metadata->setXmlNamespacePrefix($entityAnnot->nsPrefix);
         }
         if (isset($entityAnnot->repositoryClass)) {
-            $class->setCustomRepositoryClass($entityAnnot->repositoryClass);
+            $metadata->setCustomRepositoryClass($entityAnnot->repositoryClass);
+        }
+
+        // Evaluate XmlChangeTrackingPolicy annotation
+        if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlChangeTrackingPolicy'])) {
+            $changeTrackingAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlChangeTrackingPolicy'];
+            $metadata->setChangeTrackingPolicy(constant('Doctrine\OXM\Mapping\ClassMetadata::CHANGETRACKING_' . $changeTrackingAnnot->value));
         }
 
         foreach ($reflClass->getProperties() as $property) {
-            if ($class->isMappedSuperclass && ! $property->isPrivate()
-                || $class->isInheritedField($property->name)) {
+            if ($metadata->isMappedSuperclass && ! $property->isPrivate()
+                || $metadata->isInheritedField($property->name)) {
                 continue;
             }
 
@@ -180,7 +186,7 @@ class AnnotationDriver implements DriverInterface
                     }                    
 
                     $mapping = array_merge($mapping, (array) $fieldAnnot);
-                    $class->mapField($mapping);
+                    $metadata->mapField($mapping);
                 }
             }
         }
@@ -192,51 +198,51 @@ class AnnotationDriver implements DriverInterface
                     $annotations = $this->reader->getMethodAnnotations($method);
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PreMarshal'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preMarshal);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preMarshal);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostMarshal'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postMarshal);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postMarshal);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PreUnmarshal'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preUnmarshal);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preUnmarshal);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostUnmarshal'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUnmarshal);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUnmarshal);
                     }
                     
                     if (isset($annotations['Doctrine\OXM\Mapping\PrePersist'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::prePersist);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::prePersist);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostPersist'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postPersist);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postPersist);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PreUpdate'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preUpdate);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preUpdate);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostUpdate'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUpdate);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postUpdate);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PreRemove'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preRemove);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preRemove);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PostRemove'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postRemove);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postRemove);
                     }
 
                     if (isset($annotations['Doctrine\OXM\Mapping\PreLoad'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preLoad);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preLoad);
                     }
                     
                     if (isset($annotations['Doctrine\OXM\Mapping\PostLoad'])) {
-                        $class->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postLoad);
+                        $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::postLoad);
                     }
                 }
             }

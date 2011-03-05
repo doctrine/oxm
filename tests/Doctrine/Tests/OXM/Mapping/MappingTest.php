@@ -14,7 +14,7 @@ use Doctrine\OXM\Mapping\ClassMetadataInfo;
 class MappingTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Doctrine\OXM\Mapping\Mapping
+     * @var \Doctrine\OXM\Mapping\ClassMetadataInfo
      */
     private $mapping;
 
@@ -29,9 +29,19 @@ class MappingTest extends \PHPUnit_Framework_TestCase
 //        print_r($this->mapping);
         $this->assertEquals('User', $this->mapping->getReflectionClass()->getShortName());
     }
+
+    /**
+     * @test
+     */
+    public function itShouldRecordXmlNamespacesProperly()
+    {
+        $this->mapping->setXmlNamespacePrefix('example');
+        $this->mapping->setXmlNamespaceUrl('http://example.com');
+
+        $this->assertEquals('example', $this->mapping->getXmlNamespacePrefix());
+        $this->assertEquals('http://example.com', $this->mapping->getXmlNamespaceUrl());
+    }
 }
-
-
 
 class User
 {

@@ -30,8 +30,12 @@ class XmlEntity extends Annotation {
 final class XmlRootEntity extends XmlEntity {
     public $repositoryClass;
 }
+final class XmlChangeTrackingPolicy extends Annotation {
+    public $value;
+}
 final class XmlMappedSuperclass extends Annotation {}
 
+final class XmlId extends Annotation {}
 class XmlField extends Annotation {
     public $type;       // required
     public $name;       // implied (xml element name)
@@ -63,7 +67,6 @@ final class XmlReferences extends Annotation {
     public $entityName;
 }
 
-final class XmlId extends Annotation {}
 
 /* Annotations for lifecycle callbacks */
 final class HasLifecycleCallbacks extends Annotation {}

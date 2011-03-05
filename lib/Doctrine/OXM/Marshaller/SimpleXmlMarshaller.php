@@ -80,9 +80,13 @@ class SimpleXmlMarshaller extends AbstractMarshaller
 
 
         $refClass = new \ReflectionClass($mappedObject);
+
+        $nsUrl = $classMetadata->getXmlNamespaceUrl();
+        $nsPrefix = $classMetadata->getXmlNamespacePrefix();
         
         // Add to the parent element
-        $xml = $parent->addChild($classMetadata->getXmlName());
+//        $namespacedXml = new \SimpleXMLElement('<' . . '/ >', null, false, $nsPrefix, true);
+        $xml = $parent->addChild($classMetadata->getXmlName(), null, $nsUrl);
         
         foreach ($classMetadata->getReflectionProperties() as $property) {
             $fieldName = $property->getName();

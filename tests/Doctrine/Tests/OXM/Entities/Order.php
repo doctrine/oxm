@@ -12,7 +12,8 @@ namespace Doctrine\Tests\OXM\Entities;
 use \DateTime;
 
 /**
- * @XmlRootEntity
+ * @XmlRootEntity(nsUrl="http://example.com", nsPrefix="expl")
+ * @XmlChangeTrackingPolicy(value="DEFERRED_EXPLICIT")
  */
 class Order
 {
