@@ -15,6 +15,9 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\OXM\Marshaller\SimpleXmlMarshaller,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\Tests\OXM\Entities\User,
+    \Doctrine\Tests\OXM\Entities\Simple,
+    \Doctrine\Tests\OXM\Entities\SimpleWithField,
+    \Doctrine\Tests\OXM\Entities\SimpleCompound,
     \Doctrine\Tests\OXM\Entities\Order,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
     \Doctrine\Tests\OXM\Entities\Address;
@@ -91,5 +94,57 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(1, $otherOrder->getId());
         $this->assertEquals('business cards', $otherOrder->getProductType());
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldProduceExactXml()
+    {
+        $simple = new Simple();
+        $xml = $this->marshaller->marshal($simple);
+        
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple/>', $xml);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldProduceExactXmlForCompoundClassName()
+    {
+        $simple = new SimpleCompound();
+        $xml = $this->marshaller->marshal($simple);
+
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple-compound/>', $xml);
+    }
+
+
+    /**
+     * @test
+     */
+    public function itShouldProduceExactXmlForAttribute()
+    {
+        $simple = new SimpleWithField();
+        $xml = $this->marshaller->marshal($simple);
+
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple-with-field/>', $xml);
+    }
+
+
+
+    /**
+     * @test
+     */
+    public function itShouldProduceExactXmlForPopulatedAttribute()
+    {
+        $simple = new SimpleWithField();
+        $simple->id = 1;
+        $xml = $this->marshaller->marshal($simple);
+
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>', $xml);
     }
 }

@@ -9,7 +9,7 @@
 
     <filter>
         <blacklist>
-            <directory suffix=".php">tests/fixtures</directory>
+            <directory>../lib/vendor</directory>
         </blacklist>
     </filter>
 

@@ -71,6 +71,4 @@ class XmlEntityManagerTest extends OxmTestCase
         @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests');
         @rmdir(__DIR__ . '/../Workspace/Doctrine');
     }
-
-
 }

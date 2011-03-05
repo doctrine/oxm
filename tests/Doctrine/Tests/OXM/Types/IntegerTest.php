@@ -18,6 +18,7 @@ class IntegerTest extends \PHPUnit_Framework_TestCase
 
     public function testIntegerConvertsToPHPValue()
     {
+        $this->assertInternalType('integer', $this->_type->convertToPHPValue('3.14'));
         $this->assertInternalType('integer', $this->_type->convertToPHPValue('1'));
         $this->assertInternalType('integer', $this->_type->convertToPHPValue('0'));
     }
