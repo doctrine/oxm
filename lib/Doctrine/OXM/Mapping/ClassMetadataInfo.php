@@ -94,13 +94,6 @@ class ClassMetadataInfo implements BaseClassMetadata
      * @var string
      */
     public $name;
-    
-    /**
-     * The namespace of this class
-     *
-     * @var string
-     */
-    public $namespace;
 
     /**
      * The xml node name to map this class to
@@ -517,17 +510,11 @@ class ClassMetadataInfo implements BaseClassMetadata
         }
 
         if (!isset($mapping['getMethod'])) {
-            $proposedGetter = $this->inferGetter($mapping['fieldName']);
-            if ($this->reflClass->hasMethod($proposedGetter)) {
-                $mapping['getMethod'] = $proposedGetter;
-            }
+            $mapping['getMethod'] = $this->inferGetter($mapping['fieldName']);
         }
 
         if (!isset($mapping['setMethod'])) {
-            $proposedSetter = $this->inferSetter($mapping['fieldName']);
-            if ($this->reflClass->hasMethod($proposedSetter)) {
-                $mapping['setMethod'] = $proposedSetter;
-            }
+            $mapping['setMethod'] = $this->inferSetter($mapping['fieldName']);
         }
 
         if (!isset($mapping['id'])) {
@@ -539,6 +526,24 @@ class ClassMetadataInfo implements BaseClassMetadata
         $this->xmlFieldMap[$mapping['name']] = $mapping['fieldName'];
         $this->fieldMappings[$mapping['fieldName']] = $mapping;
         return $mapping;
+    }
+
+    /**
+     * @param string $fieldName
+     * @return string
+     */
+    protected function inferGetter($fieldName)
+    {
+        return 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $fieldName)));
+    }
+
+    /**
+     * @param string $fieldName
+     * @return string
+     */
+    protected function inferSetter($fieldName)
+    {
+        return 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $fieldName)));
     }
 
 
@@ -629,16 +634,6 @@ class ClassMetadataInfo implements BaseClassMetadata
     }
 
     /**
-     * The namespace this XmlEntity class belongs to.
-     *
-     * @return string $namespace The namespace name.
-     */
-    public function getNamespace()
-    {
-        return $this->namespace;
-    }
-
-    /**
      * Returns an array of all field mappings
      *
      * @return array
@@ -681,6 +676,9 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     public function getFieldXmlName($fieldName)
     {
+        if ( ! isset($this->fieldMappings[$fieldName])) {
+            throw MappingException::mappingNotFound($this->name, $fieldName);
+        }
         return isset($this->fieldMappings[$fieldName]) ?
                 $this->fieldMappings[$fieldName]['name'] : null;
     }
@@ -723,14 +721,6 @@ class ClassMetadataInfo implements BaseClassMetadata
             throw MappingException::mappingNotFound($this->name, $fieldName);
         }
         return $this->fieldMappings[$fieldName]['required'] ? true : false;
-    }
-
-    public function isTransient($fieldName)
-    {
-        if (!isset($this->fieldMappings[$fieldName])) {
-            throw MappingException::mappingNotFound($this->name, $fieldName);
-        }
-        return $this->fieldMappings[$fieldName]['transient'] ? true : false;
     }
 
     /**
@@ -779,24 +769,6 @@ class ClassMetadataInfo implements BaseClassMetadata
     }
 
     /**
-     * @param string $fieldName
-     * @return string
-     */
-    private function inferGetter($fieldName)
-    {
-        return 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $fieldName)));
-    }
-
-    /**
-     * @param string $fieldName
-     * @return string
-     */
-    private function inferSetter($fieldName)
-    {
-        return 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $fieldName)));
-    }
-
-        /**
      * Checks whether the class will generate a new \MongoId instance for us.
      *
      * @return boolean TRUE if the class uses the AUTO generator, FALSE otherwise.
@@ -847,21 +819,35 @@ class ClassMetadataInfo implements BaseClassMetadata
         return self::$_nodeTypes;
     }
 
+    /**
+     * @param  $xmlNamespacePrefix
+     * @return void
+     */
     public function setXmlNamespacePrefix($xmlNamespacePrefix)
     {
         $this->xmlNamespacePrefix = $xmlNamespacePrefix;
     }
 
+    /**
+     * @return string
+     */
     public function getXmlNamespacePrefix()
     {
         return $this->xmlNamespacePrefix;
     }
 
+    /**
+     * @param  $xmlNamespaceUrl
+     * @return void
+     */
     public function setXmlNamespaceUrl($xmlNamespaceUrl)
     {
         $this->xmlNamespaceUrl = $xmlNamespaceUrl;
     }
 
+    /**
+     * @return string
+     */
     public function getXmlNamespaceUrl()
     {
         return $this->xmlNamespaceUrl;

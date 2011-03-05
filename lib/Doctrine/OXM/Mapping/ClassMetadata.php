@@ -105,6 +105,9 @@ class ClassMetadata extends ClassMetadataInfo
         if ($this->fieldMappings[$fieldName]['direct']) {
             $this->reflFields[$fieldName]->setValue($entity, $value);
         } else {
+            if (!array_key_exists('setMethod', $this->fieldMappings[$fieldName])) {
+                $this->fieldMappings[$fieldName]['setMethod'] = $this->inferSetter($fieldName);
+            }
             $setter = $this->fieldMappings[$fieldName]['setMethod'];
 
             if ($this->reflClass->hasMethod($setter)) {
@@ -127,6 +130,9 @@ class ClassMetadata extends ClassMetadataInfo
         if ($this->fieldMappings[$fieldName]['direct']) {
             return $this->reflFields[$fieldName]->getValue($entity);
         } else {
+            if (!array_key_exists('getMethod', $this->fieldMappings[$fieldName])) {
+                $this->fieldMappings[$fieldName]['getMethod'] = $this->inferGetter($fieldName);
+            }
             $getter = $this->fieldMappings[$fieldName]['getMethod'];
 
             if ($this->reflClass->hasMethod($getter)) {

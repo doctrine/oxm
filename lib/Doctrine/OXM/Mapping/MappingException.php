@@ -79,7 +79,7 @@ class MappingException extends OXMException
 
     public static function missingFieldType($className, $fieldName)
     {
-        return new self("The 'type' field of '$fieldName' on class '$className' is a required field");
+        return new self("The type of field '$fieldName' on class '$className' is a required field");
     }
 
     public static function fieldRequired($entityName, $fieldName)
