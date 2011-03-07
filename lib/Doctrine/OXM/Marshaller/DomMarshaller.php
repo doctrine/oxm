@@ -34,16 +34,16 @@ class DomMarshaller extends AbstractMarshaller
      * @param string $xml
      * @return void
      */
-    function unmarshal(ClassMetadataFactory $mappingFactory, $xml)
+    function unmarshal($xml)
     {
         // TODO: Implement unmarshal() method.
     }
 
     /**
-     * @param  $mappedObject
+     * @param object $mappedObject
      * @return string
      */
-    function marshal(ClassMetadataFactory $mappingFactory, $mappedObject)
+    function marshal($mappedObject)
     {
         // TODO: Implement marshal() method.
     }

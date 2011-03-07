@@ -84,7 +84,9 @@ class SimpleXmlMarshaller extends AbstractMarshaller
         $nsUrl = $classMetadata->getXmlNamespaceUrl();
         $nsPrefix = $classMetadata->getXmlNamespacePrefix();
         
-        // Add to the parent element
+        // SimpleXML api sucks... maybe doesn't support namespaces properly?
+        // There's some stupid SimpleXML append scripts on the internets, but it'll kill performance
+
 //        $namespacedXml = new \SimpleXMLElement('<' . . '/ >', null, false, $nsPrefix, true);
         $xml = $parent->addChild($classMetadata->getXmlName(), null, $nsUrl);
         
@@ -138,6 +140,11 @@ class SimpleXmlMarshaller extends AbstractMarshaller
         if ($classMetadata->hasLifecycleCallbacks(Events::postMarshal)) {
             $classMetadata->invokeLifecycleCallbacks(Events::postMarshal, $mappedObject);
         }
+    }
+
+    function __clone()
+    {
+        // TODO: Implement __clone() method.
     }
 
     /**

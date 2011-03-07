@@ -12,7 +12,7 @@ namespace Doctrine\Tests\OXM\Marshaller;
 use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\OXM\Configuration,
     \Doctrine\OXM\Marshaller\Marshaller,
-    \Doctrine\OXM\Marshaller\SimpleXmlMarshaller,
+    \Doctrine\OXM\Marshaller\XmlMarshaller,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\Tests\OXM\Entities\User,
     \Doctrine\Tests\OXM\Entities\Simple,
@@ -37,7 +37,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $metadataFactory = new ClassMetadataFactory($config);
 
-        $this->marshaller = new SimpleXmlMarshaller($metadataFactory);
+        $this->marshaller = new XmlMarshaller($metadataFactory);
     }
 
 
@@ -105,7 +105,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $xml = $this->marshaller->marshal($simple);
         
         $this->assertTrue(strlen($xml) > 0);
-        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple/>', $xml);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple/>', $xml);
     }
 
     /**
@@ -117,7 +117,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $xml = $this->marshaller->marshal($simple);
 
         $this->assertTrue(strlen($xml) > 0);
-        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple-compound/>', $xml);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-compound/>', $xml);
     }
 
 
@@ -130,7 +130,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $xml = $this->marshaller->marshal($simple);
 
         $this->assertTrue(strlen($xml) > 0);
-        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple-with-field/>', $xml);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-with-field/>', $xml);
     }
 
 
@@ -145,6 +145,6 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $xml = $this->marshaller->marshal($simple);
 
         $this->assertTrue(strlen($xml) > 0);
-        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>', $xml);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>', $xml);
     }
 }

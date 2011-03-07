@@ -91,7 +91,7 @@ class Configuration
     {
         if (!isset($this->_attributes['marshallerclassName'])) {
             // todo - put most efficient marshaller here
-            $this->_attributes['marshallerclassName'] = 'Doctrine\OXM\Marshaller\SimpleXmlMarshaller';
+            $this->_attributes['marshallerclassName'] = 'Doctrine\OXM\Marshaller\XmlMarshaller';
         }
         return $this->_attributes['marshallerclassName'];
     }
