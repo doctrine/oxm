@@ -34,6 +34,7 @@ use \SimpleXmlElement,
  * @since   2.0
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
+ * @deprecated in favor of XmlMarshaller
  */
 class SimpleXmlMarshaller extends AbstractMarshaller
 {
