@@ -182,7 +182,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      *
      * @var array
      */
-    public $fieldMappings;
+    public $fieldMappings = array();
 
     /**
      * READ-ONLY: The registered lifecycle callbacks for entities of this class.
@@ -197,7 +197,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      *
      * @var array
      */
-    public $xmlFieldMap;
+    public $xmlFieldMap = array();
 
     /**
      * READ-ONLY: The policy used for change-tracking on entities of this class.
@@ -242,6 +242,13 @@ class ClassMetadataInfo implements BaseClassMetadata
      * @var boolean
      */
     public $isMappedSuperclass = false;
+    
+    /**
+     * READ-ONLY: The names of the parent classes (ancestors).
+     *
+     * @var array
+     */
+    public $parentClasses = array();
 
     /**
      * Initializes a new ClassMetadata instance that will hold the object-xml mapping
@@ -445,6 +452,19 @@ class ClassMetadataInfo implements BaseClassMetadata
     }
 
     /**
+     * Sets the parent class names.
+     * Assumes that the class names in the passed array are in the order:
+     * directParent -> directParentParent -> directParentParentParent ... -> root.
+     */
+    public function setParentClasses(array $classNames)
+    {
+        $this->parentClasses = $classNames;
+        if (count($classNames) > 0) {
+            $this->rootEntityName = array_pop($classNames);
+        }
+    }
+
+    /**
      * @param array
      * @return void
      */
@@ -557,6 +577,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     public function addInheritedFieldMapping(array $fieldMapping)
     {
         $this->fieldMappings[$fieldMapping['fieldName']] = $fieldMapping;
+        $this->xmlFieldMap[$fieldMapping['name']] = $fieldMapping['fieldName'];
     }
 
     /**

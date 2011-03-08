@@ -245,18 +245,16 @@ class XmlMarshaller extends AbstractMarshaller
             foreach ($orderedMap[ClassMetadataInfo::XML_ATTRIBUTE] as $fieldMapping) {
 
                 $fieldName = $fieldMapping['fieldName'];
-
-                if (!$refClass->hasProperty($fieldName)) {
-                    continue;
-                }
                 $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
+
                 if ($classMetadata->isRequired($fieldName) && $fieldValue === null) {
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
-
+                
                 if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
                     $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
                     $fieldType = $classMetadata->getTypeOfField($fieldName);
+
                     $writer->writeAttribute($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
                 }
             }
@@ -267,12 +265,8 @@ class XmlMarshaller extends AbstractMarshaller
             foreach ($orderedMap[ClassMetadataInfo::XML_TEXT] as $fieldMapping) {
 
                 $fieldName = $fieldMapping['fieldName'];
-
-                if (!$refClass->hasProperty($fieldName)) {
-                    continue;
-                }
-                
                 $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
+
                 if ($classMetadata->isRequired($fieldName) && $fieldValue === null) {
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
@@ -280,6 +274,7 @@ class XmlMarshaller extends AbstractMarshaller
                 if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
                     $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
                     $fieldType = $classMetadata->getTypeOfField($fieldName);
+                    
                     $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
                 }
             }
@@ -290,11 +285,8 @@ class XmlMarshaller extends AbstractMarshaller
             foreach ($orderedMap[ClassMetadataInfo::XML_ELEMENT] as $fieldMapping) {
 
                 $fieldName = $fieldMapping['fieldName'];
-
-                if (!$refClass->hasProperty($fieldName)) {
-                    continue;
-                }
                 $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
+
                 if ($classMetadata->isRequired($fieldName) && $fieldValue === null) {
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }

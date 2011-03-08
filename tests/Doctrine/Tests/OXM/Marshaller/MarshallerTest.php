@@ -16,6 +16,9 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\Tests\OXM\Entities\User,
     \Doctrine\Tests\OXM\Entities\Simple,
+    \Doctrine\Tests\OXM\Entities\SimpleChild,
+    \Doctrine\Tests\OXM\Entities\SimpleChildExtendsWithChildField,
+    \Doctrine\Tests\OXM\Entities\SimpleChildExtendsWithParentField,
     \Doctrine\Tests\OXM\Entities\SimpleWithField,
     \Doctrine\Tests\OXM\Entities\SimpleCompound,
     \Doctrine\Tests\OXM\Entities\Order,
@@ -29,15 +32,20 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
      */
     private $marshaller;
 
+    /**
+     * @var \Doctrine\OXM\Mapping\ClassMetadataFactory
+     */
+    private $metadataFactory;
+
     public function setUp()
     {
         $config = new Configuration();
         $config->setMetadataDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
         $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
 
-        $metadataFactory = new ClassMetadataFactory($config);
+        $this->metadataFactory = new ClassMetadataFactory($config);
 
-        $this->marshaller = new XmlMarshaller($metadataFactory);
+        $this->marshaller = new XmlMarshaller($this->metadataFactory);
     }
 
 
@@ -169,5 +177,32 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         <!-- Comment -->
         <simple-with-field id="1"/><!-- comment2 -->');
         $this->assertEquals(1, $simple->id);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldHandleMappedSuperclassesCorrectly()
+    {
+        $simple = new SimpleChild();
+        $xml = $this->marshaller->marshal($simple);
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-child><other>yes</other></simple-child>', $xml);
+
+
+        $simple = new SimpleChildExtendsWithChildField();
+        $simple->id = 1;
+        $simple->other = "no";
+        $xml = $this->marshaller->marshal($simple);
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <simple-child-extends-with-child-field id="1">
+                <other>no</other>
+            </simple-child-extends-with-child-field>', $xml);
+
+        $simple = new SimpleChildExtendsWithParentField();
+        $xml = $this->marshaller->marshal($simple);
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-child-extends-with-parent-field id="2"/>', $xml);
     }
 }

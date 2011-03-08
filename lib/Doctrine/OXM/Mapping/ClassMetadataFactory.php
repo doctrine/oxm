@@ -200,14 +200,14 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                 if (($cached = $this->cacheDriver->fetch("$realClassName\$XMLCLASSMETADATA")) !== false) {
                     $this->loadedMetadata[$realClassName] = $cached;
                 } else {
-                    foreach ($this->loadMapping($realClassName) as $loadedClassName) {
+                    foreach ($this->loadMetadata($realClassName) as $loadedClassName) {
                         $this->cacheDriver->save(
                             "$loadedClassName\$XMLCLASSMETADATA", $this->loadedMetadata[$loadedClassName], null
                         );
                     }
                 }
             } else {
-                $this->loadMapping($realClassName);
+                $this->loadMetadata($realClassName);
             }
 
             if ($className != $realClassName) {
@@ -268,7 +268,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      * @param string $name The name of the class for which the metadata should get loaded.
      * @param array  $tables The metadata collection to which the loaded metadata is added.
      */
-    protected function loadMapping($name)
+    protected function loadMetadata($name)
     {
         if ( ! $this->initialized) {
             $this->initialize();
@@ -285,7 +285,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         foreach ($parentClasses as $className) {
             if (isset($this->loadedMetadata[$className])) {
                 $parent = $this->loadedMetadata[$className];
-                if (!$parent->isMappedSuperclass) {
+                if ( ! $parent->isMappedSuperclass) {
                     array_unshift($visited, $className);
                 }
                 continue;
@@ -294,13 +294,11 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
             $class = $this->newClassMetadataInstance($className);
 
             if ($parent) {
-                if (!$parent->isMappedSuperclass) {
-                    $class->setInheritanceType($parent->inheritanceType);
-                    $class->setDiscriminatorField($parent->discriminatorField);
-                    $class->setDiscriminatorMap($parent->discriminatorMap);
-                }
                 $class->setIdGeneratorType($parent->generatorType);
                 $this->addInheritedFields($class, $parent);
+
+                $class->setXmlNamespacePrefix($parent->xmlNamespacePrefix);
+                $class->setXmlNamespaceUrl($parent->xmlNamespaceUrl);
                 $class->setIdentifier($parent->identifier);
                 $class->setLifecycleCallbacks($parent->lifecycleCallbacks);
                 $class->setChangeTrackingPolicy($parent->changeTrackingPolicy);
@@ -339,6 +337,8 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                 }
             }
 
+            $class->setParentClasses($visited);
+
             // Todo - ensure that root elements have an ID mapped
 
             if ($this->evm->hasListeners(Events::loadClassMetadata)) {
@@ -347,7 +347,10 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
             }
 
             $this->loadedMetadata[$className] = $class;
-            $this->xmlToClassMap[$class->getXmlName()] = $className;
+
+            if ( ! $class->isMappedSuperclass) {
+                $this->xmlToClassMap[$class->getXmlName()] = $className;
+            }
 
             $parent = $class;
 
