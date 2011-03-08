@@ -44,9 +44,38 @@ class XmlEntityManagerTest extends OxmTestCase
         $this->xem->flush();
 
         $expectedFileName = __DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml';
+
         $this->assertTrue(is_file($expectedFileName));
 
         unlink($expectedFileName);
+    }
+
+    public function testNoFlushPersisting()
+    {
+        $order = new Order(1, 'business cards', new \DateTime());
+
+        $this->xem->persist($order);
+
+        $expectedFileName = __DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml';
+
+        $this->assertTrue(!is_file($expectedFileName));
+    }
+
+    public function testPersistAndLoad()
+    {
+        $order = new Order(1, 'business cards', new \DateTime());
+
+        $this->xem->persist($order);
+        $this->xem->flush();
+
+        $expectedFileName = __DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml';
+        $this->assertTrue(is_file($expectedFileName));
+
+        $otherOrder = $this->xem->getRepository('Doctrine\Tests\OXM\Entities\Order')->find(1);
+
+        $this->assertEquals('business cards', $otherOrder->getProductType());
+
+        unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml');
     }
 
 
@@ -62,9 +91,12 @@ class XmlEntityManagerTest extends OxmTestCase
         $this->assertTrue(is_file(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/3.xml'));
         $this->assertTrue(is_file(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/4.xml'));
 
-
         unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/3.xml');
         unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/4.xml');
+    }
+
+    public function tearDown()
+    {
         @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order');
         @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities');
         @rmdir(__DIR__ . '/../Workspace/Doctrine/Tests/OXM');

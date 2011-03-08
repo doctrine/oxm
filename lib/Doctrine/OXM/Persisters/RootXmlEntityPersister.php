@@ -12,7 +12,7 @@ namespace Doctrine\OXM\Persisters;
 use \Doctrine\OXM\XmlEntityManager,
     \Doctrine\OXM\Mapping\ClassMetadata;
 
-class RootXmlEntityPersister extends AbstractPersister
+class RootXmlEntityPersister
 {
     /**
      * @var \Doctrine\OXM\Marshaller\Marshaller
@@ -25,16 +25,22 @@ class RootXmlEntityPersister extends AbstractPersister
     private $xem;
 
     /**
-     * @var \Doctrine\OXM\Storage\XmlStorage
+     * @var \Doctrine\OXM\Storage\Storage
      */
     private $storage;
 
     /**
+     * @var \Doctrine\OXM\Mapping\ClassMetadata
+     */
+    private $metadata;
+
+    /**
      * @param \Doctrine\OXM\XmlEntityManager $xem
-     * @param \Doctrine\OXM\Mapping\ClassMetadata
+     * @param \Doctrine\OXM\Mapping\ClassMetadataInfo
      */
     public function __construct(XmlEntityManager $xem, ClassMetadata $metadata)
     {
+        $this->metadata = $metadata;
         $this->xem = $xem;
         $this->marshaller = $xem->getMarshaller();
         $this->storage = $xem->getStorage();
@@ -48,18 +54,11 @@ class RootXmlEntityPersister extends AbstractPersister
      */
     public function insert($xmlEntity)
     {
-        $classMetadata = $this->xem->getClassMetadata(get_class($xmlEntity));
-        $identifier = $classMetadata->getIdentifierValue($xmlEntity);
+        $identifier = $this->metadata->getIdentifierValue($xmlEntity);
 
         $xml = $this->marshaller->marshal($xmlEntity);
-
-        // this should probably be a marshaller option... formatOutput = true
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML($xml);
-
-        return $this->storage->insert($classMetadata, $identifier, $dom->saveXML());
+        
+        return $this->storage->insert($this->metadata, $identifier, $xml);
     }
 
     /**
@@ -68,8 +67,14 @@ class RootXmlEntityPersister extends AbstractPersister
      */
     public function exists($xmlEntity)
     {
-        $classMetadata = $this->xem->getClassMetadata(get_class($xmlEntity));
-        return $this->storage->exists($classMetadata, $classMetadata->getIdentifierValue($xmlEntity));
+        return $this->storage->exists($this->metadata, $this->metadata->getIdentifierValue($xmlEntity));
     }
 
+
+    public function load($id)
+    {
+        $xml = $this->storage->load($this->metadata, $id);
+
+        return $this->marshaller->unmarshal($xml);
+    }
 }

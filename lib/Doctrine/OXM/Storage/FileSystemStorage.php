@@ -121,7 +121,12 @@ class FileSystemStorage implements Storage
      */
     public function load(ClassMetadataInfo $classMetadata, $id)
     {
-        // todo - implement load method
+        $baseFilePath = $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
+
+        // todo - id should be sanitized for the filesystem
+        $baseFilePath .= "/$id.{$this->fileExtension}";
+
+        return file_get_contents($baseFilePath);
     }
 
     /**

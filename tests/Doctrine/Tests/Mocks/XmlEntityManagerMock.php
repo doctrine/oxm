@@ -66,7 +66,7 @@ class XmlEntityManagerMock extends \Doctrine\OXM\XmlEntityManager
         }
         if (is_null($config)) {
             $config = new \Doctrine\OXM\Configuration();
-            $config->setMetadataDriverImpl(\Doctrine\OXM\Mapping\Driver\AnnotationDriver::create());
+            $config->setMetadataDriverImpl(\Doctrine\OXM\Mapping\Driver\AnnotationDriver::create(__DIR__ . '/../OXM/Entities'));
         }
         if (is_null($eventManager)) {
             $eventManager = new \Doctrine\Common\EventManager();

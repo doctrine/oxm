@@ -89,7 +89,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     const CHANGETRACKING_NOTIFY = 3;
 
     /**
-     * The name of th class
+     * The name of the class
      *
      * @var string
      */

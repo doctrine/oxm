@@ -27,13 +27,13 @@ class OxmTestCase extends \PHPUnit_Framework_TestCase
     protected function _getTestXmlEntityManager($eventManager = null, $withSharedMetadata = true)
     {
         $config = new \Doctrine\OXM\Configuration();
-        if($withSharedMetadata) {
+        if ($withSharedMetadata) {
             $config->setMetadataCacheImpl(self::getSharedMetadataCacheImpl());
         } else {
             $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache);
         }
 
-        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver());
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver(__DIR__ .'/OXM/Entities'));
 
         $storage = new \Doctrine\OXM\Storage\FileSystemStorage(__DIR__ .'/Workspace');
         

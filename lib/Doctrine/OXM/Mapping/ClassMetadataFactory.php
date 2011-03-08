@@ -181,6 +181,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     public function getMetadataFor($className)
     {
         if ( ! isset($this->loadedMetadata[$className])) {
+//            print_r('loading class ' . $className . "\n");
             $realClassName = $className;
 
             // Check for namespace alias
@@ -199,6 +200,9 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
             if ($this->cacheDriver) {
                 if (($cached = $this->cacheDriver->fetch("$realClassName\$XMLCLASSMETADATA")) !== false) {
                     $this->loadedMetadata[$realClassName] = $cached;
+                    if ( ! $cached->isMappedSuperclass) {
+                        $this->xmlToClassMap[$cached->getXmlName()] = $realClassName;
+                    }
                 } else {
                     foreach ($this->loadMetadata($realClassName) as $loadedClassName) {
                         $this->cacheDriver->save(

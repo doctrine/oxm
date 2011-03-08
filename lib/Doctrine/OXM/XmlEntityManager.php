@@ -161,7 +161,7 @@ class XmlEntityManager implements ObjectManager
     /**
      * Gets the metadata factory used to gather the metadata of classes.
      *
-     * @return Doctrine\Common\Persistence\Mapping\ClassMetadataFactory
+     * @return \Doctrine\OXM\Mapping\ClassMetadataFactory
      */
     public function getMetadataFactory()
     {
@@ -195,7 +195,7 @@ class XmlEntityManager implements ObjectManager
     private function errorIfClosed()
     {
         if ($this->closed) {
-            throw ORMException::entityManagerClosed();
+            throw OXMException::entityManagerClosed();
         }
     }
 
@@ -212,7 +212,7 @@ class XmlEntityManager implements ObjectManager
     /**
      * Gets the repository for a class.
      *
-     * @param string $className
+     * @param string $entityName
      * @return \Doctrine\Common\Persistence\ObjectRepository
      */
     public function getRepository($entityName)
@@ -385,7 +385,7 @@ class XmlEntityManager implements ObjectManager
     /**
      * Gets the UnitOfWork used by the EntityManager to coordinate operations.
      *
-     * @return Doctrine\OXM\UnitOfWork
+     * @return \Doctrine\OXM\UnitOfWork
      */
     public function getUnitOfWork()
     {

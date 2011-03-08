@@ -173,7 +173,7 @@ class UnitOfWork implements PropertyChangedListener
      * Gets the EntityPersister for an Entity.
      *
      * @param string $entityName  The name of the Entity.
-     * @return \Doctrine\OXM\Persisters\AbstractPersister
+     * @return \Doctrine\OXM\Persisters\RootXmlEntityPersister
      */
     public function getXmlEntityPersister($entityName)
     {
@@ -197,8 +197,8 @@ class UnitOfWork implements PropertyChangedListener
         $this->scheduledForDirtyCheck =
         $this->entityInsertions =
         $this->entityUpdates =
-        $this->entityDeletions =
-        $this->extraUpdates = array();
+        $this->entityDeletions = array();
+//        $this->extraUpdates = array();
 //        $this->parentAssociations =
 //        $this->orphanRemovals = array();
 //        if ($this->commitOrderCalculator !== null) {

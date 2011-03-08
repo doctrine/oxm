@@ -80,6 +80,7 @@ class XmlMarshaller extends AbstractMarshaller
         $elementName = $cursor->localName;
         
         if (!in_array($elementName, $knownMappedNodes)) {
+            print_r($knownMappedNodes);
             throw MappingException::invalidMapping($elementName);
         }
         $classMetadata = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$elementName]);
