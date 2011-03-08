@@ -48,8 +48,14 @@ class XmlMarshaller extends AbstractMarshaller
     function unmarshal($xml)
     {
         $reader = new XMLReader();
-        $reader->XML($xml);
-        $reader->read();   //position at first detected element
+        $reader->XML(trim($xml));
+
+        // Position at first detected element
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::ELEMENT) {
+                break;
+            }
+        }
 
         $mappedObject = $this->doUnmarshal($reader);
         $reader->close();

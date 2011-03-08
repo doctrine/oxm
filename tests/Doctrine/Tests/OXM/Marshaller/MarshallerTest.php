@@ -156,5 +156,18 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     {
         $simple = $this->marshaller->unmarshal('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>');
         $this->assertEquals(1, $simple->id);
+
+        $simple = $this->marshaller->unmarshal(' <?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>');
+        $this->assertEquals(1, $simple->id);
+
+        $simple = $this->marshaller->unmarshal(' <?xml version="1.0" encoding="UTF-8"?><simple-with-field
+
+        id="1"/>');
+        $this->assertEquals(1, $simple->id);
+
+        $simple = $this->marshaller->unmarshal(' <?xml version="1.0" encoding="UTF-8"?>
+        <!-- Comment -->
+        <simple-with-field id="1"/><!-- comment2 -->');
+        $this->assertEquals(1, $simple->id);
     }
 }
