@@ -147,4 +147,14 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>', $xml);
     }
+
+
+    /**
+     * @test
+     */
+    public function itShouldHandleAllValidXml()
+    {
+        $simple = $this->marshaller->unmarshal('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>');
+        $this->assertEquals(1, $simple->id);
+    }
 }

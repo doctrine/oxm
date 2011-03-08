@@ -314,9 +314,9 @@ class AnnotationDriver implements DriverInterface
     {
         $classAnnotations = $this->reader->getClassAnnotations(new \ReflectionClass($className));
 
-        return ! isset($classAnnotations['Doctrine\ORM\Mapping\XmlEntity']) &&
-               ! isset($classAnnotations['Doctrine\ORM\Mapping\XmlRootEntity']) &&
-               ! isset($classAnnotations['Doctrine\ORM\Mapping\XmlMappedSuperclass']);
+        return ! isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity']) &&
+               ! isset($classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity']) &&
+               ! isset($classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass']);
     }
 
     /**
