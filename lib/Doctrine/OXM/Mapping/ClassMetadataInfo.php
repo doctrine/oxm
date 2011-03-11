@@ -461,7 +461,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     {
         $this->parentClasses = $classNames;
         if (count($classNames) > 0) {
-            $this->rootEntityName = array_pop($classNames);
+            $this->rootXmlEntityName = array_pop($classNames);
         }
     }
 
@@ -511,7 +511,7 @@ class ClassMetadataInfo implements BaseClassMetadata
         }
 
         if (!isset($mapping['direct'])) {
-            $mapping['direct'] = false;
+            $mapping['direct'] = true;
         }
 
         if (!isset($mapping['nillable'])) {
