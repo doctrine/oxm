@@ -19,6 +19,8 @@
 
 namespace Doctrine\OXM\Mapping;
 
+use \Doctrine\OXM\Util\Inflector;
+
 /**
  * A <tt>ClassMetadata</tt> instance holds all the object-document mapping metadata
  * of a document and it's references.
@@ -68,7 +70,7 @@ class ClassMetadata extends ClassMetadataInfo
         $this->namespace = $this->reflClass->getNamespaceName();
 
         // todo - move to Inflector of some kind
-        $this->xmlName = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $this->reflClass->getShortName()));
+        $this->xmlName = Inflector::xmlize($this->reflClass->getShortName());
     }
 
 

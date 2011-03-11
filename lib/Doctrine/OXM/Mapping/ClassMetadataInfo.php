@@ -21,7 +21,8 @@ namespace Doctrine\OXM\Mapping;
 
 use ReflectionClass,
     ReflectionProperty,
-    \Doctrine\Common\Persistence\Mapping\ClassMetadata as BaseClassMetadata,
+    Doctrine\Common\Persistence\Mapping\ClassMetadata as BaseClassMetadata,
+    Doctrine\OXM\Util\Inflector,
     Doctrine\OXM\Types\Type;
 
 /**
@@ -482,7 +483,7 @@ class ClassMetadataInfo implements BaseClassMetadata
         }
 
         if (!isset($mapping['name'])) {
-            $mapping['name'] = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $mapping['fieldName']));
+            $mapping['name'] = Inflector::xmlize($mapping['fieldName']);
         } else {
             if ($mapping['name'][0] == '`') {
                 $mapping['name'] = trim($mapping['name'], '`');

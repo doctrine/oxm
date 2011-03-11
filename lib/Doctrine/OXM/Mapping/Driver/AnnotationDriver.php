@@ -21,6 +21,7 @@ namespace Doctrine\OXM\Mapping\Driver;
 
 use \Doctrine\Common\Cache\ArrayCache,
     \Doctrine\Common\Annotations\AnnotationReader,
+    \Doctrine\OXM\Util\Inflector,
     \Doctrine\OXM\Mapping\ClassMetadataInfo,
     \Doctrine\OXM\Mapping\MappingException,
     \Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
@@ -145,7 +146,7 @@ class AnnotationDriver implements DriverInterface
             $metadata->setXmlName($entityAnnot->xml);
         } else {
             // TODO - use inflector here or perhaps delay
-            $metadata->setXmlName(strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', $reflClass->getShortName())));
+            $metadata->setXmlName(Inflector::xmlize($reflClass->getShortName()));
         }
         if (isset($entityAnnot->nsUrl)) {
             $metadata->setXmlNamespaceUrl($entityAnnot->nsUrl);
