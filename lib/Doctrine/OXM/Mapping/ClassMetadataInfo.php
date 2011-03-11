@@ -555,7 +555,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     protected function inferGetter($fieldName)
     {
-        return 'get' . str_replace(' ', '', ucwords(str_replace('_', ' ', $fieldName)));
+        return 'get' . Inflector::camelize($fieldName);
     }
 
     /**
@@ -564,7 +564,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     protected function inferSetter($fieldName)
     {
-        return 'set' . str_replace(' ', '', ucwords(str_replace('_', ' ', $fieldName)));
+        return 'set' . Inflector::camelize($fieldName);
     }
 
 

@@ -68,8 +68,6 @@ class ClassMetadata extends ClassMetadataInfo
         parent::__construct($entityName);
         $this->reflClass = new \ReflectionClass($entityName);
         $this->namespace = $this->reflClass->getNamespaceName();
-
-        // todo - move to Inflector of some kind
         $this->xmlName = Inflector::xmlize($this->reflClass->getShortName());
     }
 
