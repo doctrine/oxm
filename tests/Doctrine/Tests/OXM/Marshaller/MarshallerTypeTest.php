@@ -12,7 +12,7 @@ namespace Doctrine\Tests\OXM\Marshaller;
 use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\OXM\Configuration,
     \Doctrine\OXM\Marshaller\Marshaller,
-    \Doctrine\OXM\Marshaller\SimpleXmlMarshaller,
+    \Doctrine\OXM\Marshaller\XmlMarshaller,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver;
 
 class MarshallerTypeTest extends \PHPUnit_Framework_TestCase
@@ -30,7 +30,7 @@ class MarshallerTypeTest extends \PHPUnit_Framework_TestCase
 
         $metadataFactory = new ClassMetadataFactory($config);
 
-        $this->marshaller = new SimpleXmlMarshaller($metadataFactory);
+        $this->marshaller = new XmlMarshaller($metadataFactory);
     }
 
     /**
@@ -42,7 +42,7 @@ class MarshallerTypeTest extends \PHPUnit_Framework_TestCase
         $xml = $this->marshaller->marshal($object);
 
         $this->assertTrue(strlen($xml) > 0);
-        $this->assertEquals('<?xml version="1.0" encoding="UTF-8"?>' . $resultString, $xml);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>' . $resultString, $xml);
 
         $otherObject = $this->marshaller->unmarshal($xml);
         $this->assertEquals($object->i, $otherObject->i);
