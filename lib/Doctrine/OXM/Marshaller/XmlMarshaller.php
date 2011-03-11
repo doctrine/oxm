@@ -78,9 +78,8 @@ class XmlMarshaller extends AbstractMarshaller
         }
 
         $elementName = $cursor->localName;
-        
+
         if (!in_array($elementName, $knownMappedNodes)) {
-            print_r($knownMappedNodes);
             throw MappingException::invalidMapping($elementName);
         }
         $classMetadata = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$elementName]);
@@ -135,7 +134,7 @@ class XmlMarshaller extends AbstractMarshaller
                     $cursor->nodeType == XMLReader::END_ENTITY ||
                     $cursor->nodeType == XMLReader::XML_DECLARATION) {
 
-                    // skip insignificant element
+                    // skip insignificant elements
                     continue;
                 }
 
@@ -168,6 +167,30 @@ class XmlMarshaller extends AbstractMarshaller
 
                         $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
                         $cursor->read();
+                    }
+                } elseif (in_array($cursor->name, $knownMappedNodes)) { // @todo - this isn't very efficient
+                    $class = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$cursor->name]);
+
+                    $fieldName = null;
+                    foreach ($classMetadata->getFieldMappings() as $fieldMapping) {
+                        if ($fieldMapping['type'] == $allMappedXmlNodes[$cursor->name]) {
+                            $fieldName = $fieldMapping['fieldName'];
+                        } else {
+                            // Walk parent tree
+                            foreach ($class->getParentClasses() as $parentClass) {
+                                if ($fieldMapping['type'] == $parentClass) {
+                                    $fieldName = $fieldMapping['fieldName'];
+                                }
+                            }
+                        }
+                    }
+
+                    if ($fieldName !== null) {
+                        if ($classMetadata->isCollection($fieldName)) {
+                            $collectionElements[$fieldName][] = $this->doUnmarshal($cursor);
+                        } else {
+                            $classMetadata->setFieldValue($mappedObject, $fieldName, $this->doUnmarshal($cursor));
+                        }
                     }
                 }
             }

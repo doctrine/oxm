@@ -289,7 +289,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         foreach ($parentClasses as $className) {
             if (isset($this->loadedMetadata[$className])) {
                 $parent = $this->loadedMetadata[$className];
-                if ( ! $parent->isMappedSuperclass) {
+                if ( $parent->isMappedSuperclass) {
                     array_unshift($visited, $className);
                 }
                 continue;
@@ -358,7 +358,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
 
             $parent = $class;
 
-            if ( ! $class->isMappedSuperclass) {
+            if ( $class->isMappedSuperclass) {
                 array_unshift($visited, $className);
             }
 

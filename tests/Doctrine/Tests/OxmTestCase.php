@@ -60,4 +60,24 @@ class OxmTestCase extends \PHPUnit_Framework_TestCase
     {
         return new \Doctrine\Tests\Mocks\ClassMetadataInfoMock($entityName);
     }
+
+    /**
+     * @param  $paths
+     * @return \Doctrine\OXM\Marshaller\Marshaller
+     */
+    protected function _getMarshaller($paths)
+    {
+        $config = new \Doctrine\OXM\Configuration();
+
+        if (empty($paths)) {
+            $paths = "tests/Doctrine/Tests/OXM/Entities";
+        }
+
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver($paths));
+        $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
+
+        $metadataFactory = new \Doctrine\OXM\Mapping\ClassMetadataFactory($config);
+
+        return new \Doctrine\OXM\Marshaller\XmlMarshaller($metadataFactory);
+    }
 }

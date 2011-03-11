@@ -466,6 +466,14 @@ class ClassMetadataInfo implements BaseClassMetadata
     }
 
     /**
+     * @return array
+     */
+    public function getParentClasses()
+    {
+        return $this->parentClasses;
+    }
+
+    /**
      * @param array
      * @return void
      */
