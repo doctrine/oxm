@@ -149,9 +149,12 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         if (!$this->initialized) {
             $this->initialize();
         }
+        
         // Load all metadata
-        // todo:  there should be a better way to access the metadata about a mapped xml node than instantiating all of them
-        $this->getAllMetadata();
+        if (empty($this->xmlToClassMap)) {
+            // todo:  there should be a better way to access the metadata about a mapped xml node than instantiating all of them
+            $this->getAllMetadata();
+        }
 
         return $this->xmlToClassMap;
     }

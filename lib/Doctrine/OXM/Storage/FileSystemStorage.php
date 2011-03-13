@@ -46,6 +46,11 @@ class FileSystemStorage implements Storage
      */
     private $useNamespaceInPath = true;
 
+    /**
+     * @var array
+     */
+    private $fileLocks = array();
+
 
     /**
      * Construct a file system store with a specific base path
@@ -55,6 +60,16 @@ class FileSystemStorage implements Storage
         // todo - ensure storage path exists
         $this->storagePath = $baseStoragePath;
         $this->fileExtension = $defaultFileExtension;
+    }
+
+    /**
+     * Release all known file locks when FileSystemStorage no longer in scope
+     */
+    public function __destruct()
+    {
+        foreach (array_keys($this->fileLocks) as $filename) {
+            $this->unlock($filename);
+        }
     }
 
     /**
@@ -136,6 +151,38 @@ class FileSystemStorage implements Storage
     {
         $baseFilePath = $this->_buildStoragePath($this->_resolveClassName($classMetadata));
         return is_file($baseFilePath . "/$id.{$this->fileExtension}");
+    }
+
+
+    /**
+     * @param string $filename
+     * @param Resource $handle
+     * @return bool
+     */
+    private function lock($filename, $handle)
+    {
+        if ( ! isset($this->fileLocks[$filename])) {
+            $success = flock($handle, LOCK_EX);
+            if ($success) {
+                $this->fileLocks[$filename] = $handle;
+            }
+            return $success;
+        }
+    }
+
+    /**
+     * @param string $filename
+     * @return bool
+     */
+    private function unlock($filename)
+    {
+        if (isset($this->fileLocks[$filename])) {
+            $success = flock($this->fileLocks[$filename], LOCK_UN);
+            if ($success) {
+                unset($this->fileLocks[$filename]);
+            }
+            return $success;
+        }
     }
 
     /**

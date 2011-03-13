@@ -39,13 +39,73 @@ use \XMLReader, \XMLWriter;
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class XmlMarshaller extends AbstractMarshaller
+class XmlMarshaller implements Marshaller
 {
+
+    /**
+     * @var \Doctrine\OXM\Mapping\ClassMetadataFactory
+     */
+    protected $classMetadataFactory;
+
+    /**
+     * @param ClassMetadataFactory
+     */
+    public function __construct(ClassMetadataFactory $classMetadataFactory)
+    {
+        $this->classMetadataFactory = $classMetadataFactory;
+    }
+
+    /**
+     * @param Doctrine\OXM\Mapping\ClassMetadataFactory
+     */
+    public function setClassMetadataFactory(ClassMetadataFactory $classMetadataFactory)
+    {
+        $this->classMetadataFactory = $classMetadataFactory;
+    }
+
+    /**
+     * @return Doctrine\OXM\Mapping\ClassMetadataFactory
+     */
+    public function getClassMetadataFactory()
+    {
+        return $this->classMetadataFactory;
+    }
+
+
+    /**
+     * @param string $path
+     * @return object
+     */
+    public function unmarshalFromStream($path)
+    {
+        if (!is_file($path)) {
+            throw MarshallerException::fileNotFound($path);
+        }
+
+        $reader = new XMLReader();
+        $reader->open($path);
+
+        // Position at first detected element
+        while ($reader->read()) {
+            if ($reader->nodeType === XMLReader::ELEMENT) {
+                break;
+            }
+        }
+
+        $mappedObject = $this->doUnmarshal($reader);
+        $reader->close();
+
+        return $mappedObject;
+    }
+
+
+
+
     /**
      * @param string $xml
      * @return object
      */
-    function unmarshal($xml)
+    function unmarshalFromString($xml)
     {
         $reader = new XMLReader();
         $reader->XML(trim($xml));
@@ -64,6 +124,9 @@ class XmlMarshaller extends AbstractMarshaller
     }
 
     /**
+     *
+     * INTERNAL: Performance sensitive method
+     *
      * @throws \Doctrine\OXM\Mapping\MappingException
      * @param \XMLReader $cursor
      * @return object
@@ -90,8 +153,8 @@ class XmlMarshaller extends AbstractMarshaller
             $classMetadata->invokeLifecycleCallbacks(Events::preUnmarshal, $mappedObject);
         }
 
-        if($cursor->hasAttributes) {
-            while($cursor->moveToNextAttribute()) {
+        if ($cursor->hasAttributes) {
+            while ($cursor->moveToNextAttribute()) {
                 if ($classMetadata->hasXmlField($cursor->name)) {
                     $fieldName = $classMetadata->getFieldName($cursor->name);
                     $fieldMapping = $classMetadata->getFieldMapping($fieldName);
@@ -161,7 +224,7 @@ class XmlMarshaller extends AbstractMarshaller
                         $type = Type::getType($fieldMapping['type']);
 
                         $cursor->read();
-                        if ($cursor->nodeType !== \XMLReader::TEXT) {
+                        if ($cursor->nodeType !== XMLReader::TEXT) {
                             throw new MarshallerException("unknown mapping state... terrible terrible damage");
                         }
 
@@ -214,7 +277,7 @@ class XmlMarshaller extends AbstractMarshaller
      * @param object $mappedObject
      * @return string
      */
-    function marshal($mappedObject)
+    function marshalToString($mappedObject)
     {
         $writer = new XmlWriter();
 
@@ -225,13 +288,44 @@ class XmlMarshaller extends AbstractMarshaller
         $this->doMarshal($mappedObject, $writer);
 
         $writer->endDocument();
-        $xml = $writer->flush();
 
-        return $xml;
+        return $writer->flush();
     }
 
 
-    function doMarshal($mappedObject, XmlWriter $writer)
+    /**
+     * @param object $mappedObject
+     * @param string $path
+     * @return bool|int
+     */
+    public function marshalToStream($mappedObject, $path)
+    {
+        $writer = new XmlWriter();
+
+        $writer->openUri($path);
+        $writer->startDocument('1.0', 'UTF-8');
+        $writer->setIndent(4);
+
+        $this->doMarshal($mappedObject, $writer);
+
+        $writer->endDocument();
+
+        return $writer->flush();
+    }
+
+    /**
+     *
+     *
+     * INTERNAL: Performance sensitive method
+     *
+     *
+     *
+     * @throws MarshallerException
+     * @param  $mappedObject
+     * @param \XMLWriter $writer
+     * @return void
+     */
+    private function doMarshal($mappedObject, XmlWriter $writer)
     {
         $className = get_class($mappedObject);
         $classMetadata = $this->classMetadataFactory->getMetadataFor($className);

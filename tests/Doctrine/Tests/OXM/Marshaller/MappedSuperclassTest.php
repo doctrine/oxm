@@ -34,14 +34,14 @@ class MappedSuperclassTest extends OxmTestCase
         $bo->inherit = 1;
         $request->bo = $bo;
 
-        $xml = $this->marshaller->marshal($request);
+        $xml = $this->marshaller->marshalToString($request);
 
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
             <request id="1">
                 <concrete-bo1 inherit="1"/>
             </request>', $xml);
 
-        $otherRequest = $this->marshaller->unmarshal($xml);
+        $otherRequest = $this->marshaller->unmarshalFromString($xml);
 
         $this->assertEquals(1, $otherRequest->id);
         $this->assertInstanceOf('Doctrine\Tests\OXM\Entities\MappedSuperclass\ConcreteBO1', $otherRequest->bo);

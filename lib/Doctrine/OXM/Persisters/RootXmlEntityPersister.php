@@ -56,7 +56,7 @@ class RootXmlEntityPersister
     {
         $identifier = $this->metadata->getIdentifierValue($xmlEntity);
 
-        $xml = $this->marshaller->marshal($xmlEntity);
+        $xml = $this->marshaller->marshalToString($xmlEntity);
         
         return $this->storage->insert($this->metadata, $identifier, $xml);
     }
@@ -75,6 +75,6 @@ class RootXmlEntityPersister
     {
         $xml = $this->storage->load($this->metadata, $id);
 
-        return $this->marshaller->unmarshal($xml);
+        return $this->marshaller->unmarshalFromString($xml);
     }
 }

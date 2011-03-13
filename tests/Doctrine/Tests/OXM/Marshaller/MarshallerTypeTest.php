@@ -39,12 +39,12 @@ class MarshallerTypeTest extends \PHPUnit_Framework_TestCase
      */
     public function itShouldProduceExactXmlForAttributeOfType($object, $resultString)
     {
-        $xml = $this->marshaller->marshal($object);
+        $xml = $this->marshaller->marshalToString($object);
 
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>' . $resultString, $xml);
 
-        $otherObject = $this->marshaller->unmarshal($xml);
+        $otherObject = $this->marshaller->unmarshalFromString($xml);
         $this->assertEquals($object->i, $otherObject->i);
         $this->assertEquals($object, $otherObject);
     }

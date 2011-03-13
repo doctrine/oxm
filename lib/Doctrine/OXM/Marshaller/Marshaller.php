@@ -35,12 +35,24 @@ interface Marshaller
      * @param object $mappedObject
      * @return string
      */
-    function marshal($mappedObject);
+    function marshalToString($mappedObject);
+
+    /**
+     * @param object $mappedObject
+     * @return stream
+     */
+    function marshalToStream($mappedObject, $stream);
 
     /**
      * @param string $xml
      * @return object
      */
-    function unmarshal($xml);
+    function unmarshalFromString($xml);
+
+    /**
+     * @param string $stream
+     * @return object
+     */
+    function unmarshalFromStream($stream);
 }
  

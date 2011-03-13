@@ -112,7 +112,7 @@ class XmlEntityManager implements ObjectManager
      */
     public function marshal($object)
     {
-        return $this->marshaller->marshal($object);
+        return $this->marshaller->marshalToString($object);
     }
 
     /**
@@ -123,7 +123,7 @@ class XmlEntityManager implements ObjectManager
      */
     public function unmarshal($xml)
     {
-        return $this->marshaller->unmarshal($xml);
+        return $this->marshaller->unmarshalFromString($xml);
     }
 
     /**

@@ -58,7 +58,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $user->addContact(new CustomerContact('no@way.com'));
         $user->addContact(new CustomerContact('other@way.com'));
 
-        $xml = $this->marshaller->marshal($user);
+        $xml = $this->marshaller->marshalToString($user);
 
         $dom = new \DOMDocument('1.0');
         $dom->preserveWhiteSpace = false;
@@ -66,7 +66,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $dom->loadXML($xml);
 //        print_r($dom->saveXML());
 
-        $otherUser = $this->marshaller->unmarshal($xml);
+        $otherUser = $this->marshaller->unmarshalFromString($xml);
 
 
 //        print_r($otherUser);
@@ -87,7 +87,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     {
         $order = new Order(1, 'business cards', new \DateTime());
 
-        $xml = $this->marshaller->marshal($order);
+        $xml = $this->marshaller->marshalToString($order);
 
         $dom = new \DOMDocument('1.0');
         $dom->preserveWhiteSpace = false;
@@ -97,7 +97,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue(strlen($xml) > 0);
 
-        $otherOrder = $this->marshaller->unmarshal($xml);
+        $otherOrder = $this->marshaller->unmarshalFromString($xml);
 //        print_r($otherOrder);
 
         $this->assertEquals(1, $otherOrder->getId());
@@ -110,7 +110,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function itShouldProduceExactXml()
     {
         $simple = new Simple();
-        $xml = $this->marshaller->marshal($simple);
+        $xml = $this->marshaller->marshalToString($simple);
         
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple/>', $xml);
@@ -122,7 +122,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function itShouldProduceExactXmlForCompoundClassName()
     {
         $simple = new SimpleCompound();
-        $xml = $this->marshaller->marshal($simple);
+        $xml = $this->marshaller->marshalToString($simple);
 
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-compound/>', $xml);
@@ -135,10 +135,24 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function itShouldProduceExactXmlForAttribute()
     {
         $simple = new SimpleWithField();
-        $xml = $this->marshaller->marshal($simple);
+        $xml = $this->marshaller->marshalToString($simple);
 
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-with-field/>', $xml);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldMarshalToFilenameStream()
+    {
+        $simple = new SimpleWithField();
+        $xml = $this->marshaller->marshalToStream($simple, "file://" . realpath(__DIR__) . "/../Workspace/Foo.xml");
+
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertXmlStringEqualsXmlFile(realpath(__DIR__) . "/../Workspace/Foo.xml", '<?xml version="1.0" encoding="UTF-8"?><simple-with-field/>');
+
+        @unlink(realpath(__DIR__) . "/../Workspace/Foo.xml");
     }
 
 
@@ -150,7 +164,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     {
         $simple = new SimpleWithField();
         $simple->id = 1;
-        $xml = $this->marshaller->marshal($simple);
+        $xml = $this->marshaller->marshalToString($simple);
 
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>', $xml);
@@ -162,18 +176,18 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
      */
     public function itShouldHandleAllValidXml()
     {
-        $simple = $this->marshaller->unmarshal('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>');
+        $simple = $this->marshaller->unmarshalFromString('<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>');
         $this->assertEquals(1, $simple->id);
 
-        $simple = $this->marshaller->unmarshal(' <?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>');
+        $simple = $this->marshaller->unmarshalFromString(' <?xml version="1.0" encoding="UTF-8"?><simple-with-field id="1"/>');
         $this->assertEquals(1, $simple->id);
 
-        $simple = $this->marshaller->unmarshal(' <?xml version="1.0" encoding="UTF-8"?><simple-with-field
+        $simple = $this->marshaller->unmarshalFromString(' <?xml version="1.0" encoding="UTF-8"?><simple-with-field
 
         id="1"/>');
         $this->assertEquals(1, $simple->id);
 
-        $simple = $this->marshaller->unmarshal(' <?xml version="1.0" encoding="UTF-8"?>
+        $simple = $this->marshaller->unmarshalFromString(' <?xml version="1.0" encoding="UTF-8"?>
         <!-- Comment -->
         <simple-with-field id="1"/><!-- comment2 -->');
         $this->assertEquals(1, $simple->id);
@@ -185,7 +199,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function itShouldHandleMappedSuperclassesCorrectly()
     {
         $simple = new SimpleChild();
-        $xml = $this->marshaller->marshal($simple);
+        $xml = $this->marshaller->marshalToString($simple);
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-child><other>yes</other></simple-child>', $xml);
 
@@ -193,7 +207,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $simple = new SimpleChildExtendsWithChildField();
         $simple->id = 1;
         $simple->other = "no";
-        $xml = $this->marshaller->marshal($simple);
+        $xml = $this->marshaller->marshalToString($simple);
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
             <simple-child-extends-with-child-field id="1">
@@ -201,7 +215,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
             </simple-child-extends-with-child-field>', $xml);
 
         $simple = new SimpleChildExtendsWithParentField();
-        $xml = $this->marshaller->marshal($simple);
+        $xml = $this->marshaller->marshalToString($simple);
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-child-extends-with-parent-field id="2"/>', $xml);
     }
