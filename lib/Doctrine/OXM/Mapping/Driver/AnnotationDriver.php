@@ -148,12 +148,6 @@ class AnnotationDriver implements DriverInterface
             // TODO - use inflector here or perhaps delay
             $metadata->setXmlName(Inflector::xmlize($reflClass->getShortName()));
         }
-        if (isset($entityAnnot->nsUrl)) {
-            $metadata->setXmlNamespaceUrl($entityAnnot->nsUrl);
-        }
-        if (isset($entityAnnot->nsPrefix)) {
-            $metadata->setXmlNamespacePrefix($entityAnnot->nsPrefix);
-        }
         if (isset($entityAnnot->repositoryClass)) {
             $metadata->setCustomRepositoryClass($entityAnnot->repositoryClass);
         }
@@ -163,6 +157,26 @@ class AnnotationDriver implements DriverInterface
             $changeTrackingAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlChangeTrackingPolicy'];
             $metadata->setChangeTrackingPolicy(constant('Doctrine\OXM\Mapping\ClassMetadata::CHANGETRACKING_' . $changeTrackingAnnot->value));
         }
+
+        // Check for XmlNamespace/XmlNamespaces annotations
+        $xmlNamespaces = array();
+
+        if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlNamespace'])) {
+            $xmlNamespaceAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlNamespace'];
+            $xmlNamespaces[] = array(
+                'url' => $xmlNamespaceAnnot->url,
+                'prefix' => $xmlNamespaceAnnot->prefix
+            );
+        } else if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlNamespaces'])) {
+            $xmlNamespaceAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlNamespaces'];
+            foreach ($xmlNamespaceAnnot->value as $xmlNamespace) {
+                $xmlNamespaces[] = array(
+                    'url' => $xmlNamespace->url,
+                    'prefix' => $xmlNamespace->prefix
+                );
+            }
+        }
+        $metadata->setXmlNamespaces($xmlNamespaces);
 
         foreach ($reflClass->getProperties() as $property) {
             if ($metadata->isMappedSuperclass && ! $property->isPrivate()

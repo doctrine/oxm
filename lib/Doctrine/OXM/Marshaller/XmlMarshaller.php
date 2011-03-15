@@ -206,8 +206,8 @@ class XmlMarshaller implements Marshaller
                     throw new MarshallerException("unknown mapping state... terrible terrible damage");
                 }
 
-                if ($classMetadata->hasXmlField($cursor->name)) {
-                    $fieldName = $classMetadata->getFieldName($cursor->name);
+                if ($classMetadata->hasXmlField($cursor->localName)) {
+                    $fieldName = $classMetadata->getFieldName($cursor->localName);
 
                     // Check for mapped entity as child, add recursively
                     $fieldMapping = $classMetadata->getFieldMapping($fieldName);
@@ -341,14 +341,19 @@ class XmlMarshaller implements Marshaller
 
         $refClass = new \ReflectionClass($mappedObject);
 
-        $nsUrl = $classMetadata->getXmlNamespaceUrl();
-        $nsPrefix = $classMetadata->getXmlNamespacePrefix();
+        $writer->startElement($classMetadata->getXmlName());
 
-        if ($nsUrl !== null && $nsPrefix !== null) {
-            $writer->startElementNs($nsPrefix, $classMetadata->getXmlName(), $nsUrl);
-        } else {
-            $writer->startElement($classMetadata->getXmlName());
+        $namespaces = $classMetadata->getXmlNamespaces();
+        if (!empty($namespaces)) {
+            foreach ($namespaces as $namespace) {
+                if ($namespace['prefix'] !== null) {
+                    $writer->writeAttribute('xmlns:' . $namespace['prefix'], $namespace['url']);
+                } else {
+                    $writer->writeAttribute('xmlns', $namespace['url']);
+                }
+            }
         }
+
 
         $fieldMappings = $classMetadata->getFieldMappings();
         $orderedMap = array();
@@ -373,7 +378,11 @@ class XmlMarshaller implements Marshaller
                     $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
                     $fieldType = $classMetadata->getTypeOfField($fieldName);
 
-                    $writer->writeAttribute($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                    if (isset($fieldMapping['prefix'])) {
+                        $writer->writeAttributeNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                    } else {
+                        $writer->writeAttribute($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                    }
                 }
             }
         }
@@ -392,8 +401,12 @@ class XmlMarshaller implements Marshaller
                 if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
                     $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
                     $fieldType = $classMetadata->getTypeOfField($fieldName);
-                    
-                    $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+
+                    if (isset($fieldMapping['prefix'])) {
+                        $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                    } else {
+                        $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                    }
                 }
             }
         }

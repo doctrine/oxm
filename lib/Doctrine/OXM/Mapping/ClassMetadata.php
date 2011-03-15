@@ -217,7 +217,7 @@ class ClassMetadata extends ClassMetadataInfo
         if ($this->xmlNamespacePrefix) {
             $serialized[] = 'xmlNamespacePrefix';
         }
-        if ($this->xmlNamespaceUrl) {
+        if ($this->xmlNamespaces) {
             $serialized[] = 'xmlNamespaceUrl';
         }
 

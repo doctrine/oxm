@@ -24,8 +24,6 @@ use Doctrine\Common\Annotations\Annotation;
 /* Annotations for OXM Entities */
 class XmlEntity extends Annotation {
     public $xml;        // implied
-    public $nsUrl;
-    public $nsPrefix;
 }
 final class XmlRootEntity extends XmlEntity {
     public $repositoryClass;
@@ -34,6 +32,12 @@ final class XmlChangeTrackingPolicy extends Annotation {
     public $value;
 }
 final class XmlMappedSuperclass extends Annotation {}
+
+final class XmlNamespace extends Annotation {
+    public $url;
+    public $prefix;
+}
+final class XmlNamespaces extends Annotation {}
 
 final class XmlId extends Annotation {}
 class XmlField extends Annotation {
@@ -46,6 +50,7 @@ class XmlField extends Annotation {
     public $collection = false;
     public $getMethod;  // implied
     public $setMethod;  // implied
+    public $prefix;
 }
 
 final class XmlAttribute extends XmlField {

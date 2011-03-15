@@ -35,11 +35,11 @@ class MappingTest extends \PHPUnit_Framework_TestCase
      */
     public function itShouldRecordXmlNamespacesProperly()
     {
-        $this->mapping->setXmlNamespacePrefix('example');
-        $this->mapping->setXmlNamespaceUrl('http://example.com');
+        $this->mapping->setXmlNamespaces(array(array(
+            'url' => 'http://example.com/schema',
+        )));
 
-        $this->assertEquals('example', $this->mapping->getXmlNamespacePrefix());
-        $this->assertEquals('http://example.com', $this->mapping->getXmlNamespaceUrl());
+//        $this->assertEquals('http://example.com', $this->mapping->getXmlNamespaces());
     }
 }
 

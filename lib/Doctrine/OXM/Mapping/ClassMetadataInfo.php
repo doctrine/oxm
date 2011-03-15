@@ -104,18 +104,21 @@ class ClassMetadataInfo implements BaseClassMetadata
     public $xmlName;
 
     /**
-     * The xml namespace url defined by this class mapping
+     * The xml namespaces defined by this class mapping
      *
-     * @var string
-     */
-    public $xmlNamespaceUrl;
-
-    /**
-     * The xml namespace prefix used in this class mapping
+     * The mapping definition array supports the following keys
      *
-     * @var string
+     * - <b>url</b> (required)
+     * The url containing this namespace definition.  Only one URL can be present
+     * within the class which does not have a prefix.  One can have any
+     * number of prefixed URL's.
+     *
+     * - <b>prefix</b> (optional)
+     * The prefix used by this namespace.  Prefixes must be unique.
+     *
+     * @var array
      */
-    public $xmlNamespacePrefix;
+    public $xmlNamespaces;
 
     /**
      * The ReflectionClass instance of the mapped class.
@@ -850,36 +853,19 @@ class ClassMetadataInfo implements BaseClassMetadata
     }
 
     /**
-     * @param  $xmlNamespacePrefix
+     * @param array $xmlNamespaces
      * @return void
      */
-    public function setXmlNamespacePrefix($xmlNamespacePrefix)
+    public function setXmlNamespaces(array $xmlNamespaces)
     {
-        $this->xmlNamespacePrefix = $xmlNamespacePrefix;
+        $this->xmlNamespaces = $xmlNamespaces;
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getXmlNamespacePrefix()
+    public function getXmlNamespaces()
     {
-        return $this->xmlNamespacePrefix;
-    }
-
-    /**
-     * @param  $xmlNamespaceUrl
-     * @return void
-     */
-    public function setXmlNamespaceUrl($xmlNamespaceUrl)
-    {
-        $this->xmlNamespaceUrl = $xmlNamespaceUrl;
-    }
-
-    /**
-     * @return string
-     */
-    public function getXmlNamespaceUrl()
-    {
-        return $this->xmlNamespaceUrl;
+        return $this->xmlNamespaces;
     }
 }

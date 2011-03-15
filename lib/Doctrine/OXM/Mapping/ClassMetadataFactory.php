@@ -304,8 +304,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                 $class->setIdGeneratorType($parent->generatorType);
                 $this->addInheritedFields($class, $parent);
 
-                $class->setXmlNamespacePrefix($parent->xmlNamespacePrefix);
-                $class->setXmlNamespaceUrl($parent->xmlNamespaceUrl);
+                $class->setXmlNamespaces($parent->xmlNamespaces);
                 $class->setIdentifier($parent->identifier);
                 $class->setLifecycleCallbacks($parent->lifecycleCallbacks);
                 $class->setChangeTrackingPolicy($parent->changeTrackingPolicy);
