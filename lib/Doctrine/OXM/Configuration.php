@@ -90,7 +90,6 @@ class Configuration
     public function getMarshallerClassName()
     {
         if (!isset($this->_attributes['marshallerclassName'])) {
-            // todo - put most efficient marshaller here
             $this->_attributes['marshallerclassName'] = 'Doctrine\OXM\Marshaller\XmlMarshaller';
         }
         return $this->_attributes['marshallerclassName'];
@@ -185,7 +184,7 @@ class Configuration
      * 
      * @param string $cmf
      */
-    public function setMappingFactoryName($cmfName)
+    public function setClassMetadataFactoryName($cmfName)
     {
         $this->_attributes['classMetadataFactoryName'] = $cmfName;
     }
