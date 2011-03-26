@@ -3,9 +3,6 @@
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
          bootstrap="bootstrap.php">
-    <php>
-        <includePath>../</includePath>
-    </php>
 
     <filter>
         <blacklist>

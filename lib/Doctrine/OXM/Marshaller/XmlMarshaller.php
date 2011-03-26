@@ -339,8 +339,6 @@ class XmlMarshaller implements Marshaller
             $classMetadata->invokeLifecycleCallbacks(Events::preMarshal, $mappedObject);
         }
 
-        $refClass = new \ReflectionClass($mappedObject);
-
         $writer->startElement($classMetadata->getXmlName());
 
         $namespaces = $classMetadata->getXmlNamespaces();
@@ -362,6 +360,7 @@ class XmlMarshaller implements Marshaller
                 $orderedMap[$fieldMapping['node']][] = $fieldMapping;
             }
         }
+        print_r($orderedMap);
 
         // do attributes
         if (array_key_exists(ClassMetadataInfo::XML_ATTRIBUTE, $orderedMap)) {
