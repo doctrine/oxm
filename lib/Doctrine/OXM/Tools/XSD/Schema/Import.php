@@ -24,5 +24,9 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Import
 {
+    public $id;
+    public $namespace;
+    public $schemaLocation;
 
+    public $annotation;
 }

@@ -24,5 +24,8 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Field
 {
+    public $id;
+    public $xpath;
 
+    public $annotation;
 }

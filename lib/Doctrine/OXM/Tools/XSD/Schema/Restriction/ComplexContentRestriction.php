@@ -17,18 +17,24 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Tools\XSD\Schema;
+namespace Doctrine\OXM\Tools\XSD\Schema\Restriction;
+
+use Doctrine\OXM\Tools\XSD\Schema\Restriction;
 
 /**
  *
  */
-class Key
+class SimpleContentRestriction extends Restriction
 {
-    public $id;
-    public $name;
+    public $simpleType;
 
-    public $annotation;
+    public $group;
+    public $all;
+    public $choice;
+    public $sequence;
 
-    public $selector;
-    public $fields;
+    public $attributes;
+    public $attributeGroups;
+
+    public $anyAttribute;
 }

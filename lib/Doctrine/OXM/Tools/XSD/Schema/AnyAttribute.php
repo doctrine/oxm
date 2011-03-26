@@ -24,5 +24,9 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class AnyAttribute
 {
+    public $id;
+    public $namespace;
+    public $processContents;
 
+    public $annotation;
 }

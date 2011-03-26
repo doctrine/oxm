@@ -24,5 +24,16 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Choice
 {
+    public $id;
+    public $maxOccurs;
+    public $minOccurs;
 
+    public $annotation;
+
+
+    public $elements;
+    public $groups;
+    public $choices;
+    public $sequences;
+    public $anys;
 }

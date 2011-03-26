@@ -24,6 +24,20 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Schema
 {
+    public $id;
+    public $attributeFormDefault;
+    public $elementFormDefault;
+    public $blockDefault;
+    public $finalDefault;
+    public $targetNamespace;
+    public $version;
+    public $xmlns;
+
+    public $includes;
+    public $imports;
+    public $redefines;
+
+
     /**
      * A set of named simple and complex type definitions
      *

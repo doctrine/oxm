@@ -24,5 +24,12 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class KeyRef
 {
+    public $id;
+    public $name;
+    public $refer;
 
+    public $annotation;
+
+    public $selector;
+    public $fields;
 }

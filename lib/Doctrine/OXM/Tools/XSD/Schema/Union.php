@@ -22,13 +22,12 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
 /**
  *
  */
-class Key
+class Union
 {
     public $id;
-    public $name;
+    public $memberTypes;
 
     public $annotation;
-
-    public $selector;
-    public $fields;
+    
+    public $simpleTypes;
 }

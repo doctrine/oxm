@@ -22,13 +22,10 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
 /**
  *
  */
-class Key
+class Restriction
 {
     public $id;
-    public $name;
+    public $base;
 
     public $annotation;
-
-    public $selector;
-    public $fields;
 }

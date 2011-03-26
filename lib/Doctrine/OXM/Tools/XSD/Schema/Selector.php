@@ -24,5 +24,8 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Selector
 {
+    public $id;
+    public $xpath;
 
+    public $annotation;
 }

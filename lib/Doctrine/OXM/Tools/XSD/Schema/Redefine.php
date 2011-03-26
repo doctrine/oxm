@@ -24,5 +24,13 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Redefine
 {
+    public $id;
+    public $schemaLocation;
 
+    public $annotations;
+
+    public $simpleTypes;
+    public $complexTypes;
+    public $groups;
+    public $attributeGroups;
 }

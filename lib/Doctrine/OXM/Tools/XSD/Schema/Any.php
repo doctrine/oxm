@@ -24,5 +24,11 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Any
 {
+    public $id;
+    public $maxOccurs;
+    public $minOccurs;
+    public $namespace;
+    public $processContents;
 
+    public $annotation;
 }

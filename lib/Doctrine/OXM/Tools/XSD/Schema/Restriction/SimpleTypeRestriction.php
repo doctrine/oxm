@@ -17,18 +17,27 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Tools\XSD\Schema;
+namespace Doctrine\OXM\Tools\XSD\Schema\Restriction;
+
+use Doctrine\OXM\Tools\XSD\Schema\Restriction;
 
 /**
  *
  */
-class Key
+class SimpleTypeRestriction extends Restriction
 {
-    public $id;
-    public $name;
+    public $simpleType;
 
-    public $annotation;
+    public $minExclusive;
+    public $minInclusive;
+    public $maxExclusive;
+    public $maxInclusive;
+    public $totaldigits;
+    public $fractionDigits;
 
-    public $selector;
-    public $fields;
+    public $length;
+    public $maxLength;
+    public $enumeration;
+    public $whiteSpace;
+    public $pattern;
 }

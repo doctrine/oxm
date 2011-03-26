@@ -22,13 +22,11 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
 /**
  *
  */
-class Key
+class List
 {
     public $id;
-    public $name;
+    public $itemType;
 
     public $annotation;
-
-    public $selector;
-    public $fields;
+    public $simpleType;
 }

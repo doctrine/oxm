@@ -24,5 +24,18 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Extension
 {
+    public $id;
+    public $base;
 
+    public $annotation;
+
+    public $group;
+    public $all;
+    public $choice;
+    public $sequence;
+
+    public $attributes;
+    public $attributeGroups;
+
+    public $anyAttribute;
 }

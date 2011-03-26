@@ -24,5 +24,15 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Group
 {
+    public $id;
+    public $name;
+    public $ref;
+    public $maxOccurs;
+    public $minOccurs;
 
+    public $annotation;
+    
+    public $all;
+    public $choice;
+    public $sequence;
 }

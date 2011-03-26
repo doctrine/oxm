@@ -22,13 +22,10 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
 /**
  *
  */
-class Key
+class Documentation
 {
-    public $id;
-    public $name;
+    public $source;
+    public $lang;
 
-    public $annotation;
-
-    public $selector;
-    public $fields;
+    public $content;
 }

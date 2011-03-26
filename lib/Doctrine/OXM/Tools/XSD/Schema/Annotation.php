@@ -24,5 +24,8 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Annotation
 {
+    public $id;
 
+    public $appInfos;
+    public $documentations;
 }

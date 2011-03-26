@@ -24,5 +24,15 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Sequence
 {
+    public $id;
+    public $maxOccurs;
+    public $minOccurs;
 
+    public $annotation;
+
+    public $elements;
+    public $groups;
+    public $choices;
+    public $sequences;
+    public $anys;
 }

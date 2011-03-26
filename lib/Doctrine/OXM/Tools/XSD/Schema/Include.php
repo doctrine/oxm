@@ -24,5 +24,8 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Include
 {
+    public $id;
+    public $schemaLocation;
 
+    public $annotation;
 }

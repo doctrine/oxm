@@ -24,5 +24,12 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class SimpleType
 {
+    public $id;
+    public $name;
 
+    public $annotation;
+
+    public $restriction;
+    public $list;
+    public $union;
 }

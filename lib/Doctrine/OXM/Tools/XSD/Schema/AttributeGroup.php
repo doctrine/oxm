@@ -24,5 +24,13 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class AttributeGroup
 {
+    public $id;
+    public $name;
+    public $ref;
 
+    public $annotation;
+
+    public $attributes;
+    public $attributesGroups;
+    public $anyAttribute;
 }

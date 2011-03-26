@@ -24,5 +24,10 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Notation
 {
+    public $id;
+    public $name;
+    public $public;
+    public $system;
 
+    public $annotation;
 }

@@ -50,6 +50,7 @@ class Element
     public $type;
 
     public $annotation;
+    
     public $simpleType;
     public $complexType;
 

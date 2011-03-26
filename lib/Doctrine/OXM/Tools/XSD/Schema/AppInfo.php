@@ -22,13 +22,9 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
 /**
  *
  */
-class Key
+class AppInfo
 {
-    public $id;
-    public $name;
+    public $source;
 
-    public $annotation;
-
-    public $selector;
-    public $fields;
+    public $content;
 }

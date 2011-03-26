@@ -24,5 +24,10 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class SimpleContent
 {
+    public $id;
 
+    public $annotation;
+
+    public $restriction;
+    public $extension;
 }

@@ -24,5 +24,10 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class All
 {
+    public $id;
+    public $minOccurs;
+    public $maxOccurs;
 
+    public $annotation;
+    public $elements;
 }

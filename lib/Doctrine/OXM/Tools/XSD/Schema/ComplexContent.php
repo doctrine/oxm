@@ -24,5 +24,11 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class ComplexContent
 {
+    public $id;
+    public $mixed;
 
+    public $annotation;
+    
+    public $restriction;
+    public $extension;
 }

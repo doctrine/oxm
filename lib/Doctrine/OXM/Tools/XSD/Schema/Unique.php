@@ -24,5 +24,11 @@ namespace Doctrine\OXM\Tools\XSD\Schema;
  */
 class Unique
 {
+    public $id;
+    public $name;
 
+    public $annotation;
+
+    public $selector;
+    public $fields;
 }
