@@ -35,7 +35,7 @@ Example use case:
 
     $xml = $this->getRequest()->getParam('posted_xml');
 
-    $orderObject = $marshaller->unmarshal($xml);
+    $order = $marshaller->unmarshal($xml);
     $this->view->message = "Order recieved:  " . $order->getId();
 
     $update = new UpdateNotification("Order " . $order->getId() . " was received by the application");
