@@ -15,3 +15,10 @@ class CollectionClass
     /** @var array @XmlText(type="string", collection=true) */
     public $list;
 }
+
+/** @XmlEntity */
+class CollectionAttributeClass
+{
+    /** @var array @XmlAttribute(type="string", collection=true) */
+    public $colors;
+}

@@ -10,7 +10,8 @@
 namespace Doctrine\Tests\OXM\Marshaller;
 
 use Doctrine\Tests\OxmTestCase,
-    Doctrine\Tests\OXM\Entities\CollectionClass;
+    Doctrine\Tests\OXM\Entities\CollectionClass,
+    Doctrine\Tests\OXM\Entities\CollectionAttributeClass;
 
 class CollectionsTest extends OxmTestCase
 {
@@ -25,7 +26,7 @@ class CollectionsTest extends OxmTestCase
     /**
      * @test
      */
-    public function itShouldHandleCollectionsProperly()
+    public function itShouldHandleXmlTextCollectionsProperly()
     {
         $request = new CollectionClass();
         $request->list = array('one', 'two', 'three');
@@ -44,5 +45,25 @@ class CollectionsTest extends OxmTestCase
         $this->assertContains('one', $otherRequest->list);
         $this->assertContains('two', $otherRequest->list);
         $this->assertContains('three', $otherRequest->list);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldHandleXmlAttributeCollectionsProperly()
+    {
+        $colorContainer = new CollectionAttributeClass();
+        $colorContainer->colors = array('red', 'green', 'blue');
+
+        $xml = $this->marshaller->marshalToString($colorContainer);
+
+        $this->assertXmlStringEqualsXmlString('<collection-attribute-class colors="red green blue" />', $xml);
+
+        $otherContainer = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertEquals(3, count($otherContainer->colors));
+        $this->assertContains('red', $otherContainer->colors);
+        $this->assertContains('green', $otherContainer->colors);
+        $this->assertContains('blue', $otherContainer->colors);
     }
 }

@@ -164,7 +164,16 @@ class XmlMarshaller implements Marshaller
                         throw MappingException::fieldRequired($classMetadata->name, $fieldName);
                     }
 
-                    $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
+                    if ($classMetadata->isCollection($fieldName)) {
+                        $convertedValues = array();
+                        foreach (explode(" ", $cursor->value) as $value) {
+                            $convertedValues[] = $type->convertToPHPValue($value);
+                        }
+                        $classMetadata->setFieldValue($mappedObject, $fieldName, $convertedValues);
+                    } else {
+                        $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
+                    }
+
                 }
             }
             $cursor->moveToElement();
@@ -381,11 +390,24 @@ class XmlMarshaller implements Marshaller
                     $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
                     $fieldType = $classMetadata->getTypeOfField($fieldName);
 
-                    if (isset($fieldMapping['prefix'])) {
-                        $writer->writeAttributeNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                    if ($classMetadata->isCollection($fieldName)) {
+                        $convertedValues = array();
+                        foreach ($fieldValue as $value) {
+                            $convertedValues[] = Type::getType($fieldType)->convertToXmlValue($value);
+                        }
+
+                        if (isset($fieldMapping['prefix'])) {
+                            $writer->writeAttributeNs($fieldMapping['prefix'], $fieldXmlName, null, implode(" ", $convertedValues));
+                        } else {
+                            $writer->writeAttribute($fieldXmlName, implode(" ", $convertedValues));
+                        }
                     } else {
-                        $writer->writeAttribute($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
-                    }
+                        if (isset($fieldMapping['prefix'])) {
+                            $writer->writeAttributeNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                        } else {
+                            $writer->writeAttribute($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                        }
+                    }                    
                 }
             }
         }
