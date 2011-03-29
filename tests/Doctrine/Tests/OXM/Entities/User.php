@@ -51,7 +51,7 @@ class User
     /**
      * @var CustomerContact[]
      *
-     * @XmlCollection(type="Doctrine\Tests\OXM\Entities\CustomerContact", direct=true, name="customer-contact")
+     * @XmlElement(type="Doctrine\Tests\OXM\Entities\CustomerContact", collection=true, direct=true, name="customer-contact")
      */
     private $contacts;
 

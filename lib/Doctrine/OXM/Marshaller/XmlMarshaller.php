@@ -228,7 +228,12 @@ class XmlMarshaller implements Marshaller
                             throw new MarshallerException("unknown mapping state... terrible terrible damage");
                         }
 
-                        $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
+                        if ($classMetadata->isCollection($fieldName)) {
+                            $collectionElements[$fieldName][] = $type->convertToPHPValue($cursor->value);
+                        } else {
+                            $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
+                        }
+                        
                         $cursor->read();
                     }
                 } elseif (in_array($cursor->name, $knownMappedNodes)) { // @todo - this isn't very efficient
@@ -360,7 +365,6 @@ class XmlMarshaller implements Marshaller
                 $orderedMap[$fieldMapping['node']][] = $fieldMapping;
             }
         }
-        print_r($orderedMap);
 
         // do attributes
         if (array_key_exists(ClassMetadataInfo::XML_ATTRIBUTE, $orderedMap)) {
@@ -402,9 +406,21 @@ class XmlMarshaller implements Marshaller
                     $fieldType = $classMetadata->getTypeOfField($fieldName);
 
                     if (isset($fieldMapping['prefix'])) {
-                        $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                        if ($classMetadata->isCollection($fieldName)) {
+                            foreach ($fieldValue as $value) {
+                                $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($value));
+                            }
+                        } else {
+                            $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                        }
                     } else {
-                        $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                        if ($classMetadata->isCollection($fieldName)) {
+                            foreach ($fieldValue as $value) {
+                                $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($value));
+                            }
+                        } else {
+                            $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
+                        }
                     }
                 }
             }

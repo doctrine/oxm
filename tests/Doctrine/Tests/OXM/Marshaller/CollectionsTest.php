@@ -41,5 +41,8 @@ class CollectionsTest extends OxmTestCase
         $otherRequest = $this->marshaller->unmarshalFromString($xml);
 
         $this->assertEquals(3, count($otherRequest->list));
+        $this->assertContains('one', $otherRequest->list);
+        $this->assertContains('two', $otherRequest->list);
+        $this->assertContains('three', $otherRequest->list);
     }
 }

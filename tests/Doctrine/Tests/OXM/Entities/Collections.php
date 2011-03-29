@@ -12,6 +12,6 @@ namespace Doctrine\Tests\OXM\Entities;
 /** @XmlEntity */
 class CollectionClass
 {
-    /** @var array @XmlCollection(type="string") */
+    /** @var array @XmlText(type="string", collection=true) */
     public $list;
 }

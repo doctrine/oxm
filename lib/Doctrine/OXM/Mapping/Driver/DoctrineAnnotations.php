@@ -51,6 +51,7 @@ class XmlField extends Annotation {
     public $getMethod;  // implied
     public $setMethod;  // implied
     public $prefix;
+    public $wrapper;
 }
 
 final class XmlAttribute extends XmlField {
@@ -61,11 +62,6 @@ final class XmlElement extends XmlField {
 }
 final class XmlText extends XmlField {
     public $node = "text";
-}
-final class XmlCollection extends XmlField {
-    public $node = "element";
-    public $collection = true;
-    public $wrapper;
 }
 
 final class XmlReferences extends Annotation {
