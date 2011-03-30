@@ -19,13 +19,13 @@
 
 namespace Doctrine\OXM\Marshaller;
 
-use \Doctrine\OXM\Mapping\ClassMetadataInfo,
-    \Doctrine\OXM\Mapping\ClassMetadataFactory,
-    \Doctrine\OXM\Mapping\MappingException,
-    \Doctrine\OXM\Types\Type,
-    \Doctrine\OXM\Events;
+use Doctrine\OXM\Mapping\ClassMetadataInfo,
+    Doctrine\OXM\Mapping\ClassMetadataFactory,
+    Doctrine\OXM\Mapping\MappingException,
+    Doctrine\OXM\Types\Type,
+    Doctrine\OXM\Events;
     
-use \XMLReader, \XMLWriter;
+use XMLReader, XMLWriter;
     
 /**
  * A marshaller class which uses Xml Writer and Xml Reader php libraries.
@@ -43,9 +43,32 @@ class XmlMarshaller implements Marshaller
 {
 
     /**
+     * Mapping data for all known XmlEntity classes
+     *
      * @var \Doctrine\OXM\Mapping\ClassMetadataFactory
      */
-    protected $classMetadataFactory;
+    private $classMetadataFactory;
+
+    /**
+     * Support for indentation during marshalling
+     *
+     * @var int
+     */
+    private $indent = 4;
+
+    /**
+     * Xml Character Encoding
+     *
+     * @var string
+     */
+    private $encoding = 'UTF-8';
+
+    /**
+     * Xml Schema Version
+     *
+     * @var string
+     */
+    private $schemaVersion = '1.0';
 
     /**
      * @param ClassMetadataFactory
@@ -71,26 +94,76 @@ class XmlMarshaller implements Marshaller
         return $this->classMetadataFactory;
     }
 
+    /**
+     * Set the marshallers output indentation level.  Zero for no indentation.
+     *
+     * @param int $indent
+     */
+    public function setIndent($indent)
+    {
+        $this->indent = (int) $indent;
+    }
 
     /**
-     * @param string $path
+     * Return the indentation level.  Zero for no indentation.
+     *
+     * @return int
+     */
+    public function getIndent()
+    {
+        return $this->indent;
+    }
+
+    /**
+     * @param string $encoding
+     * @return void
+     * 
+     * @todo check for valid encoding from http://www.w3.org/TR/REC-xml/#charencoding
+     */
+    public function setEncoding($encoding)
+    {
+        $this->encoding = strtoupper($encoding);
+    }
+
+    /**
+     * @return string
+     */
+    public function getEncoding()
+    {
+        return $this->encoding;
+    }
+
+    /**
+     * @param string $schemaVersion
+     * @return void
+     */
+    public function setSchemaVersion($schemaVersion)
+    {
+        $this->schemaVersion = $schemaVersion;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSchemaVersion()
+    {
+        return $this->schemaVersion;
+    }
+
+    /**
+     * @param string $streamUri
      * @return object
      */
-    public function unmarshalFromStream($path)
+    public function unmarshalFromStream($streamUri)
     {
-        if (!is_file($path)) {
-            throw MarshallerException::fileNotFound($path);
-        }
-
         $reader = new XMLReader();
-        $reader->open($path);
+
+        if (!$reader->open($streamUri)) {
+            throw MarshallerException::couldNotOpenStream($streamUri);
+        }
 
         // Position at first detected element
-        while ($reader->read()) {
-            if ($reader->nodeType === XMLReader::ELEMENT) {
-                break;
-            }
-        }
+        while ($reader->read() && $reader->nodeType !== XMLReader::ELEMENT);
 
         $mappedObject = $this->doUnmarshal($reader);
         $reader->close();
@@ -98,24 +171,22 @@ class XmlMarshaller implements Marshaller
         return $mappedObject;
     }
 
-
-
-
     /**
      * @param string $xml
      * @return object
      */
     function unmarshalFromString($xml)
     {
+        $xml = trim((string) $xml);
+
         $reader = new XMLReader();
-        $reader->XML(trim($xml));
+
+        if (!$reader->XML($xml)) {
+            throw MarshallerException::couldNotReadXml($xml);
+        }
 
         // Position at first detected element
-        while ($reader->read()) {
-            if ($reader->nodeType === XMLReader::ELEMENT) {
-                break;
-            }
-        }
+        while ($reader->read() && $reader->nodeType !== XMLReader::ELEMENT);
 
         $mappedObject = $this->doUnmarshal($reader);
         $reader->close();
@@ -137,7 +208,8 @@ class XmlMarshaller implements Marshaller
         $knownMappedNodes = array_keys($allMappedXmlNodes);
 
         if ($cursor->nodeType !== XMLReader::ELEMENT) {
-            throw new MarshallerException("unknown mapping state... terrible terrible damage");
+            throw MarshallerException::invalidMarshallerState($cursor);
+
         }
 
         $elementName = $cursor->localName;
@@ -212,7 +284,7 @@ class XmlMarshaller implements Marshaller
 
 
                 if ($cursor->nodeType !== XMLReader::ELEMENT) {
-                    throw new MarshallerException("unknown mapping state... terrible terrible damage");
+                    throw MarshallerException::invalidMarshallerState($cursor);
                 }
 
                 if ($classMetadata->hasXmlField($cursor->localName)) {
@@ -234,7 +306,7 @@ class XmlMarshaller implements Marshaller
 
                         $cursor->read();
                         if ($cursor->nodeType !== XMLReader::TEXT) {
-                            throw new MarshallerException("unknown mapping state... terrible terrible damage");
+                            throw MarshallerException::invalidMarshallerState($cursor);
                         }
 
                         if ($classMetadata->isCollection($fieldName)) {
@@ -293,12 +365,9 @@ class XmlMarshaller implements Marshaller
      */
     function marshalToString($mappedObject)
     {
-        $writer = new XmlWriter();
+        $writer = $this->getXmlWriter();
 
-        $writer->openMemory();
-        $writer->startDocument('1.0', 'UTF-8');
-        $writer->setIndent(4);
-
+        // Begin marshalling
         $this->doMarshal($mappedObject, $writer);
 
         $writer->endDocument();
@@ -309,22 +378,45 @@ class XmlMarshaller implements Marshaller
 
     /**
      * @param object $mappedObject
-     * @param string $path
+     * @param string $streamUri
      * @return bool|int
      */
-    public function marshalToStream($mappedObject, $path)
+    public function marshalToStream($mappedObject, $streamUri)
     {
-        $writer = new XmlWriter();
+        $writer = $this->getXmlWriter($streamUri);
 
-        $writer->openUri($path);
-        $writer->startDocument('1.0', 'UTF-8');
-        $writer->setIndent(4);
-
+        // Begin marshalling
         $this->doMarshal($mappedObject, $writer);
 
         $writer->endDocument();
 
         return $writer->flush();
+    }
+
+    /**
+     * Initializes an XMLWriter instance with all the proper settings according
+     * to current configuration
+     *
+     * @param string|null $uri  The output stream uri
+     * @return \XMLWriter
+     */
+    private function getXmlWriter($uri = null)
+    {
+        $writer = new XmlWriter();
+
+        if ($uri !== null) {
+            $writer->openUri($uri);
+        } else {
+            $writer->openMemory();
+        }
+
+        $writer->startDocument($this->schemaVersion, $this->encoding);
+
+        if ($this->indent > 0) {
+            $writer->setIndent((int) $this->indent);
+        }
+        
+        return $writer;
     }
 
     /**

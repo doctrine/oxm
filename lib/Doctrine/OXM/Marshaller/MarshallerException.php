@@ -35,4 +35,20 @@ class MarshallerException extends OXMException
     {
         return new self("The '$fieldName' field of Entity '$entityName' is a required field");
     }
+
+    public static function couldNotReadXml($xml)
+    {
+        return new self("The XMLReader could not read XML '$xml'");
+    }
+
+    public static function couldNotOpenStream($streamUri)
+    {
+        return new self("The XMLReader could not open output stream at '$streamUri'");
+    }
+
+    public static function invalidMarshallerState($cursor)
+    {
+        return new self("The XmlMarshaller parser is in an invalid state at node '{$cursor->nodeType}'.
+            This is probably a bug and should be reported to the Doctrine OXM team.");
+    }
 }

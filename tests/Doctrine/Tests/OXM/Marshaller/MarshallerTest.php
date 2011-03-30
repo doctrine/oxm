@@ -25,10 +25,13 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
     \Doctrine\Tests\OXM\Entities\Address;
 
+/**
+ * @ErrorHandlerSettings false
+ */
 class MarshallerTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Doctrine\OXM\Marshaller\Marshaller
+     * @var \Doctrine\OXM\Marshaller\XmlMarshaller
      */
     private $marshaller;
 
@@ -46,6 +49,11 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $this->metadataFactory = new ClassMetadataFactory($config);
 
         $this->marshaller = new XmlMarshaller($this->metadataFactory);
+    }
+
+    public function tearDown()
+    {
+        error_reporting(-1); // reactive all error levels
     }
 
 
@@ -218,5 +226,20 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
         $xml = $this->marshaller->marshalToString($simple);
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple-child-extends-with-parent-field id="2"/>', $xml);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldSupportMarshallingToOtherEncodings()
+    {
+        $simple = new SimpleChild();
+        $this->marshaller->setEncoding('ISO-8859-1');
+        $xml = $this->marshaller->marshalToString($simple);
+        $this->assertTrue(strlen($xml) > 0);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="ISO-8859-1"?><simple-child><other>yes</other></simple-child>', $xml);
+
+        $obj = $this->marshaller->unmarshalFromString($xml);
+        $this->assertEquals('yes', $obj->other);
     }
 }
