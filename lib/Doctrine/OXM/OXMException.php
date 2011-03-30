@@ -30,7 +30,7 @@ class OXMException extends Exception
     public static function missingMappingDriverImpl()
     {
         return new self("It's a requirement to specify a Mapping Driver and pass it ".
-            "to Doctrine\ORM\Configuration::setMappingDriverImpl().");
+            "to Doctrine\\OXM\\Configuration::setMappingDriverImpl().");
     }
 
     public static function unrecognizedField($field)

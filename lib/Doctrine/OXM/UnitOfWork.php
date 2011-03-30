@@ -438,7 +438,12 @@ class UnitOfWork implements PropertyChangedListener
 
         $class = $this->xem->getClassMetadata(get_class($xmlEntity));
 
+        // We assume NEW, so DETACHED entities result in an exception on flush (constraint violation).
+        // If we would detect DETACHED here we would throw an exception anyway with the same
+        // consequences (not recoverable/programming error), so just assuming NEW here
+        // lets us avoid some database lookups for entities with natural identifiers.
         $xmlEntityState = $this->getXmlEntityState($xmlEntity, self::STATE_NEW);
+
         switch ($xmlEntityState) {
             case self::STATE_MANAGED:
                 // Nothing to do, except if policy is "deferred explicit"
@@ -449,22 +454,16 @@ class UnitOfWork implements PropertyChangedListener
             case self::STATE_NEW:
                 $this->persistNew($class, $xmlEntity);
                 break;
-            case self::STATE_DETACHED:
-                throw new \InvalidArgumentException(
-                        "Behavior of persist() for a detached document is not yet defined.");
             case self::STATE_REMOVED:
-                if ( ! $class->isEmbeddedDocument) {
-                    // Document becomes managed again
-                    if ($this->isScheduledForDelete($xmlEntity)) {
-                        unset($this->entityDeletions[$oid]);
-                    } else {
-                        //FIXME: There's more to think of here...
-                        $this->scheduleForInsert($xmlEntity);
-                    }
-                    break;
-                }
+                // Entity becomes managed again
+                unset($this->entityDeletions[$oid]);
+                $this->entityStates[$oid] = self::STATE_MANAGED;
+                break;
+            case self::STATE_DETACHED:
+                // Can actually not happen right now since we assume STATE_NEW.
+                throw new InvalidArgumentException("Detached entity passed to persist().");
             default:
-                throw OXMException::invalidXmlEntityState($xmlEntityState);
+                throw new UnexpectedValueException("Unexpected entity state: $xmlEntityState.");
         }
 
 //        $this->cascadePersist($xmlEntity, $visited);
@@ -484,33 +483,44 @@ class UnitOfWork implements PropertyChangedListener
 
     /**
      * @param \Doctrine\OXM\Mapping\ClassMetadata $class
-     * @param  $xmlElement
+     * @param  $xmlEntity
      * @return void
      */
-    private function persistNew($class, $xmlElement)
+    private function persistNew($class, $xmlEntity)
     {
-        $oid = spl_object_hash($xmlElement);
+        $oid = spl_object_hash($xmlEntity);
         if (isset($class->lifecycleCallbacks[Events::prePersist])) {
-            $class->invokeLifecycleCallbacks(Events::prePersist, $xmlElement);
+            $class->invokeLifecycleCallbacks(Events::prePersist, $xmlEntity);
         }
         if ($this->evm->hasListeners(Events::prePersist)) {
-            $this->evm->dispatchEvent(Events::prePersist, new LifecycleEventArgs($xmlElement, $this->xem));
+            $this->evm->dispatchEvent(Events::prePersist, new LifecycleEventArgs($xmlEntity, $this->xem));
+        }
+
+        $idGen = $class->idGenerator;
+        if ( ! $idGen->isPostInsertGenerator()) {
+            $idValue = $idGen->generate($this->xem, $xmlEntity);
+            if ( ! $idGen instanceof \Doctrine\OXM\Id\AssignedGenerator) {
+                $this->entityIdentifiers[$oid] = array($class->identifier => $idValue);
+                $class->setIdentifierValue($xmlEntity, $this->entityIdentifiers[$oid]);
+            } else {
+                $this->entityIdentifiers[$oid] = $idValue;
+            }
         }
 
         $this->entityStates[$oid] = self::STATE_MANAGED;
 
-        $this->scheduleForInsert($xmlElement);
+        $this->scheduleForInsert($xmlEntity);
     }
 
     /**
      * Schedules an document for insertion into the database.
      * If the document already has an identifier, it will be added to the identity map.
      *
-     * @param object $document The document to schedule for insertion.
+     * @param object $xmlEntity The document to schedule for insertion.
      */
-    public function scheduleForInsert($document)
+    public function scheduleForInsert($xmlEntity)
     {
-        $oid = spl_object_hash($document);
+        $oid = spl_object_hash($xmlEntity);
 
         if (isset($this->entityUpdates[$oid])) {
             throw new \InvalidArgumentException("Dirty xml entity can not be scheduled for insertion.");
@@ -522,11 +532,22 @@ class UnitOfWork implements PropertyChangedListener
             throw new \InvalidArgumentException("Xml entity can not be scheduled for insertion twice.");
         }
 
-        $this->entityInsertions[$oid] = $document;
+        $this->entityInsertions[$oid] = $xmlEntity;
 
         if (isset($this->entityIdentifiers[$oid])) {
-            $this->addToIdentityMap($document);
+            $this->addToIdentityMap($xmlEntity);
         }
+    }
+    
+    /**
+     * Checks whether an entity is scheduled for insertion.
+     *
+     * @param object $entity
+     * @return boolean
+     */
+    public function isScheduledForInsert($entity)
+    {
+        return isset($this->entityInsertions[spl_object_hash($entity)]);
     }
 
     /**
@@ -543,12 +564,8 @@ class UnitOfWork implements PropertyChangedListener
     public function addToIdentityMap($xmlEntity)
     {
         $classMetadata = $this->xem->getClassMetadata(get_class($xmlEntity));
-//        if ($classMetadata->isEmbeddedDocument) {
-//            $id = spl_object_hash($xmlEntity);
-//        } else {
-            $id = $this->entityIdentifiers[spl_object_hash($xmlEntity)];
-//            $id = $classMetadata->getPHPIdentifierValue($id);
-//        }
+        $id = $this->entityIdentifiers[spl_object_hash($xmlEntity)];
+
         if ($id === '') {
             throw new \InvalidArgumentException("The given xml entity has no identity.");
         }
@@ -556,6 +573,7 @@ class UnitOfWork implements PropertyChangedListener
         if (isset($this->identityMap[$className][$id])) {
             return false;
         }
+        
         $this->identityMap[$className][$id] = $xmlEntity;
         if ($xmlEntity instanceof NotifyPropertyChanged) {
             $xmlEntity->addPropertyChangedListener($this);

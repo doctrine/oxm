@@ -137,7 +137,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     /**
      * READ-ONLY: The ID generator used for generating IDs for this class.
      *
-     * @var AbstractIdGenerator
+     * @var \Doctrine\OXM\Id\AbstractIdGenerator
      */
     public $idGenerator;
 
@@ -443,6 +443,16 @@ class ClassMetadataInfo implements BaseClassMetadata
     public function setIdGeneratorType($generatorType)
     {
         $this->generatorType = $generatorType;
+    }
+
+    /**
+     * Sets the ID generator used to generate IDs for instances of this class.
+     *
+     * @param AbstractIdGenerator $generator
+     */
+    public function setIdGenerator($generator)
+    {
+        $this->idGenerator = $generator;
     }
 
     /**

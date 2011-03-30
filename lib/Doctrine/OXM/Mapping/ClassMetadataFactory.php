@@ -343,6 +343,22 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                 }
             }
 
+            if ($parent && ! $parent->isMappedSuperclass) {
+                if ($parent->isIdGeneratorSequence()) {
+                    $class->setSequenceGeneratorDefinition($parent->sequenceGeneratorDefinition);
+                } else if ($parent->isIdGeneratorTable()) {
+                    $class->getTableGeneratorDefinition($parent->tableGeneratorDefinition);
+                }
+                if ($parent->generatorType) {
+                    $class->setIdGeneratorType($parent->generatorType);
+                }
+                if ($parent->idGenerator) {
+                    $class->setIdGenerator($parent->idGenerator);
+                }
+            } else {
+                $this->completeIdGeneratorMapping($class);
+            }
+
             $class->setParentClasses($visited);
 
             // Todo - ensure that root elements have an ID mapped
@@ -389,6 +405,51 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         }
         foreach ($parentClass->reflFields as $name => $field) {
             $subClass->reflFields[$name] = $field;
+        }
+    }
+
+    /**
+     * Completes the ID generator mapping. If "auto" is specified we choose the generator
+     * most appropriate.
+     *
+     * @param Doctrine\OXM\Mapping\ClassMetadataInfo $class
+     */
+    private function completeIdGeneratorMapping(ClassMetadataInfo $class)
+    {
+        $idGenType = $class->generatorType;
+        if ($idGenType == ClassMetadata::GENERATOR_TYPE_AUTO) {
+            $class->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_NONE);
+        }
+
+        // Create & assign an appropriate ID generator instance
+        switch ($class->generatorType) {
+            case ClassMetadataInfo::GENERATOR_TYPE_INCREMENT:
+
+                throw new OXMException("Increment generator type not implemented yet");
+
+                // If there is no sequence definition yet, create a default definition
+//                $definition = $class->sequenceGeneratorDefinition;
+//                if ( ! $definition) {
+//                    $sequenceName = $class->getTableName() . '_' . $class->getSingleIdentifierColumnName() . '_seq';
+//                    $definition['sequenceName'] = $this->targetPlatform->fixSchemaElementName($sequenceName);
+//                    $definition['allocationSize'] = 1;
+//                    $definition['initialValue'] = 1;
+//                    $class->setSequenceGeneratorDefinition($definition);
+//                }
+//                $sequenceGenerator = new \Doctrine\ORM\Id\SequenceGenerator(
+//                    $definition['sequenceName'],
+//                    $definition['allocationSize']
+//                );
+//                $class->setIdGenerator($sequenceGenerator);
+                break;
+            case ClassMetadataInfo::GENERATOR_TYPE_NONE:
+                $class->setIdGenerator(new \Doctrine\OXM\Id\AssignedGenerator());
+                break;
+            case ClassMetadataInfo::GENERATOR_TYPE_UUID:
+                $class->setIdGenerator(new \Doctrine\OXM\Id\UuidGenerator());
+                break;
+            default:
+                throw new OXMException("Unknown generator type: " . $class->generatorType);
         }
     }
 

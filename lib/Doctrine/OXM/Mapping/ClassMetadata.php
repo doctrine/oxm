@@ -118,6 +118,20 @@ class ClassMetadata extends ClassMetadataInfo
         }
     }
 
+    /**
+     * Populates the entity identifier of an entity.
+     *
+     * @param object $xmlEntity
+     * @param mixed $id
+     * @todo Rename to assignIdentifier()
+     */
+    public function setIdentifierValue($xmlEntity, array $id)
+    {
+        foreach ($id as $idField => $idValue) {
+            $this->reflFields[$idField]->setValue($xmlEntity, $idValue);
+        }
+    }
+
 
     /**
      * Gets the specified field's value off the given entity.

@@ -24,8 +24,7 @@ use \Doctrine\Common\Cache\Cache,
     \Doctrine\OXM\Mapping\Driver\Driver;
 
 /**
- * Configuration container for all configuration options of Doctrine.
- * It combines all configuration options from DBAL & ORM.
+ * Configuration container for all configuration options of Doctrine OXM.
  */
 class Configuration
 {
@@ -52,7 +51,6 @@ class Configuration
     /**
      * Gets the cache driver implementation that is used for the mapping metadata.
      *
-     * @throws ORMException
      * @return Mapping\Driver\Driver
      */
     public function getMetadataDriverImpl()
@@ -169,7 +167,7 @@ class Configuration
      * Ensures that this Configuration instance contains settings that are
      * suitable for a production environment.
      *
-     * @throws ORMException If a configuration setting has a value that is not
+     * @throws OXMException If a configuration setting has a value that is not
      *                      suitable for a production environment.
      */
     public function ensureProductionSettings()

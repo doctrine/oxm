@@ -142,12 +142,13 @@ class AnnotationDriver implements DriverInterface
         }
 
         $metadata->setName($reflClass->getName());
+        
         if (isset($entityAnnot->xml)) {
             $metadata->setXmlName($entityAnnot->xml);
         } else {
-            // TODO - use inflector here or perhaps delay
             $metadata->setXmlName(Inflector::xmlize($reflClass->getShortName()));
         }
+
         if (isset($entityAnnot->repositoryClass)) {
             $metadata->setCustomRepositoryClass($entityAnnot->repositoryClass);
         }

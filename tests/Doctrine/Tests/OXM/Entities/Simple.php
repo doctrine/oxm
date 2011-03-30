@@ -15,8 +15,8 @@ class Simple { }
 /** @XmlEntity */
 class SimpleCompound { }
 
-/** @XmlEntity */
-class SimpleWithField { /** @XmlAttribute(type="integer", direct=true) */ public $id; }
+/** @XmlRootEntity */
+class SimpleWithField { /** @XmlAttribute(type="integer", direct=true) @XmlId */ public $id; }
 
 /** @XmlMappedSuperclass */
 abstract class SimpleAbstractParent { /** @XmlText(type="string", direct=true) */public $other = "yes"; }

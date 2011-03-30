@@ -190,7 +190,7 @@ class XmlEntityManager implements ObjectManager
     /**
      * Throws an exception if the EntityManager is closed or currently not active.
      *
-     * @throws ORMException If the EntityManager is closed.
+     * @throws OXMException If the EntityManager is closed.
      */
     private function errorIfClosed()
     {
@@ -249,7 +249,7 @@ class XmlEntityManager implements ObjectManager
             $this->unitOfWork->clear();
         } else {
             //TODO
-            throw new ORMException("EntityManager#clear(\$entityName) not yet implemented.");
+            throw new OXMException("EntityManager#clear(\$entityName) not yet implemented.");
         }
     }
 
