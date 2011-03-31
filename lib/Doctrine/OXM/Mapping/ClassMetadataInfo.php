@@ -496,9 +496,10 @@ class ClassMetadataInfo implements BaseClassMetadata
         if (!isset($mapping['fieldName']) || strlen($mapping['fieldName']) == 0) {
             throw MappingException::missingFieldName($this->name);
         }
-        if (isset($this->fieldMappings[$mapping['fieldName']])) {
-            throw MappingException::duplicateFieldMapping($this->name, $mapping['fieldName']);
-        }
+        // todo reimplement when we can detect field mapping overrides in child classes
+//        if (isset($this->fieldMappings[$mapping['fieldName']])) {
+//            throw MappingException::duplicateFieldMapping($this->name, $mapping['fieldName']);
+//        }
         if (!isset($mapping['type']) || strlen($mapping['type']) == 0) {
             throw MappingException::missingFieldType($this->name, $mapping['fieldName']);
         }
@@ -511,9 +512,10 @@ class ClassMetadataInfo implements BaseClassMetadata
                 $mapping['quoted'] = true;
             }
         }
-        if (isset($this->xmlFieldMap[$mapping['name']])) {
-            throw MappingException::duplicateXmlFieldName($this->name, $mapping['name']);
-        }
+        // todo reimplement when we can detect field mapping overrides in child classes
+//        if (isset($this->xmlFieldMap[$mapping['name']])) {
+//            throw MappingException::duplicateXmlFieldName($this->name, $mapping['name']);
+//        }
 
         if (!isset($mapping['node'])) {
             if (Type::hasType($mapping['type'])) {

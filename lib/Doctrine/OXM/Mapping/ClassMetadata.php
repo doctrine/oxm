@@ -132,6 +132,16 @@ class ClassMetadata extends ClassMetadataInfo
         }
     }
 
+    /**
+     * Gets the document identifier.
+     *
+     * @param object $xmlEntity
+     * @return string $id
+     */
+    public function getIdentifierValue($xmlEntity)
+    {
+        return (string) $this->reflFields[$this->identifier]->getValue($xmlEntity);
+    }
 
     /**
      * Gets the specified field's value off the given entity.
@@ -156,18 +166,6 @@ class ClassMetadata extends ClassMetadataInfo
             }
         }
     }
-
-    /**
-     * Gets the document identifier.
-     *
-     * @param object $xmlEntity
-     * @return string $id
-     */
-    public function getIdentifierValue($xmlEntity)
-    {
-        return (string) $this->reflFields[$this->identifier]->getValue($xmlEntity);
-    }
-
 
     /**
      * Map a field.

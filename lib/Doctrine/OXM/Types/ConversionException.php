@@ -43,6 +43,6 @@ class ConversionException extends \Doctrine\OXM\OXMException
     static public function conversionFailed($value, $toType)
     {
         $value = (strlen($value) > 32) ? substr($value, 0, 20) . "..." : $value;
-        return new self('Could not convert database value "' . $value . '" to Doctrine Type ' . $toType);
+        return new self('Could not convert xml value "' . $value . '" to Doctrine Type ' . $toType);
     }
 }
