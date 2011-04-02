@@ -191,19 +191,12 @@ class UnitOfWork implements PropertyChangedListener
     {
         $this->identityMap =
         $this->entityIdentifiers =
-//        $this->originalDocumentData =
         $this->entityChangeSets =
         $this->entityStates =
         $this->scheduledForDirtyCheck =
         $this->entityInsertions =
         $this->entityUpdates =
         $this->entityDeletions = array();
-//        $this->extraUpdates = array();
-//        $this->parentAssociations =
-//        $this->orphanRemovals = array();
-//        if ($this->commitOrderCalculator !== null) {
-//            $this->commitOrderCalculator->clear();
-//        }
     }
 
     /**
@@ -239,7 +232,7 @@ class UnitOfWork implements PropertyChangedListener
         }
 
         if ($this->entityDeletions) {
-            foreach ($this->entityUpdates as $class) {
+            foreach ($this->entityDeletions as $class) {
                 $classMetadata = $this->xem->getClassMetadata(get_class($class));
                 $this->executeDeletions($classMetadata, $options);
             }
@@ -253,7 +246,7 @@ class UnitOfWork implements PropertyChangedListener
         $this->scheduledForDirtyCheck = array();
     }
 
-        /**
+    /**
      * Executes all document insertions for documents of the specified type.
      *
      * @param \Doctrine\OXM\Mapping\ClassMetadata $class
@@ -391,9 +384,122 @@ class UnitOfWork implements PropertyChangedListener
         
     }
 
-    public function remove($entity)
+    public function remove($xmlEntity)
     {
-        
+        $visited = array();
+        $this->doRemove($xmlEntity, $visited);
+    }
+
+    private function doRemove($xmlEntity, array &$visited)
+    {
+        $oid = spl_object_hash($xmlEntity);
+        if (isset($visited[$oid])) {
+            return; // Prevent infinite recursion
+        }
+
+        $visited[$oid] = $xmlEntity; // mark visited
+
+        $class = $this->xem->getClassMetadata(get_class($xmlEntity));
+        $entityState = $this->getXmlEntityState($xmlEntity);
+        switch ($entityState) {
+            case self::STATE_NEW:
+            case self::STATE_REMOVED:
+                // nothing to do
+                break;
+            case self::STATE_MANAGED:
+                if (isset($class->lifecycleCallbacks[Events::preRemove])) {
+                    $class->invokeLifecycleCallbacks(Events::preRemove, $xmlEntity);
+                }
+                if ($this->evm->hasListeners(Events::preRemove)) {
+                    $this->evm->dispatchEvent(Events::preRemove, new Event\LifecycleEventArgs($xmlEntity, $this->xem));
+                }
+                $this->scheduleForDelete($xmlEntity);
+                break;
+            case self::STATE_DETACHED:
+                throw new InvalidArgumentException("A detached xml entity can not be removed.");
+            default:
+                throw new UnexpectedValueException("Unexpected xml entity state: $entityState.");
+        }
+    }
+
+    /**
+     * INTERNAL:
+     * Schedules an entity for deletion.
+     *
+     * @param object $xmlEntity
+     */
+    public function scheduleForDelete($xmlEntity)
+    {
+        $oid = spl_object_hash($xmlEntity);
+
+        if (isset($this->entityInsertions[$oid])) {
+            if ($this->isInIdentityMap($xmlEntity)) {
+                $this->removeFromIdentityMap($xmlEntity);
+            }
+            unset($this->entityInsertions[$oid]);
+            return; // entity has not been persisted yet, so nothing more to do.
+        }
+
+        if ( ! $this->isInIdentityMap($xmlEntity)) {
+            return; // ignore
+        }
+
+        $this->removeFromIdentityMap($xmlEntity);
+
+        if (isset($this->entityUpdates[$oid])) {
+            unset($this->entityUpdates[$oid]);
+        }
+        if ( ! isset($this->entityDeletions[$oid])) {
+            $this->entityDeletions[$oid] = $xmlEntity;
+        }
+    }
+
+    /**
+     * Checks whether an entity is registered in the identity map of this UnitOfWork.
+     *
+     * @param object $entity
+     * @return boolean
+     */
+    public function isInIdentityMap($entity)
+    {
+        $oid = spl_object_hash($entity);
+        if ( ! isset($this->entityIdentifiers[$oid])) {
+            return false;
+        }
+        $classMetadata = $this->xem->getClassMetadata(get_class($entity));
+        $id = $this->entityIdentifiers[$oid];
+        if ($id === '') {
+            return false;
+        }
+
+        return isset($this->identityMap[$classMetadata->rootXmlEntityName][$id]);
+    }
+
+    /**
+     * INTERNAL:
+     * Removes an entity from the identity map. This effectively detaches the
+     * entity from the persistence management of Doctrine.
+     *
+     * @ignore
+     * @param object $entity
+     * @return boolean
+     */
+    public function removeFromIdentityMap($entity)
+    {
+        $oid = spl_object_hash($entity);
+        $classMetadata = $this->xem->getClassMetadata(get_class($entity));
+        $id = $this->entityIdentifiers[$oid];
+        if ($id === '') {
+            throw new InvalidArgumentException("The given entity has no identity.");
+        }
+        $className = $classMetadata->rootXmlEntityName;
+        if (isset($this->identityMap[$className][$id])) {
+            unset($this->identityMap[$className][$id]);
+            //$this->entityStates[$oid] = self::STATE_DETACHED;
+            return true;
+        }
+
+        return false;
     }
     
     /**

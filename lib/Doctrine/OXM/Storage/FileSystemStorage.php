@@ -97,6 +97,21 @@ class FileSystemStorage implements Storage
         return $result > 0;
     }
 
+    public function delete(ClassMetadataInfo $classMetadata, $id, array $options = array())
+    {
+        $baseFilePath = $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
+
+        // todo - id should be sanitized for the filesystem
+        $baseFilePath .= "/$id.{$this->fileExtension}";
+        $result = unlink($baseFilePath);
+        if (false === $result) {
+            // @codeCoverageIgnoreStart
+            throw new StorageException("Entity '$id' could not be deleted from the filesystem at path '$baseFilePath'");
+            // @codeCoverageIgnoreEnd
+        }
+        return $result;
+    }
+
     private function _resolveClassName(ClassMetadataInfo $classMetadata)
     {
         if ($this->useNamespaceInPath) {

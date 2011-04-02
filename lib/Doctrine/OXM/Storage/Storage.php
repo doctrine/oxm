@@ -57,4 +57,13 @@ interface Storage
      * @return boolean
      */
     function exists(ClassMetadataInfo $classMetadata, $id);
+
+
+    /**
+     * @abstract
+     * @param \Doctrine\OXM\Mapping\ClassMetadata $classMetadata
+     * @param  $id
+     * @return boolean
+     */
+    function delete(ClassMetadataInfo $classMetadata, $id);
 }

@@ -61,6 +61,23 @@ class XmlEntityManagerTest extends OxmTestCase
         $this->assertTrue(!is_file($expectedFileName));
     }
 
+    public function testPersistingAndDelete()
+    {
+        $order = new Order(1, 'business cards', new \DateTime());
+
+        $this->xem->persist($order);
+        $this->xem->flush();
+
+        $expectedFileName = __DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml';
+
+        $this->assertTrue(is_file($expectedFileName));
+
+        $this->xem->remove($order);
+        $this->xem->flush();
+        
+        $this->assertTrue(!is_file($expectedFileName));        
+    }
+
     public function testPersistAndLoad()
     {
         $order = new Order(1, 'business cards', new \DateTime());

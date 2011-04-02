@@ -70,6 +70,11 @@ class RootXmlEntityPersister
         return $this->storage->exists($this->metadata, $this->metadata->getIdentifierValue($xmlEntity));
     }
 
+    public function delete($xmlEntity, array $options = array())
+    {
+        return $this->storage->delete($this->metadata, $this->metadata->getIdentifierValue($xmlEntity));
+    }
+
 
     public function load($id)
     {
