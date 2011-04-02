@@ -324,7 +324,7 @@ class UnitOfWork implements PropertyChangedListener
                     $class->invokeLifecycleCallbacks(Events::postRemove, $xmlEntity);
                 }
                 if ($hasListeners) {
-                    $this->evm->dispatchEvent(Events::postRemove, new LifecycleEventArgs($xmlEntity, $this->dm));
+                    $this->evm->dispatchEvent(Events::postRemove, new Event\LifecycleEventArgs($xmlEntity, $this->xem));
                 }
 //                $this->cascadePostRemove($class, $xmlEntity);
             }
@@ -368,7 +368,7 @@ class UnitOfWork implements PropertyChangedListener
                     $class->invokeLifecycleCallbacks(Events::postUpdate, $xmlEntity);
                 }
                 if ($hasPostUpdateListeners) {
-                    $this->evm->dispatchEvent(Events::postUpdate, new LifecycleEventArgs($xmlEntity, $this->dm));
+                    $this->evm->dispatchEvent(Events::postUpdate, new Event\LifecycleEventArgs($xmlEntity, $this->xem));
                 }
 //                    $this->cascadePostUpdateAndPostPersist($class, $xmlEntity);
             }
@@ -493,7 +493,7 @@ class UnitOfWork implements PropertyChangedListener
             $class->invokeLifecycleCallbacks(Events::prePersist, $xmlEntity);
         }
         if ($this->evm->hasListeners(Events::prePersist)) {
-            $this->evm->dispatchEvent(Events::prePersist, new LifecycleEventArgs($xmlEntity, $this->xem));
+            $this->evm->dispatchEvent(Events::prePersist, new Event\LifecycleEventArgs($xmlEntity, $this->xem));
         }
 
         $idGen = $class->idGenerator;
