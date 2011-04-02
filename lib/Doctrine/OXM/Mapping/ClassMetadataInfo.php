@@ -496,10 +496,17 @@ class ClassMetadataInfo implements BaseClassMetadata
         if (!isset($mapping['fieldName']) || strlen($mapping['fieldName']) == 0) {
             throw MappingException::missingFieldName($this->name);
         }
-        // todo reimplement when we can detect field mapping overrides in child classes
-//        if (isset($this->fieldMappings[$mapping['fieldName']])) {
-//            throw MappingException::duplicateFieldMapping($this->name, $mapping['fieldName']);
-//        }
+        
+        if (isset($this->fieldMappings[$mapping['fieldName']])) {
+            $existingMapping = $this->fieldMappings[$mapping['fieldName']];
+
+            // only complain if one exists for this class, and not any parents
+            if ( ! isset($existingMapping['declared'])) {
+                throw MappingException::duplicateFieldMapping($this->name, $mapping['fieldName']);
+            } elseif ($existingMapping['declared'] == $this->rootXmlEntityName) {
+                throw MappingException::duplicateFieldMapping($this->name, $mapping['fieldName']);
+            }
+        }
         if (!isset($mapping['type']) || strlen($mapping['type']) == 0) {
             throw MappingException::missingFieldType($this->name, $mapping['fieldName']);
         }
@@ -512,10 +519,16 @@ class ClassMetadataInfo implements BaseClassMetadata
                 $mapping['quoted'] = true;
             }
         }
-        // todo reimplement when we can detect field mapping overrides in child classes
-//        if (isset($this->xmlFieldMap[$mapping['name']])) {
-//            throw MappingException::duplicateXmlFieldName($this->name, $mapping['name']);
-//        }
+
+        if (isset($this->xmlFieldMap[$mapping['name']])) {
+            $existingMapping = $this->fieldMappings[$this->xmlFieldMap[$mapping['name']]];
+
+            if ( ! isset($existingMapping['declared'])) {
+                throw MappingException::duplicateXmlFieldName($this->name, $mapping['name']);
+            } elseif ($existingMapping['declared'] == $this->rootXmlEntityName) {
+                throw MappingException::duplicateXmlFieldName($this->name, $mapping['name']);
+            }
+        }
 
         if (!isset($mapping['node'])) {
             if (Type::hasType($mapping['type'])) {
@@ -578,7 +591,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     protected function inferGetter($fieldName)
     {
-        return 'get' . Inflector::camelize($fieldName);
+        return 'get' . ucfirst(Inflector::camelize($fieldName));
     }
 
     /**
@@ -587,7 +600,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     protected function inferSetter($fieldName)
     {
-        return 'set' . Inflector::camelize($fieldName);
+        return 'set' . ucfirst(Inflector::camelize($fieldName));
     }
 
 
@@ -600,8 +613,10 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     public function addInheritedFieldMapping(array $fieldMapping)
     {
-        $this->fieldMappings[$fieldMapping['fieldName']] = $fieldMapping;
-        $this->xmlFieldMap[$fieldMapping['name']] = $fieldMapping['fieldName'];
+        if (!isset($this->fieldMappings[$fieldMapping['fieldName']])) {
+            $this->fieldMappings[$fieldMapping['fieldName']] = $fieldMapping;
+            $this->xmlFieldMap[$fieldMapping['name']] = $fieldMapping['fieldName'];
+        }
     }
 
     /**

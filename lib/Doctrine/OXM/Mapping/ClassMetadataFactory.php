@@ -317,38 +317,13 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                 throw MappingException::reflectionFailure($className, $e);
             }
 
-            // Post loading validation
-            if (in_array($class->getXmlName(), array_keys($this->xmlToClassMap))) {
+            if ( ! $class->isMappedSuperclass && in_array($class->getXmlName(), array_keys($this->xmlToClassMap))) {
                 throw MappingException::duplicateXmlNameBinding($className, $class->getXmlName());
             }
-            // (somewhat expensive, does some duplicate work)
-            $fieldMappings = $class->getFieldMappings();
-            if (!empty($fieldMappings)) {
-
-                foreach ($fieldMappings as $fieldName => $mapping) {
-                    if (Type::hasType($mapping['type'])) {
-                        continue;
-                    }
-
-                    // Support type as a mapped class?
-                    if (!$this->hasMetadataFor($mapping['type']) && !$this->getMetadataFor($mapping['type'])) {
-                        throw MappingException::fieldTypeNotFound($className, $fieldName, $mapping['type']);
-                    }
-
-                    // Mapped classes must have binding node type XML_ELEMENT
-                    $fieldMapping = $class->getFieldMapping($fieldName);
-                    if ($fieldMapping['node'] !== ClassMetadataInfo::XML_ELEMENT) {
-                        throw MappingException::customTypeWithoutNodeElement($className, $fieldName);
-                    }
-                }
-            }
+            
+            $this->completeMappingTypeValidation($className, $class);
 
             if ($parent && ! $parent->isMappedSuperclass) {
-                if ($parent->isIdGeneratorSequence()) {
-                    $class->setSequenceGeneratorDefinition($parent->sequenceGeneratorDefinition);
-                } else if ($parent->isIdGeneratorTable()) {
-                    $class->getTableGeneratorDefinition($parent->tableGeneratorDefinition);
-                }
                 if ($parent->generatorType) {
                     $class->setIdGeneratorType($parent->generatorType);
                 }
@@ -364,7 +339,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
             // Todo - ensure that root elements have an ID mapped
 
             if ($this->evm->hasListeners(Events::loadClassMetadata)) {
-                $eventArgs = new \Doctrine\OXM\Event\LoadClassMetadataEventArgs($class, $this->xem);
+                $eventArgs = new \Doctrine\OXM\Event\LoadClassMetadataEventArgs($class, $this);
                 $this->evm->dispatchEvent(Events::loadClassMetadata, $eventArgs);
             }
 
@@ -384,6 +359,31 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         }
 
         return $loaded;
+    }
+
+    /**
+     * Complete and validate type mappings
+     *
+     * @param string $className
+     * @param ClassMetadataInfo $class
+     */
+    private function completeMappingTypeValidation($className, ClassMetadataInfo $class)
+    {
+        foreach ($class->fieldMappings as $fieldName => $mapping) {
+            if (Type::hasType($mapping['type'])) {
+                continue;
+            }
+
+            // Support type as a mapped class?
+            if (!$this->hasMetadataFor($mapping['type']) && !$this->getMetadataFor($mapping['type'])) {
+                throw MappingException::fieldTypeNotFound($className, $fieldName, $mapping['type']);
+            }
+
+            // Mapped classes must have binding node type XML_ELEMENT
+            if ($mapping['node'] !== ClassMetadataInfo::XML_ELEMENT) {
+                throw MappingException::customTypeWithoutNodeElement($className, $fieldName);
+            }
+        }
     }
 
     /**
@@ -424,23 +424,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         // Create & assign an appropriate ID generator instance
         switch ($class->generatorType) {
             case ClassMetadataInfo::GENERATOR_TYPE_INCREMENT:
-
                 throw new OXMException("Increment generator type not implemented yet");
-
-                // If there is no sequence definition yet, create a default definition
-//                $definition = $class->sequenceGeneratorDefinition;
-//                if ( ! $definition) {
-//                    $sequenceName = $class->getTableName() . '_' . $class->getSingleIdentifierColumnName() . '_seq';
-//                    $definition['sequenceName'] = $this->targetPlatform->fixSchemaElementName($sequenceName);
-//                    $definition['allocationSize'] = 1;
-//                    $definition['initialValue'] = 1;
-//                    $class->setSequenceGeneratorDefinition($definition);
-//                }
-//                $sequenceGenerator = new \Doctrine\ORM\Id\SequenceGenerator(
-//                    $definition['sequenceName'],
-//                    $definition['allocationSize']
-//                );
-//                $class->setIdGenerator($sequenceGenerator);
                 break;
             case ClassMetadataInfo::GENERATOR_TYPE_NONE:
                 $class->setIdGenerator(new \Doctrine\OXM\Id\AssignedGenerator());

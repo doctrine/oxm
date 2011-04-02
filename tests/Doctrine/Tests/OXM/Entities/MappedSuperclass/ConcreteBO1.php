@@ -18,4 +18,7 @@ class ConcreteBO1 extends AbstractBusinessObject
      * @XmlAttribute(type="string")
      */
     public $type;
+
+    /** @XmlText(type="string", required="true") */
+    public $overridden;
 }

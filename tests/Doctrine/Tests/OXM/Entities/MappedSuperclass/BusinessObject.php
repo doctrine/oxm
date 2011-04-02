@@ -3,21 +3,19 @@
  * Created by JetBrains PhpStorm.
  * User: richardfullmer
  * Date: 3/10/11
- * Time: 8:49 PM
+ * Time: 8:52 PM
  * To change this template use File | Settings | File Templates.
  */
 
 namespace Doctrine\Tests\OXM\Entities\MappedSuperclass;
 
 /**
- * @XmlMappedSuperclass
+ * @XmlEntity
  */
-abstract class AbstractBusinessObject
+class BusinessObject extends AbstractBusinessObject
 {
-    /** @XmlAttribute(type="string") */
-    public $inherit;
-
-    /** @XmlText(type="string") */
-    public $overridden;
-
+    /**
+     * @XmlAttribute(type="string")
+     */
+    public $description;
 }

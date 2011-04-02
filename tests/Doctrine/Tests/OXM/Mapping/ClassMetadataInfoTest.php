@@ -65,6 +65,16 @@ class ClassMetadataInfoTest extends OxmTestCase
         $class->mapField(array('fieldName' => 'squibbleYou', 'type' => 'string', 'name' => 'this'));
     }
 
+    public function itShouldInferGettersProperly()
+    {
+        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
+        $class->mapField(array('fieldName' => 'squibble', 'type' => 'string'));
+
+        $mapping = $class->getFieldMapping('squibble'); // todo - don't like relying on internal implementation
+        $this->assertEquals('getSquibble', $mapping['getMethod']);
+        $this->assertEquals('setSquibble', $mapping['setMethod']);
+    }
+
     /**
      * @test
      */

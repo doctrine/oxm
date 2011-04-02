@@ -22,7 +22,7 @@ namespace Doctrine\OXM\Event;
 use Doctrine\Common\EventArgs;
 
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
-use Doctrine\OXM\XmlEntityManager;
+use Doctrine\OXM\Mapping\ClassMetadataFactory;
 
 /**
  * Class that holds event arguments for a loadMapping event.
@@ -41,18 +41,18 @@ class LoadClassMetadataEventArgs extends EventArgs
     private $mapping;
 
     /**
-     * @var XmlEntityManager
+     * @var ClassMetadataFactory
      */
-    private $xem;
+    private $factory;
 
     /**
      * @param Mapping $mapping
-     * @param EntityManager $xem
+     * @param EntityManager $factory
      */
-    public function __construct(ClassMetadataInfo $mapping, XmlEntityManager $xem)
+    public function __construct(ClassMetadataInfo $mapping, ClassMetadataFactory $factory)
     {
         $this->mapping = $mapping;
-        $this->xem = $xem;
+        $this->factory = $factory;
     }
 
     /**
@@ -64,11 +64,11 @@ class LoadClassMetadataEventArgs extends EventArgs
     }
 
     /**
-     * @return XmlEntityManager
+     * @return ClassMetadataFactory
      */
-    public function getEntityManager()
+    public function getFactory()
     {
-        return $this->xem;
+        return $this->factory;
     }
 }
 
