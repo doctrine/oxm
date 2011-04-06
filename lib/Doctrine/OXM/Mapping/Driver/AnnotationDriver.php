@@ -283,7 +283,7 @@ class AnnotationDriver implements DriverInterface
 
         foreach ($this->paths as $path) {
             if ( ! is_dir($path)) {
-                throw MappingException::fileMappingDriversRequireConfiguredDirectoryPath($path);
+                throw MappingException::fileMappingDriversRequiresConfiguredDirectoryPath($path);
             }
 
             $iterator = new \RecursiveIteratorIterator(

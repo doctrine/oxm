@@ -118,6 +118,11 @@ class MappingException extends OXMException
         return new self("No mapping found for field '$fieldName' on class '$className'.");
     }
 
+    public static function fileMappingDriversRequiresConfiguredDirectoryPath($path)
+    {
+        return new self("File mapping driver requires configured directory path '$path'");
+    }
+
     /**
      * Generic exception for invalid mappings.
      *
