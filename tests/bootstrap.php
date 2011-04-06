@@ -8,13 +8,13 @@
  */
 
 // execution point is at doctrine-oxm/
-require_once 'lib/vendor/doctrine-common/lib/Doctrine/Common/ClassLoader.php';
+require_once __DIR__.'/../lib/vendor/doctrine-common/lib/Doctrine/Common/ClassLoader.php';
 
-$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\Common', realpath('lib/vendor/doctrine-common/lib'));
+$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\Common', realpath(__DIR__.'/../lib/vendor/doctrine-common/lib'));
 $classLoader->register();
 
-$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\OXM', realpath('lib'));
+$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\OXM', realpath(__DIR__.'/../lib'));
 $classLoader->register();
 
-$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\Tests', realpath('tests'));
+$classLoader = new \Doctrine\Common\ClassLoader('Doctrine\Tests', realpath(__DIR__.'/../tests'));
 $classLoader->register();
