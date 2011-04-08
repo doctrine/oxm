@@ -95,6 +95,25 @@ class XmlEntityManagerTest extends OxmTestCase
         unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml');
     }
 
+    public function testPersistUpdateAndLoad()
+    {
+        $order = new Order(1, 'business cards', new \DateTime());
+
+        $this->xem->persist($order);
+
+        $order->setProductType('postcards');
+        $this->xem->persist($order);
+        $this->xem->flush();
+
+        $expectedFileName = __DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml';
+        $this->assertTrue(is_file($expectedFileName));
+
+        $otherOrder = $this->xem->getRepository('Doctrine\Tests\OXM\Entities\Order')->find(1);
+
+        $this->assertEquals('postcards', $otherOrder->getProductType());
+
+        unlink(__DIR__ . '/../Workspace/Doctrine/Tests/OXM/Entities/Order/1.xml');
+    }
 
     public function testPersistMultipleObjects()
     {
