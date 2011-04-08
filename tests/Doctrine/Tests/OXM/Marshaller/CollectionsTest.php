@@ -1,17 +1,28 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: richardfullmer
- * Date: 3/10/11
- * Time: 8:56 PM
- * To change this template use File | Settings | File Templates.
+/*
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * This software consists of voluntary contributions made by many individuals
+ * and is licensed under the LGPL. For more information, see
+ * <http://www.doctrine-project.org>.
  */
 
 namespace Doctrine\Tests\OXM\Marshaller;
 
 use Doctrine\Tests\OxmTestCase,
-    Doctrine\Tests\OXM\Entities\CollectionClass,
-    Doctrine\Tests\OXM\Entities\CollectionAttributeClass;
+    Doctrine\Tests\OXM\Entities\Collections\CollectionClass,
+    Doctrine\Tests\OXM\Entities\Collections\CollectionAttributeClass,
+    Doctrine\Tests\OXM\Entities\Collections\Wrapper;
 
 class CollectionsTest extends OxmTestCase
 {
@@ -65,5 +76,44 @@ class CollectionsTest extends OxmTestCase
         $this->assertContains('red', $otherContainer->colors);
         $this->assertContains('green', $otherContainer->colors);
         $this->assertContains('blue', $otherContainer->colors);
+    }
+
+    /**
+     * @test
+     */
+    public function collectionWrapsXmlText()
+    {
+        $wrapper = new Wrapper();
+        $wrapper->list = array('red', 'green', 'blue');
+        $wrapper->enum = array('one', 'two', 'three', 'four');
+
+        $xml = $this->marshaller->marshalToString($wrapper);
+
+        $this->assertXmlStringEqualsXmlString('<wrapper xmlns:prfx="http://www.foo.bar.baz.com/schema">
+            <foo>
+                <list>red</list>
+                <list>green</list>
+                <list>blue</list>
+            </foo>
+            <prfx:bar>
+                <prfx:enum>one</prfx:enum>
+                <prfx:enum>two</prfx:enum>
+                <prfx:enum>three</prfx:enum>
+                <prfx:enum>four</prfx:enum>
+            </prfx:bar>
+        </wrapper>', $xml);
+
+        $otherWrapper = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertEquals(3, count($otherWrapper->list));
+        $this->assertContains('red', $otherWrapper->list);
+        $this->assertContains('green', $otherWrapper->list);
+        $this->assertContains('blue', $otherWrapper->list);
+
+        $this->assertEquals(4, count($otherWrapper->enum));
+        $this->assertContains('one', $otherWrapper->enum);
+        $this->assertContains('two', $otherWrapper->enum);
+        $this->assertContains('three', $otherWrapper->enum);
+        $this->assertContains('four', $otherWrapper->enum);
     }
 }

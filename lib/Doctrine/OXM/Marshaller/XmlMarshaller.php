@@ -521,16 +521,28 @@ class XmlMarshaller implements Marshaller
 
                     if (isset($fieldMapping['prefix'])) {
                         if ($classMetadata->isCollection($fieldName)) {
+                            if ($classMetadata->hasFieldWrapping($fieldName)) {
+                                $writer->startElementNs($fieldMapping['prefix'], $fieldMapping['wrapper'], null);
+                            }
                             foreach ($fieldValue as $value) {
                                 $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($value));
+                            }
+                            if ($classMetadata->hasFieldWrapping($fieldName)) {
+                                $writer->endElement();
                             }
                         } else {
                             $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
                         }
                     } else {
                         if ($classMetadata->isCollection($fieldName)) {
+                            if ($classMetadata->hasFieldWrapping($fieldName)) {
+                                $writer->startElement($fieldMapping['wrapper']);
+                            }
                             foreach ($fieldValue as $value) {
                                 $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($value));
+                            }
+                            if ($classMetadata->hasFieldWrapping($fieldName)) {
+                                $writer->endElement();
                             }
                         } else {
                             $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));

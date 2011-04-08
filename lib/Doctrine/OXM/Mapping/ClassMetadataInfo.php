@@ -632,6 +632,14 @@ class ClassMetadataInfo implements BaseClassMetadata
     /**
      * @return boolean
      */
+    public function hasFieldWrapping($fieldName)
+    {
+        return isset($this->fieldMappings[$fieldName]['wrapper']);
+    }
+
+    /**
+     * @return boolean
+     */
     public function hasXmlField($xmlName)
     {
         return isset($this->xmlFieldMap[$xmlName]);
