@@ -255,38 +255,17 @@ class XmlMarshaller implements Marshaller
 
         if (!$cursor->isEmptyElement) {
             $collectionElements = array();
-            while ($cursor->read()) {
+
+            while (true) {
+                $cursor->read();
                 if ($cursor->nodeType === XMLReader::END_ELEMENT && $cursor->name === $elementName) {
                     // we're at the original element closing node, bug out
                     break;
                 }
 
-                if ($cursor->nodeType == XMLReader::NONE ||
-    //                $reader->nodeType == XMLReader::ELEMENT ||
-                    $cursor->nodeType == XMLReader::ATTRIBUTE ||
-                    $cursor->nodeType == XMLReader::TEXT ||
-                    $cursor->nodeType == XMLReader::CDATA ||
-                    $cursor->nodeType == XMLReader::ENTITY_REF ||
-                    $cursor->nodeType == XMLReader::ENTITY ||
-                    $cursor->nodeType == XMLReader::PI ||
-                    $cursor->nodeType == XMLReader::COMMENT ||
-                    $cursor->nodeType == XMLReader::DOC ||
-                    $cursor->nodeType == XMLReader::DOC_TYPE ||
-                    $cursor->nodeType == XMLReader::DOC_FRAGMENT ||
-                    $cursor->nodeType == XMLReader::NOTATION ||
-                    $cursor->nodeType == XMLReader::WHITESPACE ||
-                    $cursor->nodeType == XMLReader::SIGNIFICANT_WHITESPACE ||
-                    $cursor->nodeType == XMLReader::END_ELEMENT ||
-                    $cursor->nodeType == XMLReader::END_ENTITY ||
-                    $cursor->nodeType == XMLReader::XML_DECLARATION) {
-
+                if ($cursor->nodeType !== XMLReader::ELEMENT) {
                     // skip insignificant elements
                     continue;
-                }
-
-
-                if ($cursor->nodeType !== XMLReader::ELEMENT) {
-                    throw MarshallerException::invalidMarshallerState($cursor);
                 }
 
                 if ($classMetadata->hasXmlField($cursor->localName)) {
@@ -303,14 +282,13 @@ class XmlMarshaller implements Marshaller
                             $classMetadata->setFieldValue($mappedObject, $fieldName, $this->doUnmarshal($cursor));
                         }
                     } else {
-
-                        $type = Type::getType($fieldMapping['type']);
-
+                        // assume text element (dangerous?)
                         $cursor->read();
                         if ($cursor->nodeType !== XMLReader::TEXT) {
                             throw MarshallerException::invalidMarshallerState($cursor);
                         }
 
+                        $type = Type::getType($fieldMapping['type']);
                         if ($classMetadata->isCollection($fieldName)) {
                             $collectionElements[$fieldName][] = $type->convertToPHPValue($cursor->value);
                         } else {
@@ -319,16 +297,18 @@ class XmlMarshaller implements Marshaller
                         
                         $cursor->read();
                     }
-                } elseif (in_array($cursor->name, $knownMappedNodes)) { // @todo - this isn't very efficient
-                    $class = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$cursor->name]);
+                } elseif (in_array($cursor->name, $knownMappedNodes)) {  // look for inherited child directly
+                    $childClassMetadata = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$cursor->name]);
 
+                    // todo: ensure this potential child inherits from parent correctly
+                    
                     $fieldName = null;
                     foreach ($classMetadata->getFieldMappings() as $fieldMapping) {
                         if ($fieldMapping['type'] == $allMappedXmlNodes[$cursor->name]) {
                             $fieldName = $fieldMapping['fieldName'];
                         } else {
                             // Walk parent tree
-                            foreach ($class->getParentClasses() as $parentClass) {
+                            foreach ($childClassMetadata->getParentClasses() as $parentClass) {
                                 if ($fieldMapping['type'] == $parentClass) {
                                     $fieldName = $fieldMapping['fieldName'];
                                 }
