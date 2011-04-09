@@ -51,4 +51,9 @@ class MarshallerException extends OXMException
         return new self("The XmlMarshaller parser is in an invalid state at node '{$cursor->nodeType}'.
             This is probably a bug and should be reported to the Doctrine OXM team.");
     }
+
+    public static function mappingNotFoundForClass($className)
+    {
+        return new self("A mapping does not exist for class '$className'");
+    }
 }

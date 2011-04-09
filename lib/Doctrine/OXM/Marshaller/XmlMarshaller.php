@@ -19,9 +19,11 @@
 
 namespace Doctrine\OXM\Marshaller;
 
-use Doctrine\OXM\Mapping\ClassMetadataInfo,
+use Doctrine\OXM\Mapping\ClassMetadata,
     Doctrine\OXM\Mapping\ClassMetadataFactory,
     Doctrine\OXM\Mapping\MappingException,
+    Doctrine\OXM\Marshaller\Helper\ReaderHelper,
+    Doctrine\OXM\Marshaller\Helper\WriterHelper,
     Doctrine\OXM\Types\Type,
     Doctrine\OXM\Events;
     
@@ -365,12 +367,10 @@ class XmlMarshaller implements Marshaller
      */
     function marshalToString($mappedObject)
     {
-        $writer = $this->getXmlWriter();
+        $writer = new WriterHelper($this);
 
         // Begin marshalling
         $this->doMarshal($mappedObject, $writer);
-
-        $writer->endDocument();
 
         return $writer->flush();
     }
@@ -383,61 +383,29 @@ class XmlMarshaller implements Marshaller
      */
     public function marshalToStream($mappedObject, $streamUri)
     {
-        $writer = $this->getXmlWriter($streamUri);
+        $writer = new WriterHelper($this, $streamUri);
 
         // Begin marshalling
         $this->doMarshal($mappedObject, $writer);
-
-        $writer->endDocument();
 
         return $writer->flush();
     }
 
     /**
-     * Initializes an XMLWriter instance with all the proper settings according
-     * to current configuration
-     *
-     * @param string|null $uri  The output stream uri
-     * @return \XMLWriter
-     */
-    private function getXmlWriter($uri = null)
-    {
-        $writer = new XmlWriter();
-
-        if ($uri !== null) {
-            $writer->openUri($uri);
-        } else {
-            $writer->openMemory();
-        }
-
-        $writer->startDocument($this->schemaVersion, $this->encoding);
-
-        if ($this->indent > 0) {
-            $writer->setIndent((int) $this->indent);
-        }
-        
-        return $writer;
-    }
-
-    /**
-     *
-     *
      * INTERNAL: Performance sensitive method
      *
-     *
-     *
      * @throws MarshallerException
-     * @param  $mappedObject
-     * @param \XMLWriter $writer
+     * @param object $mappedObject
+     * @param WriterHelper $writer
      * @return void
      */
-    private function doMarshal($mappedObject, XmlWriter $writer)
+    private function doMarshal($mappedObject, WriterHelper $writer)
     {
         $className = get_class($mappedObject);
         $classMetadata = $this->classMetadataFactory->getMetadataFor($className);
 
         if (!$this->classMetadataFactory->hasMetadataFor($className)) {
-            throw new MarshallerException("A mapping does not exist for class '$className'");
+            throw MarshallerException::mappingNotFoundForClass($className);
         }
 
         // PreMarshall Hook
@@ -450,15 +418,11 @@ class XmlMarshaller implements Marshaller
         $namespaces = $classMetadata->getXmlNamespaces();
         if (!empty($namespaces)) {
             foreach ($namespaces as $namespace) {
-                if ($namespace['prefix'] !== null) {
-                    $writer->writeAttribute('xmlns:' . $namespace['prefix'], $namespace['url']);
-                } else {
-                    $writer->writeAttribute('xmlns', $namespace['url']);
-                }
+                $writer->writeNamespace($namespace['url'], $namespace['prefix']);
             }
         }
 
-
+        // build ordered field mappings for this class
         $fieldMappings = $classMetadata->getFieldMappings();
         $orderedMap = array();
         if (!empty($fieldMappings)) {
@@ -468,8 +432,8 @@ class XmlMarshaller implements Marshaller
         }
 
         // do attributes
-        if (array_key_exists(ClassMetadataInfo::XML_ATTRIBUTE, $orderedMap)) {
-            foreach ($orderedMap[ClassMetadataInfo::XML_ATTRIBUTE] as $fieldMapping) {
+        if (array_key_exists(ClassMetadata::XML_ATTRIBUTE, $orderedMap)) {
+            foreach ($orderedMap[ClassMetadata::XML_ATTRIBUTE] as $fieldMapping) {
 
                 $fieldName = $fieldMapping['fieldName'];
                 $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
@@ -477,36 +441,16 @@ class XmlMarshaller implements Marshaller
                 if ($classMetadata->isRequired($fieldName) && $fieldValue === null) {
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
-                
+
                 if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
-                    $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
-                    $fieldType = $classMetadata->getTypeOfField($fieldName);
-
-                    if ($classMetadata->isCollection($fieldName)) {
-                        $convertedValues = array();
-                        foreach ($fieldValue as $value) {
-                            $convertedValues[] = Type::getType($fieldType)->convertToXmlValue($value);
-                        }
-
-                        if (isset($fieldMapping['prefix'])) {
-                            $writer->writeAttributeNs($fieldMapping['prefix'], $fieldXmlName, null, implode(" ", $convertedValues));
-                        } else {
-                            $writer->writeAttribute($fieldXmlName, implode(" ", $convertedValues));
-                        }
-                    } else {
-                        if (isset($fieldMapping['prefix'])) {
-                            $writer->writeAttributeNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
-                        } else {
-                            $writer->writeAttribute($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
-                        }
-                    }                    
+                    $this->_writeAttribute($writer, $classMetadata, $fieldName, $fieldValue);
                 }
             }
         }
 
         // do text
-        if (array_key_exists(ClassMetadataInfo::XML_TEXT, $orderedMap)) {
-            foreach ($orderedMap[ClassMetadataInfo::XML_TEXT] as $fieldMapping) {
+        if (array_key_exists(ClassMetadata::XML_TEXT, $orderedMap)) {
+            foreach ($orderedMap[ClassMetadata::XML_TEXT] as $fieldMapping) {
 
                 $fieldName = $fieldMapping['fieldName'];
                 $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
@@ -516,45 +460,14 @@ class XmlMarshaller implements Marshaller
                 }
 
                 if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
-                    $fieldXmlName = $classMetadata->getFieldXmlName($fieldName);
-                    $fieldType = $classMetadata->getTypeOfField($fieldName);
-
-                    if (isset($fieldMapping['prefix'])) {
-                        if ($classMetadata->isCollection($fieldName)) {
-                            if ($classMetadata->hasFieldWrapping($fieldName)) {
-                                $writer->startElementNs($fieldMapping['prefix'], $fieldMapping['wrapper'], null);
-                            }
-                            foreach ($fieldValue as $value) {
-                                $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($value));
-                            }
-                            if ($classMetadata->hasFieldWrapping($fieldName)) {
-                                $writer->endElement();
-                            }
-                        } else {
-                            $writer->writeElementNs($fieldMapping['prefix'], $fieldXmlName, null, Type::getType($fieldType)->convertToXmlValue($fieldValue));
-                        }
-                    } else {
-                        if ($classMetadata->isCollection($fieldName)) {
-                            if ($classMetadata->hasFieldWrapping($fieldName)) {
-                                $writer->startElement($fieldMapping['wrapper']);
-                            }
-                            foreach ($fieldValue as $value) {
-                                $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($value));
-                            }
-                            if ($classMetadata->hasFieldWrapping($fieldName)) {
-                                $writer->endElement();
-                            }
-                        } else {
-                            $writer->writeElement($fieldXmlName, Type::getType($fieldType)->convertToXmlValue($fieldValue));
-                        }
-                    }
+                    $this->_writeText($writer, $classMetadata, $fieldName, $fieldValue);
                 }
             }
         }
 
         // do elements
-        if (array_key_exists(ClassMetadataInfo::XML_ELEMENT, $orderedMap)) {
-            foreach ($orderedMap[ClassMetadataInfo::XML_ELEMENT] as $fieldMapping) {
+        if (array_key_exists(ClassMetadata::XML_ELEMENT, $orderedMap)) {
+            foreach ($orderedMap[ClassMetadata::XML_ELEMENT] as $fieldMapping) {
 
                 $fieldName = $fieldMapping['fieldName'];
                 $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
@@ -564,17 +477,7 @@ class XmlMarshaller implements Marshaller
                 }
 
                 if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
-                    $fieldType = $classMetadata->getTypeOfField($fieldName);
-
-                    if ($this->classMetadataFactory->hasMetadataFor($fieldType)) {
-                        if ($classMetadata->isCollection($fieldName)) {
-                            foreach ($fieldValue as $value) {
-                                $this->doMarshal($value, $writer);
-                            }
-                        } else {
-                            $this->doMarshal($fieldValue, $writer);
-                        }
-                    }
+                    $this->_writeElement($writer, $classMetadata, $fieldName,  $fieldValue);   
                 }
             }
         }
@@ -585,5 +488,79 @@ class XmlMarshaller implements Marshaller
         }
 
         $writer->endElement();
+    }
+
+    /**
+     * @param WriterHelper $writer
+     * @param ClassMetadata $classMetadata
+     * @param string $fieldName
+     * @param mixed $fieldValue
+     */
+    private function _writeAttribute(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName, $fieldValue)
+    {
+        $name    = $classMetadata->getFieldXmlName($fieldName);
+        $type    = $classMetadata->getTypeOfField($fieldName);
+        $mapping = $classMetadata->getFieldMapping($fieldName);
+        $prefix  = (isset($mapping['prefix']) ? $mapping['prefix'] : null);
+
+        if ($classMetadata->isCollection($fieldName)) {
+            $convertedValues = array();
+            foreach ($fieldValue as $value) {
+                $convertedValues[] = Type::getType($type)->convertToXmlValue($value);
+            }
+
+            $writer->writeAttribute($name, implode(" ", $convertedValues), $prefix);
+        } else {
+            $writer->writeAttribute($name, Type::getType($type)->convertToXmlValue($fieldValue), $prefix);
+        }
+    }
+
+    /**
+     * @param WriterHelper $writer
+     * @param ClassMetadata $classMetadata
+     * @param string $fieldName
+     * @param mixed $fieldValue
+     */
+    private function _writeText(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName, $fieldValue)
+    {
+        $xmlName = $classMetadata->getFieldXmlName($fieldName);
+        $type    = $classMetadata->getTypeOfField($fieldName);
+        $mapping = $classMetadata->getFieldMapping($fieldName);
+        $prefix  = (isset($mapping['prefix']) ? $mapping['prefix'] : null);
+
+        if ($classMetadata->isCollection($fieldName)) {
+            if ($classMetadata->hasFieldWrapping($fieldName)) {
+                $writer->startElement($mapping['wrapper'], $prefix);
+            }
+            foreach ($fieldValue as $value) {
+                $writer->writeElement($xmlName, Type::getType($type)->convertToXmlValue($value), $prefix);
+            }
+            if ($classMetadata->hasFieldWrapping($fieldName)) {
+                $writer->endElement();
+            }
+        } else {
+            $writer->writeElement($xmlName, Type::getType($type)->convertToXmlValue($fieldValue), $prefix);
+        }
+    }
+
+    /**
+     * @param WriterHelper $writer
+     * @param ClassMetadata $classMetadata
+     * @param string $fieldName
+     * @param mixed $fieldValue
+     */
+    private function _writeElement(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName,  $fieldValue)
+    {
+        $fieldType = $classMetadata->getTypeOfField($fieldName);
+
+        if ($this->classMetadataFactory->hasMetadataFor($fieldType)) {
+            if ($classMetadata->isCollection($fieldName)) {
+                foreach ($fieldValue as $value) {
+                    $this->doMarshal($value, $writer);
+                }
+            } else {
+                $this->doMarshal($fieldValue, $writer);
+            }
+        }
     }
 }
