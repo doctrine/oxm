@@ -17,6 +17,11 @@ class BooleanTest extends \PHPUnit_Framework_TestCase
         $this->_type = Type::getType('boolean');
     }
 
+    public function testName()
+    {
+        $this->assertEquals('boolean', $this->_type->getName());
+    }
+
     public function testBooleanConvertsToXmlValue()
     {
         $this->assertInternalType('string', $this->_type->convertToXmlValue(1));

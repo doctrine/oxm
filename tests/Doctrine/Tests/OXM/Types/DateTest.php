@@ -24,6 +24,11 @@ class DateTest extends \PHPUnit_Framework_TestCase
         date_default_timezone_set($this->_tz);
     }
 
+    public function testName()
+    {
+        $this->assertEquals('date', $this->_type->getName());
+    }
+
     public function testDateConvertsToDatabaseValue()
     {
         $this->assertTrue(

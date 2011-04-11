@@ -16,6 +16,11 @@ class TimeTest extends \PHPUnit_Framework_TestCase
         $this->_type = Type::getType('time');
     }
 
+    public function testName()
+    {
+        $this->assertEquals('time', $this->_type->getName());
+    }
+
     public function testTimeConvertsToDatabaseValue()
     {
         $this->assertInternalType('string', $this->_type->convertToXmlValue(new \DateTime()));

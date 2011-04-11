@@ -21,6 +21,10 @@ class ArrayTest extends \PHPUnit_Framework_TestCase
         error_reporting(-1); // reactive all error levels
     }
 
+    public function testName()
+    {
+        $this->assertEquals('array', $this->_type->getName());
+    }
 
     public function testArrayConvertsToDatabaseValue()
     {

@@ -17,6 +17,11 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
         $this->_type = Type::getType('datetime');
     }
 
+    public function testName()
+    {
+        $this->assertEquals('datetime', $this->_type->getName());
+    }
+
     public function testDateTimeConvertsToXmlValue()
     {
         $date = new \DateTime('1985-09-01 10:10:10');

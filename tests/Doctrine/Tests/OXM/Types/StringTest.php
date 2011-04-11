@@ -16,6 +16,11 @@ class StringTest extends \PHPUnit_Framework_TestCase
         $this->_type = Type::getType('string');
     }
 
+    public function testName()
+    {
+        $this->assertEquals('string', $this->_type->getName());
+    }
+
     public function testConvertToPHPValue()
     {
         $this->assertInternalType("string", $this->_type->convertToPHPValue("foo"));

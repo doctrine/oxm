@@ -16,6 +16,11 @@ class IntegerTest extends \PHPUnit_Framework_TestCase
         $this->_type = Type::getType('integer');
     }
 
+    public function testName()
+    {
+        $this->assertEquals('integer', $this->_type->getName());
+    }
+
     public function testIntegerConvertsToPHPValue()
     {
         $this->assertInternalType('integer', $this->_type->convertToPHPValue('3.14'));

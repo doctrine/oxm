@@ -16,6 +16,11 @@ class FloatTest extends \PHPUnit_Framework_TestCase
         $this->_type = Type::getType('float');
     }
 
+    public function testName()
+    {
+        $this->assertEquals('float', $this->_type->getName());
+    }
+
     public function testIntegerConvertsToPHPValue()
     {
         $this->assertInternalType('float', $this->_type->convertToPHPValue('1'));

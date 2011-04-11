@@ -16,6 +16,11 @@ class ObjectTest extends \PHPUnit_Framework_TestCase
         $this->_type = Type::getType('object');
     }
 
+    public function testName()
+    {
+        $this->assertEquals('object', $this->_type->getName());
+    }
+
     public function tearDown()
     {
         error_reporting(-1); // reactive all error levels
