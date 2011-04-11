@@ -32,12 +32,12 @@ class FileSystemStorage implements Storage
     private $storagePath;
 
     /**
-     * @var
+     * @var string
      */
     private $fileExtension;
 
     /**
-     *
+     * @var int
      */
     private $fileModeBits = 0755;
 
@@ -73,6 +73,22 @@ class FileSystemStorage implements Storage
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function load(ClassMetadataInfo $classMetadata, $id)
+    {
+        return file_get_contents($this->_getFilename($classMetadata, $id));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function exists(ClassMetadataInfo $classMetadata, $id)
+    {
+        return is_file($this->_getFilename($classMetadata, $id));
+    }
+
+    /**
      * Insert the XML into the filesystem with a specific identifier
      *
      * @throws StorageException
@@ -96,6 +112,9 @@ class FileSystemStorage implements Storage
         return $result > 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function delete(ClassMetadataInfo $classMetadata, $id, array $options = array())
     {
         $result = unlink($this->_getFilename($classMetadata, $id));
@@ -158,23 +177,6 @@ class FileSystemStorage implements Storage
 
         return $baseFilePath . '/' . $id . '.' . $this->fileExtension;
     }
-
-    /**
-     *
-     */
-    public function load(ClassMetadataInfo $classMetadata, $id)
-    {
-        return file_get_contents($this->_getFilename($classMetadata, $id));
-    }
-
-    /**
-     * 
-     */
-    public function exists(ClassMetadataInfo $classMetadata, $id)
-    {
-        return is_file($this->_getFilename($classMetadata, $id));
-    }
-
 
     /**
      * @param string $filename
