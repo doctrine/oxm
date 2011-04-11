@@ -44,4 +44,17 @@ Example use case:
     $this->sendToExternalService($xml);
 
 
+## Run tests ##
+
+[Install PHPUnit (>= 3.5)](http://www.phpunit.de/manual/3.6/en/installation.html)
+
+Copy the phpunit.xml file from tests to the root:
+
+    cp ./tests/phpunit.xml ./phpunit.xml
+
+Run the tests
+
+    phpunit ./tests
+
+
 ### API DOCUMENTATION - todo
