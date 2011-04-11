@@ -24,7 +24,6 @@ use \Doctrine\OXM\Mapping\ClassMetadataInfo,
     \Doctrine\Common\Util\Debug,
     \Doctrine\OXM\XmlEntityManager,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
-    \Doctrine\OXM\Configuration,
     \Doctrine\Common\EventManager,
     \Doctrine\Tests\OXM\Entities\Order,
     \Doctrine\Tests\OXM\Entities\SimpleWithField;
@@ -35,11 +34,6 @@ class XmlEntityManagerTest extends OxmTestCase
      * @var \Doctrine\OXM\XmlEntityManager
      */
     private $xem;
-
-    /**
-     * @var \Doctrine\OXM\Configuration
-     */
-    private $config;
 
     public function setup()
     {
