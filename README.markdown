@@ -48,9 +48,9 @@ Example use case:
 
 [Install PHPUnit (>= 3.5)](http://www.phpunit.de/manual/3.6/en/installation.html)
 
-Copy the phpunit.xml file from tests to the root:
+Copy the phpunit.xml
 
-    cp ./tests/phpunit.xml ./phpunit.xml
+    cp ./phpunit.xml.dist ./phpunit.xml
 
 Run the tests
 
