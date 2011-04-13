@@ -32,12 +32,12 @@ class FileSystemStorage implements Storage
     private $storagePath;
 
     /**
-     * @var
+     * @var string
      */
     private $fileExtension;
 
     /**
-     *
+     * @var int
      */
     private $fileModeBits = 0755;
 
@@ -73,6 +73,22 @@ class FileSystemStorage implements Storage
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function load(ClassMetadataInfo $classMetadata, $id)
+    {
+        return file_get_contents($this->_getFilename($classMetadata, $id));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function exists(ClassMetadataInfo $classMetadata, $id)
+    {
+        return is_file($this->_getFilename($classMetadata, $id));
+    }
+
+    /**
      * Insert the XML into the filesystem with a specific identifier
      *
      * @throws StorageException
@@ -83,27 +99,25 @@ class FileSystemStorage implements Storage
      */
     public function insert(ClassMetadataInfo $classMetadata, $id, $xmlContent)
     {
-        $baseFilePath = $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
+        $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
 
-        // todo - id should be sanitized for the filesystem
-        $baseFilePath .= "/$id.{$this->fileExtension}";
-        
-        $result = file_put_contents($baseFilePath, $xmlContent);
+        $result = file_put_contents($this->_getFilename($classMetadata, $id), $xmlContent);
+
         if (false === $result) {
             // @codeCoverageIgnoreStart
             throw new StorageException("Entity '$id' could not be saved to the filesystem at path '$baseFilePath'");
             // @codeCoverageIgnoreEnd
         }
+
         return $result > 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function delete(ClassMetadataInfo $classMetadata, $id, array $options = array())
     {
-        $baseFilePath = $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
-
-        // todo - id should be sanitized for the filesystem
-        $baseFilePath .= "/$id.{$this->fileExtension}";
-        $result = unlink($baseFilePath);
+        $result = unlink($this->_getFilename($classMetadata, $id));
         if (false === $result) {
             // @codeCoverageIgnoreStart
             throw new StorageException("Entity '$id' could not be deleted from the filesystem at path '$baseFilePath'");
@@ -112,6 +126,10 @@ class FileSystemStorage implements Storage
         return $result;
     }
 
+    /**
+     * @param ClassMetadataInfo $classMetadata
+     * @return string
+     */
     private function _resolveClassName(ClassMetadataInfo $classMetadata)
     {
         if ($this->useNamespaceInPath) {
@@ -147,27 +165,18 @@ class FileSystemStorage implements Storage
     }
 
     /**
-     *
+     * @param ClassMetadataInfo $classMetadata
+     * @param mixed $id
+     * @return string The filename for the given entity
      */
-    public function load(ClassMetadataInfo $classMetadata, $id)
-    {
-        $baseFilePath = $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
-
-        // todo - id should be sanitized for the filesystem
-        $baseFilePath .= "/$id.{$this->fileExtension}";
-
-        return file_get_contents($baseFilePath);
-    }
-
-    /**
-     * 
-     */
-    public function exists(ClassMetadataInfo $classMetadata, $id)
+    protected function _getFilename(ClassMetadataInfo $classMetadata, $id)
     {
         $baseFilePath = $this->_buildStoragePath($this->_resolveClassName($classMetadata));
-        return is_file($baseFilePath . "/$id.{$this->fileExtension}");
-    }
 
+        // todo - id should be sanitized for the filesystem
+
+        return $baseFilePath . '/' . $id . '.' . $this->fileExtension;
+    }
 
     /**
      * @param string $filename
@@ -267,6 +276,5 @@ class FileSystemStorage implements Storage
     {
         return $this->useNamespaceInPath;
     }
-
 
 }
