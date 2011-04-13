@@ -14,9 +14,7 @@
 
     <!-- Run unit tests and generate junit.xml and clover.xml -->
     <target name="phpunit">
-        <exec executable="phpunit" failonerror="true">
-            <arg line="-c ${basedir}/tests/phpunit.xml ${basedir}/tests" />
-        </exec>
+        <exec executable="phpunit" failonerror="true" />
     </target>
 
     <!-- Run the pdepend, phpmd, phpcpd, phpcs, phpdoc and phploc tasks
