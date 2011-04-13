@@ -16,12 +16,16 @@ class TypeTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException Doctrine\OXM\OXMException
+     * @backupStaticAttributes enabled
      */
     public function testAddTypeExists()
     {
         Type::addType('string', 'Doctrine\\Tests\\Mocks\\TypeMock');
     }
-    
+
+    /**
+     * @backupStaticAttributes enabled
+     */
     public function testAddType()
     {
         Type::addType('mock', 'Doctrine\\Tests\\Mocks\\TypeMock');
@@ -37,8 +41,12 @@ class TypeTest extends \PHPUnit_Framework_TestCase
         Type::overrideType('foo', 'Doctrine\\Tests\\Mocks\\TypeMock');
     }
 
+    /**
+     * @backupStaticAttributes enabled
+     */
     public function testOverrideType()
     {
         Type::overrideType('string', 'Doctrine\\Tests\\Mocks\\TypeMock');
+        $this->assertInstanceOf('Doctrine\\Tests\\Mocks\\TypeMock', Type::getType('string'));
     }
 }
