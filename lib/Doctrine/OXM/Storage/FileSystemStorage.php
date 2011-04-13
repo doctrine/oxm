@@ -101,11 +101,12 @@ class FileSystemStorage implements Storage
     {
         $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
 
-        $result = file_put_contents($this->_getFilename($classMetadata, $id), $xmlContent);
+        $filePath = $this->_getFilename($classMetadata, $id);
+        $result = file_put_contents($filePath, $xmlContent);
 
         if (false === $result) {
             // @codeCoverageIgnoreStart
-            throw new StorageException("Entity '$id' could not be saved to the filesystem at path '$baseFilePath'");
+            throw new StorageException("Entity '$id' could not be saved to the filesystem at '$filePath'");
             // @codeCoverageIgnoreEnd
         }
 
@@ -117,10 +118,11 @@ class FileSystemStorage implements Storage
      */
     public function delete(ClassMetadataInfo $classMetadata, $id, array $options = array())
     {
-        $result = unlink($this->_getFilename($classMetadata, $id));
+        $filePath = $this->_getFilename($classMetadata, $id);
+        $result = unlink($filePath);
         if (false === $result) {
             // @codeCoverageIgnoreStart
-            throw new StorageException("Entity '$id' could not be deleted from the filesystem at path '$baseFilePath'");
+            throw new StorageException("Entity '$id' could not be deleted from the filesystem at '$filePath'");
             // @codeCoverageIgnoreEnd
         }
         return $result;
