@@ -127,7 +127,7 @@ abstract class Type
      * @static
      * @param string $name Name of the type. This should correspond to what getName() returns.
      * @param string $className The class name of the custom type.
-     * @throws DBALException
+     * @throws OXMException
      */
     public static function addType($name, $className)
     {
@@ -156,7 +156,7 @@ abstract class Type
      * @static
      * @param string $name
      * @param string $className
-     * @throws DBALException
+     * @throws OXMException
      */
     public static function overrideType($name, $className)
     {
@@ -165,6 +165,7 @@ abstract class Type
         }
 
         self::$_typesMap[$name] = $className;
+        unset(self::$_typeObjects[$name]);
     }
 
     /**
