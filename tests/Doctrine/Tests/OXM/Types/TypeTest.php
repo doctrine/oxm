@@ -55,7 +55,7 @@ class TypeTest extends \PHPUnit_Framework_TestCase
     /**
      * @backupStaticAttributes enabled
      */
-    public function testOverridreTypeAlreadyInstancied()
+    public function testOverrideTypeAlreadyInstantiated()
     {
         Type::getType('string');
         Type::overrideType('string', 'Doctrine\\Tests\\Mocks\\TypeMock');
