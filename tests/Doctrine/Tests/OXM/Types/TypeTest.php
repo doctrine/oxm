@@ -47,6 +47,18 @@ class TypeTest extends \PHPUnit_Framework_TestCase
     public function testOverrideType()
     {
         Type::overrideType('string', 'Doctrine\\Tests\\Mocks\\TypeMock');
+        $typesMap = Type::getTypesMap();
+        $this->assertEquals('Doctrine\\Tests\\Mocks\\TypeMock', $typesMap['string']);
+        $this->assertInstanceOf('Doctrine\\Tests\\Mocks\\TypeMock', Type::getType('string'));
+    }
+
+    /**
+     * @backupStaticAttributes enabled
+     */
+    public function testOverrideTypeAlreadyInstantiated()
+    {
+        Type::getType('string');
+        Type::overrideType('string', 'Doctrine\\Tests\\Mocks\\TypeMock');
         $this->assertInstanceOf('Doctrine\\Tests\\Mocks\\TypeMock', Type::getType('string'));
     }
 }
