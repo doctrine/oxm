@@ -19,8 +19,8 @@
 
 namespace Doctrine\OXM\Persisters;
 
-use \Doctrine\OXM\XmlEntityManager,
-    \Doctrine\OXM\Mapping\ClassMetadata;
+use Doctrine\OXM\XmlEntityManager;
+use Doctrine\OXM\Mapping\ClassMetadata;
 
 class RootXmlEntityPersister
 {
@@ -69,6 +69,22 @@ class RootXmlEntityPersister
         $xml = $this->marshaller->marshalToString($xmlEntity);
         
         return $this->storage->insert($this->metadata, $identifier, $xml);
+    }
+
+
+    /**
+     * Updates this xml entity in the storage system
+     *
+     * @param  $xmlEntity
+     * @return bool|int
+     */
+    public function update($xmlEntity)
+    {
+        $identifier = $this->metadata->getIdentifierValue($xmlEntity);
+
+        $xml = $this->marshaller->marshalToString($xmlEntity);
+
+        return $this->storage->update($this->metadata, $identifier, $xml);
     }
 
     /**

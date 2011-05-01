@@ -35,11 +35,11 @@ Example use case:
 
     $xml = $this->getRequest()->getParam('posted_xml');
 
-    $order = $marshaller->unmarshal($xml);
+    $order = $marshaller->unmarshalFromString($xml);
     $this->view->message = "Order recieved:  " . $order->getId();
 
     $update = new UpdateNotification("Order " . $order->getId() . " was received by the application");
-    $xml = $marshaller->marshal($update);
+    $xml = $marshaller->marshalToString($update);
 
     $this->sendToExternalService($xml);
 

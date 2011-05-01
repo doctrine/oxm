@@ -19,8 +19,8 @@
 
 namespace Doctrine\OXM\Marshaller\Helper;
 
-use XmlWriter,
-    Doctrine\OXM\Marshaller\XmlMarshaller;
+use XmlWriter;
+use Doctrine\OXM\Marshaller\XmlMarshaller;
 
 /**
  * Responsible for writing xml with an XmlWriter and ClassMetadata information.

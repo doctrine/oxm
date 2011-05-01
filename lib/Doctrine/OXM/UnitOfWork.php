@@ -19,21 +19,21 @@
 
 namespace Doctrine\OXM;
 
-use Exception, InvalidArgumentException, UnexpectedValueException,
-    Doctrine\Common\Collections\ArrayCollection,
-    Doctrine\Common\Collections\Collection,
-    Doctrine\Common\NotifyPropertyChanged,
-    Doctrine\Common\PropertyChangedListener,
-    Doctrine\OXM\Event,
-    Doctrine\OXM\Mapping\ClassMetadata;
+use Exception, InvalidArgumentException, UnexpectedValueException;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\NotifyPropertyChanged;
+use Doctrine\Common\PropertyChangedListener;
+use Doctrine\OXM\Mapping\ClassMetadata;
+use Doctrine\OXM\Event;
 
 /**
  * The UnitOfWork is responsible for tracking changes to objects during an
  * "object-level" transaction and for writing out changes to the filesystem
  *
  * This UnitOfWork is only capable of persisting xml class which are mapped via
- * the @XmlRoot element.  This ensures that @XmlId fields exist, and the persister
- * knows how to save the files correctly.
+ * the @XmlRootEntity element.  This ensures that @XmlId fields exist, and the persister
+ * knows how to save the xml correctly.
  *
  * @since       2.0
  * @author      Richard Fullmer <richard.fullmer@opensoftdev.com>
@@ -149,8 +149,6 @@ class UnitOfWork implements PropertyChangedListener
      * @var Doctrine\OXM\XmlEntityManager
      */
     private $xem;
-
-
 
     /**
      * The EventManager used for dispatching events.
@@ -378,18 +376,18 @@ class UnitOfWork implements PropertyChangedListener
         }
     }
 
-    public function refresh($entity)
+    public function refresh($xmlEntity)
     {
         
     }
 
 
-    public function detach($entity)
+    public function detach($xmlEntity)
     {
 
     }
 
-    public function merge($entity)
+    public function merge($xmlEntity)
     {
         
     }
@@ -774,15 +772,13 @@ class UnitOfWork implements PropertyChangedListener
         $oid = spl_object_hash($entity);
         $class = $this->xem->getClassMetadata(get_class($entity));
 
-        $isAssocField = isset($class->associationMappings[$propertyName]);
-
-        if ( ! $class->isTransient($propertyName) && ! isset($class->fieldMappings[$propertyName])) {
+        if ( ! isset($class->fieldMappings[$propertyName])) {
             return; // ignore non-persistent fields
         }
 
         // Update changeset and mark entity for synchronization
         $this->entityChangeSets[$oid][$propertyName] = array($oldValue, $newValue);
-        if ( ! isset($this->scheduledForDirtyCheck[$class->rootEntityName][$oid])) {
+        if ( ! isset($this->scheduledForDirtyCheck[$class->rootXmlEntityName][$oid])) {
             $this->scheduleForDirtyCheck($entity);
         }
     }

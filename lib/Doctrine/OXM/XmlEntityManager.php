@@ -19,10 +19,10 @@
 
 namespace Doctrine\OXM;
 
-use \Doctrine\OXM\Marshaller\Marshaller,
-    \Doctrine\OXM\Storage\Storage,
-    \Doctrine\Common\EventManager,
-    \Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\OXM\Marshaller\Marshaller;
+use Doctrine\OXM\Storage\Storage;
+use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\ObjectManager;
 
 /**
  *

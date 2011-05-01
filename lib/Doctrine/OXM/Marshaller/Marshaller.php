@@ -19,8 +19,6 @@
 
 namespace Doctrine\OXM\Marshaller;
 
-use \Doctrine\OXM\Mapping\ClassMetadataFactory;
-    
 /**
  *
  * @license http://www.opensource.org/licenses/lgpl-license.php LGPL

@@ -2,8 +2,8 @@
 
 namespace Doctrine\OXM\Event;
 
-use Doctrine\Common\EventArgs,
-    Doctrine\OXM\XmlEntityManager;
+use Doctrine\Common\EventArgs;
+use Doctrine\OXM\XmlEntityManager;
 
 /**
  * Class that holds event arguments for a preInsert/preUpdate event.

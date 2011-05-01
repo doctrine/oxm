@@ -19,12 +19,12 @@
 
 namespace Doctrine\OXM\Mapping\Driver;
 
-use \Doctrine\Common\Cache\ArrayCache,
-    \Doctrine\Common\Annotations\AnnotationReader,
-    \Doctrine\OXM\Util\Inflector,
-    \Doctrine\OXM\Mapping\ClassMetadataInfo,
-    \Doctrine\OXM\Mapping\MappingException,
-    \Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
+use Doctrine\Common\Cache\ArrayCache;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\OXM\Util\Inflector;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\MappingException;
+use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
 
 require __DIR__ . '/DoctrineAnnotations.php';
 

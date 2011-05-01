@@ -19,9 +19,8 @@
 
 namespace Doctrine\OXM;
 
-use \Doctrine\Common\Cache\Cache,
-    \Doctrine\OXM\Marshaller\Marshaller,
-    \Doctrine\OXM\Mapping\Driver\Driver;
+use Doctrine\Common\Cache\Cache;
+use Doctrine\OXM\Mapping\Driver\Driver;
 
 /**
  * Configuration container for all configuration options of Doctrine OXM.

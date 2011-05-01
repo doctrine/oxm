@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Storage;
 
-use \Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
 
  /**
   * @author Richard Fullmer <richardfullmer@gmail.com>
@@ -98,6 +98,32 @@ class FileSystemStorage implements Storage
      * @return boolean
      */
     public function insert(ClassMetadataInfo $classMetadata, $id, $xmlContent)
+    {
+        $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
+
+        $filePath = $this->_getFilename($classMetadata, $id);
+        $result = file_put_contents($filePath, $xmlContent);
+
+        if (false === $result) {
+            // @codeCoverageIgnoreStart
+            throw new StorageException("Entity '$id' could not be saved to the filesystem at '$filePath'");
+            // @codeCoverageIgnoreEnd
+        }
+
+        return $result > 0;
+    }
+
+
+    /**
+     * Update the XML in the filesystem with a specific identifier
+     *
+     * @throws StorageException
+     * @param \Doctrine\OXM\Mapping\ClassMetadataInfo $classMetadata
+     * @param string $id
+     * @param string $xmlContent
+     * @return boolean
+     */
+    public function update(ClassMetadataInfo $classMetadata, $id, $xmlContent)
     {
         $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
 

@@ -19,8 +19,8 @@
 
 namespace Doctrine\OXM\Mapping\Metadata\Driver;
 
-use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface,
-    Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
 
 /**
  *

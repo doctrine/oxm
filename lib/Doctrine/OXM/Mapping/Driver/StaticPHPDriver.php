@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Mapping\Driver;
 
-use \Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
 
 /**
  *

@@ -19,15 +19,15 @@
 
 namespace Doctrine\OXM\Mapping;
 
-use \ReflectionException,
-    \Doctrine\OXM\OXMException,
-    \Doctrine\OXM\Configuration,
-    \Doctrine\Common\Util\Debug,
-    \Doctrine\OXM\Events,
-    \Doctrine\Common\Cache\Cache,
-    \Doctrine\Common\EventManager,
-    \Doctrine\Common\Persistence\Mapping\ClassMetadataFactory as BaseClassMetadataFactory,
-    \Doctrine\OXM\Types\Type;
+use ReflectionException;
+use Doctrine\OXM\OXMException;
+use Doctrine\OXM\Configuration;
+use Doctrine\Common\Util\Debug;
+use Doctrine\OXM\Events;
+use Doctrine\Common\Cache\Cache;
+use Doctrine\Common\EventManager;
+use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory as BaseClassMetadataFactory;
+use Doctrine\OXM\Types\Type;
 
 /**
  * The ClassMetadataFactory is used to create Mapping objects that contain all the
@@ -127,7 +127,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      */
     public function getAllMetadata()
     {
-        if ( ! $this->initialized) {
+        if (!$this->initialized) {
             $this->initialize();
         }
 
@@ -190,7 +190,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
             // Check for namespace alias
             if (strpos($className, ':') !== false) {
                 list($namespaceAlias, $simpleClassName) = explode(':', $className);
-                $realClassName = $this->xem->getConfiguration()->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
+                $realClassName = $this->configuration->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
 
                 if (isset($this->loadedMetadata[$realClassName])) {
                     // We do not have the alias name in the map, include it
@@ -203,7 +203,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
             if ($this->cacheDriver) {
                 if (($cached = $this->cacheDriver->fetch("$realClassName\$XMLCLASSMETADATA")) !== false) {
                     $this->loadedMetadata[$realClassName] = $cached;
-                    if ( ! $cached->isMappedSuperclass) {
+                    if (!$cached->isMappedSuperclass) {
                         $this->xmlToClassMap[$cached->getXmlName()] = $realClassName;
                     }
                 } else {
@@ -261,7 +261,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         // Collect parent classes, ignoring transient (not-mapped) classes.
         $parentClasses = array();
         foreach (array_reverse(class_parents($name)) as $parentClass) {
-            if ( ! $this->driver->isTransient($parentClass)) {
+            if (!$this->driver->isTransient($parentClass)) {
                 $parentClasses[] = $parentClass;
             }
         }
@@ -277,7 +277,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      */
     protected function loadMetadata($name)
     {
-        if ( ! $this->initialized) {
+        if (!$this->initialized) {
             $this->initialize();
         }
 

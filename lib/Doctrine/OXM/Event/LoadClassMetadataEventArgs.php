@@ -20,7 +20,6 @@
 namespace Doctrine\OXM\Event;
 
 use Doctrine\Common\EventArgs;
-
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
 use Doctrine\OXM\Mapping\ClassMetadataFactory;
 

@@ -19,11 +19,11 @@
 
 namespace Doctrine\OXM\Mapping;
 
-use ReflectionClass,
-    ReflectionProperty,
-    Doctrine\Common\Persistence\Mapping\ClassMetadata as BaseClassMetadata,
-    Doctrine\OXM\Util\Inflector,
-    Doctrine\OXM\Types\Type;
+use ReflectionClass;
+use ReflectionProperty;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata as BaseClassMetadata;
+use Doctrine\OXM\Util\Inflector;
+use Doctrine\OXM\Types\Type;
 
 /**
  *

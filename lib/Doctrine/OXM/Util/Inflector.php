@@ -21,7 +21,7 @@
 
 namespace Doctrine\OXM\Util;
 
-use \Doctrine\Common\Util\Inflector as BaseInflector;
+use Doctrine\Common\Util\Inflector as BaseInflector;
 
 /**
  * Doctrine inflector has static methods for inflecting text

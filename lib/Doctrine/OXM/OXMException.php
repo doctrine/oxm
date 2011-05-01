@@ -74,4 +74,19 @@ class OXMException extends Exception
     {
         return new self("Type '$name' was not found");
     }
+
+    public static function cannotPersistMappedSuperclass($className)
+    {
+        return new self("OXM cannot persist XmlMappedSuperclass '$className'.  OXM can only persist root entities.");
+    }
+
+    public static function canOnlyPersistRootClasses($className)
+    {
+        return new self("OXM can only persist xml root mapped entities.  '$className' is not a root entity");
+    }
+
+    public static function entityManagerClosed()
+    {
+        return new self("The XmlEntityManager is closed");
+    }
 }

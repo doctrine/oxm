@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Storage;
 
-use \Doctrine\OXM\OXMException;
+use Doctrine\OXM\OXMException;
  
 class StorageException extends OXMException
 {

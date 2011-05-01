@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Storage;
 
-use \Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
 
 /**
  * A common interface for persisting XML for long term storage
@@ -39,6 +39,17 @@ interface Storage
      * @return void
      */
     function insert(ClassMetadataInfo $classMetadata, $id, $xmlContent);
+
+    /**
+     * Update the XML in the storage system with a specific identifier
+     *
+     * @abstract
+     * @param ClassMetadata
+     * @param string $id
+     * @param string $xmlContent
+     * @return void
+     */
+    function update(ClassMetadataInfo $classMetadata, $id, $xmlContent);
 
     /**
      * Load XML from storage

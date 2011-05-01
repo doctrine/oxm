@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Mapping;
 
-use \Doctrine\OXM\OXMException;
+use Doctrine\OXM\OXMException;
 
 /**
  *

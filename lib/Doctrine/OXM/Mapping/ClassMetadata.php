@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM\Mapping;
 
-use \Doctrine\OXM\Util\Inflector;
+use Doctrine\OXM\Util\Inflector;
 
 /**
  * A <tt>ClassMetadata</tt> instance holds all the object-document mapping metadata
@@ -225,12 +225,8 @@ class ClassMetadata extends ClassMetadataInfo
         if ($this->isMappedSuperclass) {
             $serialized[] = 'isMappedSuperclass';
         }
-
-        if ($this->xmlNamespacePrefix) {
-            $serialized[] = 'xmlNamespacePrefix';
-        }
         if ($this->xmlNamespaces) {
-            $serialized[] = 'xmlNamespaceUrl';
+            $serialized[] = 'xmlNamespaces';
         }
 
         return $serialized;

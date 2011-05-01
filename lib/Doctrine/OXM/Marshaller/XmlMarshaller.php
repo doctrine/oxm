@@ -19,13 +19,13 @@
 
 namespace Doctrine\OXM\Marshaller;
 
-use Doctrine\OXM\Mapping\ClassMetadata,
-    Doctrine\OXM\Mapping\ClassMetadataFactory,
-    Doctrine\OXM\Mapping\MappingException,
-    Doctrine\OXM\Marshaller\Helper\ReaderHelper,
-    Doctrine\OXM\Marshaller\Helper\WriterHelper,
-    Doctrine\OXM\Types\Type,
-    Doctrine\OXM\Events;
+use Doctrine\OXM\Mapping\ClassMetadata;
+use Doctrine\OXM\Mapping\ClassMetadataFactory;
+use Doctrine\OXM\Mapping\MappingException;
+use Doctrine\OXM\Marshaller\Helper\ReaderHelper;
+use Doctrine\OXM\Marshaller\Helper\WriterHelper;
+use Doctrine\OXM\Types\Type;
+use Doctrine\OXM\Events;
     
 use XMLReader, XMLWriter;
     

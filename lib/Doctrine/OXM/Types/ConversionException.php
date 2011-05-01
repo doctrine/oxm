@@ -17,9 +17,10 @@
  * <http://www.doctrine-project.org>.
  */
 
+namespace Doctrine\OXM\Types;
 
 /**
- * Conversion Exception is thrown when the database to PHP conversion fails
+ * Conversion Exception is thrown when the xml to PHP conversion fails
  *
  * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
  * @link        www.doctrine-project.com
@@ -29,8 +30,6 @@
  * @author      Jonathan Wage <jonwage@gmail.com>
  * @author      Roman Borschel <roman@code-factory.org>
  */
-namespace Doctrine\OXM\Types;
-
 class ConversionException extends \Doctrine\OXM\OXMException
 {
     /**

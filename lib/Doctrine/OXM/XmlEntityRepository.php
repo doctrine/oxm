@@ -19,7 +19,7 @@
 
 namespace Doctrine\OXM;
 
-use \Doctrine\Common\Persistence\ObjectRepository;
+use Doctrine\Common\Persistence\ObjectRepository;
 
 class XmlEntityRepository implements ObjectRepository
 {
