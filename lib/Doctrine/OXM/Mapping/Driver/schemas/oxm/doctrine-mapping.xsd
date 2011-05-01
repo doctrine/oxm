@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://doctrine-project.org/schemas/oxm/doctrine-mapping"
+    xmlns:oxm="http://doctrine-project.org/schemas/oxm/doctrine-mapping"
+    elementFormDefault="qualified">
+
+  <xs:annotation> 
+    <xs:documentation><![CDATA[ 
+       This is the XML Schema for the object/xml
+       mapping file used by the Doctrine OXM.
+     ]]></xs:documentation>
+  </xs:annotation>
+
+  <xs:element name="doctrine-mapping">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="mapped-superclass" type="oxm:mapped-superclass" minOccurs="0" maxOccurs="unbounded" />
+        <xs:element name="entity" type="oxm:entity" minOccurs="0" maxOccurs="unbounded" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:complexType name="emptyType"/> 
+
+  <xs:simpleType name="lifecycle-callback-type">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="preUnmarshal"/>
+      <xs:enumeration value="postUnmarshal"/>
+      <xs:enumeration value="preMarshal"/>
+      <xs:enumeration value="postMarshal"/>
+      <xs:enumeration value="prePersist"/>
+      <xs:enumeration value="postPersist"/>
+      <xs:enumeration value="preUpdate"/>
+      <xs:enumeration value="postUpdate"/>
+      <xs:enumeration value="preRemove"/>
+      <xs:enumeration value="postRemove"/>
+      <xs:enumeration value="postLoad"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="lifecycle-callback">
+    <xs:attribute name="type" type="oxm:lifecycle-callback-type" use="required" />
+    <xs:attribute name="method" type="xs:NMTOKEN" use="required" />
+  </xs:complexType>
+  
+  <xs:complexType name="lifecycle-callbacks">
+    <xs:sequence>
+      <xs:element name="lifecycle-callback" type="oxm:lifecycle-callback" minOccurs="1" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="entity">
+    <xs:sequence>
+      <xs:element name="namespaces" type="oxm:namespaces" minOccurs="0"/>
+      <xs:element name="lifecycle-callbacks" type="oxm:lifecycle-callbacks" minOccurs="0" maxOccurs="1" />
+      <xs:element name="field" type="oxm:field" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="xml-name" type="xs:string" use="optional" />
+    <xs:attribute name="root" type="xs:boolean" use="optional" />
+    <xs:attribute name="repository-class" type="xs:string"/>
+    <xs:attribute name="change-tracking-policy" type="oxm:change-tracking-policy" />
+  </xs:complexType>
+  
+  <xs:complexType name="mapped-superclass" >
+    <xs:complexContent>
+      <xs:extension base="oxm:entity"/>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="change-tracking-policy">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="DEFERRED_IMPLICIT"/>
+      <xs:enumeration value="DEFERRED_EXPLICIT"/>
+      <xs:enumeration value="NOTIFY"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="generator-strategy"> 
+    <xs:restriction base="xs:token"> 
+      <xs:enumeration value="ASSIGNED"/>
+      <xs:enumeration value="INCREMENT"/>
+      <xs:enumeration value="UUID"/>
+      <xs:enumeration value="AUTO"/> 
+    </xs:restriction> 
+  </xs:simpleType>
+
+  <xs:simpleType name="node-type">
+    <xs:restriction base="xs:token">
+      <xs:enumeration value="ATTRIBUTE"/>
+      <xs:enumeration value="ELEMENT"/>
+      <xs:enumeration value="TEXT"/> 
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="field">
+    <xs:attribute name="name" type="xs:NMTOKEN" use="required" />
+    <xs:attribute name="type" type="xs:NMTOKEN" default="string" use="required" />
+    <xs:attribute name="node" type="oxm:node-type" use="required" />
+    <xs:attribute name="xml-name" type="xs:NMTOKEN" use="optional" />
+    <xs:attribute name="id" type="xs:boolean" default="false" />
+    <xs:attribute name="id-generator" type="oxm:generator-strategy" use="optional" default="AUTO" />
+    <xs:attribute name="direct" type="xs:boolean" default="true" />
+    <xs:attribute name="nillable" type="xs:boolean" default="false" />
+    <xs:attribute name="required" type="xs:boolean" default="false" />
+    <xs:attribute name="collection" type="xs:boolean" default="false" />
+    <xs:attribute name="get-method" type="xs:NMTOKEN" />
+    <xs:attribute name="set-method" type="xs:NMTOKEN" />
+    <xs:attribute name="prefix" type="xs:string" />
+    <xs:attribute name="wrapper" type="xs:string" use="optional" />
+  </xs:complexType>
+  
+  <xs:complexType name="namespace">
+    <xs:attribute name="url" type="xs:NMTOKEN" use="required"/>
+    <xs:attribute name="prefix" type="xs:NMTOKEN" use="optional"/>
+  </xs:complexType>
+  
+  <xs:complexType name="namespaces">
+    <xs:sequence>
+      <xs:element name="index" type="oxm:namespace" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
