@@ -118,9 +118,16 @@ class MappingException extends OXMException
         return new self("No mapping found for field '$fieldName' on class '$className'.");
     }
 
-    public static function fileMappingDriversRequiresConfiguredDirectoryPath($path)
+    public static function fileMappingDriversRequiresConfiguredDirectoryPath($path = null)
     {
-        return new self("File mapping driver requires configured directory path '$path'");
+        if ( ! empty($path)) {
+            $path = '[' . $path . ']';
+        }
+
+        return new self(
+            'File mapping drivers must have a valid directory path, ' .
+            'however the given path ' . $path . ' seems to be incorrect!'
+        );
     }
 
     /**
@@ -149,6 +156,10 @@ class MappingException extends OXMException
     public static function classIsNotAValidXmlEntity($className)
     {
         return new self('Class '.$className.' is not a valid xml entity.');
+    }
+    public static function classIsNotAValidXmlEntityOrXmlMappedSuperClass($className)
+    {
+        return new self('Class '.$className.' is not a valid xml entity or xml mapped super class.');
     }
 
     public static function propertyTypeIsRequired($className, $propertyName)

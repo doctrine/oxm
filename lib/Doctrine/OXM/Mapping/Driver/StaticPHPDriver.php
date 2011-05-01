@@ -20,6 +20,7 @@
 namespace Doctrine\OXM\Mapping\Driver;
 
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\MappingException;
 
 /**
  *
@@ -29,31 +30,48 @@ use Doctrine\OXM\Mapping\ClassMetadataInfo;
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class StaticPHPDriver extends AbstractFileDriver
+class StaticPHPDriver implements Driver
 {
     /**
-     * Whether the class with the specified name should have its metadata loaded.
-     * This is only the case if it is either mapped as an XmlEntity
+     * Paths of entity directories.
      *
-     * @param string $className
-     * @return boolean
+     * @var array
      */
-    function isTransient($className)
+    private $_paths = array();
+
+    /**
+     * Map of all class names.
+     *
+     * @var array
+     */
+    private $_classNames;
+
+    /**
+     * The file extension of mapping documents
+     *
+     * @var string
+     */
+    private $_fileExtension = '.php';
+
+    public function __construct($paths)
     {
-        // TODO: Implement isTransient() method.
-        throw new \Exception("Not yet implemented");
+        $this->addPaths((array) $paths);
     }
 
+    public function addPaths(array $paths)
+    {
+        $this->_paths = array_unique(array_merge($this->_paths, $paths));
+    }
 
     /**
      * Loads the metadata for the specified class into the provided container.
      *
      * @param string $className
-     * @param Mapping $mapping
+     * @param Mapping $metadata
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $mapping)
+    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
     {
-        call_user_func_array(array($className, 'loadMapping'), array($mapping));
+        call_user_func_array(array($className, 'loadMetadata'), array($metadata));
     }
 
     /**
@@ -75,8 +93,8 @@ class StaticPHPDriver extends AbstractFileDriver
         $includedFiles = array();
 
         foreach ($this->_paths as $path) {
-            if ( ! is_dir($path)) {
-                throw MappingException::fileMappingDriversRequireConfiguredDirectoryPath($path);
+            if (!is_dir($path)) {
+                throw MappingException::fileMappingDriversRequiresConfiguredDirectoryPath($path);
             }
 
             $iterator = new \RecursiveIteratorIterator(
@@ -100,7 +118,7 @@ class StaticPHPDriver extends AbstractFileDriver
         foreach ($declared as $className) {
             $rc = new \ReflectionClass($className);
             $sourceFile = $rc->getFileName();
-            if (in_array($sourceFile, $includedFiles) && ! $this->isTransient($className)) {
+            if (in_array($sourceFile, $includedFiles) && !$this->isTransient($className)) {
                 $classes[] = $className;
             }
         }
@@ -110,5 +128,11 @@ class StaticPHPDriver extends AbstractFileDriver
         return $classes;
     }
 
-
+    /**
+     * {@inheritdoc}
+     */
+    public function isTransient($className)
+    {
+        return method_exists($className, 'loadMetadata') ? false : true;
+    }
 }

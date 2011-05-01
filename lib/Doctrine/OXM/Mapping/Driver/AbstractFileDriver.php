@@ -20,6 +20,7 @@
 namespace Doctrine\OXM\Mapping\Driver;
 
 use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
+use Doctrine\OXM\Mapping\MappingException;
 
 /**
  *
@@ -96,4 +97,105 @@ abstract class AbstractFileDriver implements DriverInterface
     {
         $this->_fileExtension = $fileExtension;
     }
+
+
+    /**
+     * Get the element of schema meta data for the class from the mapping file.
+     * This will lazily load the mapping file if it is not loaded yet
+     *
+     * @return array $element  The element of schema meta data
+     */
+    public function getElement($className)
+    {
+        $result = $this->_loadMappingFile($this->_findMappingFile($className));
+
+        return $result[$className];
+    }
+
+    /**
+     * Whether the class with the specified name should have its metadata loaded.
+     * This is only the case if it is either mapped as an Entity or a
+     * MappedSuperclass.
+     *
+     * @param string $className
+     * @return boolean
+     */
+    public function isTransient($className)
+    {
+        $fileName = str_replace('\\', '.', $className) . $this->_fileExtension;
+
+        // Check whether file exists
+        foreach ((array) $this->_paths as $path) {
+            if (file_exists($path . DIRECTORY_SEPARATOR . $fileName)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets the names of all mapped classes known to this driver.
+     *
+     * @return array The names of all mapped classes known to this driver.
+     */
+    public function getAllClassNames()
+    {
+        $classes = array();
+
+        if ($this->_paths) {
+            foreach ((array) $this->_paths as $path) {
+                if ( ! is_dir($path)) {
+                    throw MappingException::fileMappingDriversRequiresConfiguredDirectoryPath($path);
+                }
+
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($path),
+                    \RecursiveIteratorIterator::LEAVES_ONLY
+                );
+
+                foreach ($iterator as $file) {
+                    if (($fileName = $file->getBasename($this->_fileExtension)) == $file->getBasename()) {
+                        continue;
+                    }
+
+                    // NOTE: All files found here means classes are not transient!
+                    $classes[] = str_replace('.', '\\', $fileName);
+                }
+            }
+        }
+
+        return $classes;
+    }
+
+    /**
+     * Finds the mapping file for the class with the given name by searching
+     * through the configured paths.
+     *
+     * @param $className
+     * @return string The (absolute) file name.
+     * @throws MappingException
+     */
+    protected function _findMappingFile($className)
+    {
+        $fileName = str_replace('\\', '.', $className) . $this->_fileExtension;
+
+        // Check whether file exists
+        foreach ((array) $this->_paths as $path) {
+            if (file_exists($path . DIRECTORY_SEPARATOR . $fileName)) {
+                return $path . DIRECTORY_SEPARATOR . $fileName;
+            }
+        }
+
+        throw MappingException::mappingFileNotFound($className, $fileName);
+    }
+
+    /**
+     * Loads a mapping file with the given name and returns a map
+     * from class/entity names to their corresponding elements.
+     *
+     * @param string $file The mapping file to load.
+     * @return array
+     */
+    abstract protected function _loadMappingFile($file);
 }

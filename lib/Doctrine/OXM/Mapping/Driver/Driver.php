@@ -36,9 +36,9 @@ interface Driver
      * Loads the mapping for the specified class into the provided container.
      *
      * @param string $className
-     * @param Mapping $mapping
+     * @param Mapping $metadata
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $mapping);
+    public function loadMetadataForClass($className, ClassMetadataInfo $metadata);
 
     /**
      * Gets the names of all mapped classes known to this driver.

@@ -59,9 +59,9 @@ class YAMLDriver extends AbstractFileDriver
      * Loads the mapping for the specified class into the provided container.
      *
      * @param string $className
-     * @param Mapping $mapping
+     * @param Mapping $metadata
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $mapping)
+    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
     {
         // TODO: Implement loadMappingForClass() method.
         throw new \Exception("Not yet implemented");

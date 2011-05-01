@@ -17,9 +17,8 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Mapping\Metadata\Driver;
+namespace Doctrine\OXM\Mapping\Driver;
 
-use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
 
 /**
@@ -30,31 +29,11 @@ use Doctrine\OXM\Mapping\ClassMetadataInfo;
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class PHPDriver implements DriverInterface
+class PHPDriver extends AbstractFileDriver
 {
-    /**
-     * Whether the class with the specified name should have its metadata loaded.
-     * This is only the case if it is either mapped as an XmlEntity
-     *
-     * @param string $className
-     * @return boolean
-     */
-    function isTransient($className)
-    {
-        // TODO: Implement isTransient() method.
-        throw new \Exception("Not yet implemented");
-    }
 
-    /**
-     * Gets the names of all mapped classes known to this driver.
-     *
-     * @return array The names of all mapped classes known to this driver.
-     */
-    public function getAllClassNames()
-    {
-        // TODO: Implement getAllClassNames() method.
-        throw new \Exception("Not yet implemented");
-    }
+    protected $_fileExtension = '.php';
+    protected $_metadata;
 
     /**
      * Loads the mapping for the specified class into the provided container.
@@ -62,10 +41,15 @@ class PHPDriver implements DriverInterface
      * @param string $className
      * @param Mapping $mapping
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $mapping)
+    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
     {
-        // TODO: Implement loadMappingForClass() method.
-        throw new \Exception("Not yet implemented");
+        $this->_metadata = $metadata;
+        $this->_loadMappingFile($this->_findMappingFile($className));
     }
 
+    protected function _loadMappingFile($file)
+    {
+        $metadata = $this->_metadata;
+        include $file;
+    }
 }
