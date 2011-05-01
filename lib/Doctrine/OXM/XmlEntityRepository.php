@@ -117,7 +117,7 @@ class XmlEntityRepository implements ObjectRepository
             if (!$this->class->isVersioned) {
                 throw OptimisticLockException::notVersioned($this->entityName);
             }
-            $entity = $this->xem->getUnitOfWork()->getEntityPersister($this->entityName)->load($id);
+            $entity = $this->xem->getUnitOfWork()->getXmlEntityPersister($this->entityName)->load($id);
 
             $this->xem->getUnitOfWork()->lock($entity, $lockMode, $lockVersion);
 
