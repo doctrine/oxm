@@ -46,7 +46,7 @@ class XmlDriver extends AbstractFileDriver
     public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
     {
         $xmlRoot = $this->getElement($className);
-
+        
         if ($xmlRoot->getName() == 'entity') {
             if (isset($xmlRoot['root']) && $xmlRoot['root'] == "true") {
                 $metadata->isRoot = true;
@@ -95,15 +95,15 @@ class XmlDriver extends AbstractFileDriver
                 $mapping = array(
                     'fieldName' => (string)$fieldMapping['name'],
                     'type' => (string)$fieldMapping['type'],
-                    'node' => constant('Doctrine\OXM\Mapping\ClassMetadata::XML_' . (string)$fieldMapping['node']),
+                    'node' => constant('Doctrine\OXM\Mapping\ClassMetadata::XML_' . strtoupper((string)$fieldMapping['node'])),
                 );
 
                 if (isset($fieldMapping['xml-name'])) {
                     $mapping['name'] = (string)$fieldMapping['xml-name'];
                 }
 
-                if (isset($fieldMapping['id'])) {
-                    $mapping['id'] = (boolean)$fieldMapping['id'];
+                if (isset($fieldMapping['identifier'])) {
+                    $mapping['id'] = (boolean)$fieldMapping['identifier'];
                 }
 
                 if (isset($fieldMapping['direct'])) {
@@ -159,14 +159,16 @@ class XmlDriver extends AbstractFileDriver
 
         if (isset($xmlElement->entity)) {
             foreach ($xmlElement->entity as $xmlEntityElement) {
-                $className = (string) $xmlEntityElement['name'];
+                $className = (string) $xmlEntityElement['class'];
                 $result[$className] = $xmlEntityElement;
             }
         } elseif (isset($xmlElement->{'mapped-superclass'})) {
             foreach ($xmlElement->{'mapped-superclass'} as $xmlMappedSuperClass) {
-                $className = (string) $xmlMappedSuperClass['name'];
+                $className = (string) $xmlMappedSuperClass['class'];
                 $result[$className] = $xmlMappedSuperClass;
             }
         }
+
+        return $result;
     }
 }

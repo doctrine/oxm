@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/oxm/doctrine-mapping"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://doctrine-project.org/schemas/oxm/doctrine-mapping
+                          http://www.doctrine-project.org/schemas/oxm/doctrine-mapping.xsd">
+
+    <entity class="Doctrine\Tests\OXM\Mapping\User" xml-name="cms-user" root="true">
+
+        <namespaces>
+            <namespace url="http://www.schema.com/foo" prefix="foo"/>
+            <namespace url="http://www.schema.com/bar" prefix="bar"/>
+        </namespaces>
+
+        <lifecycle-callbacks>
+            <lifecycle-callback type="prePersist" method="doStuffOnPrePersist"/>
+            <lifecycle-callback type="prePersist" method="doOtherStuffOnPrePersistToo"/>
+            <lifecycle-callback type="postPersist" method="doStuffOnPostPersist"/>
+            <lifecycle-callback type="preMarshal" method="doStuffOnPreMarshal"/>
+        </lifecycle-callbacks>
+
+        <field name="id" type="string" node="ATTRIBUTE" identifier="true" />
+        <field name="name" type="string" node="TEXT" required="true" get-method="getUsername" set-method="setUsername" />
+        <field name="comments" xml-name="comment" collection="true" type="string" node="TEXT" wrapper="comments" />
+    </entity>
+
+</doctrine-mapping>

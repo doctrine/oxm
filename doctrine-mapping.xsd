@@ -56,7 +56,7 @@
       <xs:element name="lifecycle-callbacks" type="oxm:lifecycle-callbacks" minOccurs="0" maxOccurs="1" />
       <xs:element name="field" type="oxm:field" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="class" type="xs:string" use="required" />
     <xs:attribute name="xml-name" type="xs:string" use="optional" />
     <xs:attribute name="root" type="xs:boolean" use="optional" />
     <xs:attribute name="repository-class" type="xs:string"/>
@@ -96,10 +96,10 @@
 
   <xs:complexType name="field">
     <xs:attribute name="name" type="xs:NMTOKEN" use="required" />
-    <xs:attribute name="type" type="xs:NMTOKEN" default="string" use="required" />
+    <xs:attribute name="type" type="xs:NMTOKEN" use="required" />
     <xs:attribute name="node" type="oxm:node-type" use="required" />
     <xs:attribute name="xml-name" type="xs:NMTOKEN" use="optional" />
-    <xs:attribute name="id" type="xs:boolean" default="false" />
+    <xs:attribute name="identifier" type="xs:boolean" default="false" />
     <xs:attribute name="id-generator" type="oxm:generator-strategy" use="optional" default="AUTO" />
     <xs:attribute name="direct" type="xs:boolean" default="true" />
     <xs:attribute name="nillable" type="xs:boolean" default="false" />
@@ -112,13 +112,13 @@
   </xs:complexType>
   
   <xs:complexType name="namespace">
-    <xs:attribute name="url" type="xs:NMTOKEN" use="required"/>
-    <xs:attribute name="prefix" type="xs:NMTOKEN" use="optional"/>
+    <xs:attribute name="url" type="xs:string" use="required"/>
+    <xs:attribute name="prefix" type="xs:string" use="optional"/>
   </xs:complexType>
   
   <xs:complexType name="namespaces">
     <xs:sequence>
-      <xs:element name="index" type="oxm:namespace" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="namespace" type="oxm:namespace" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 

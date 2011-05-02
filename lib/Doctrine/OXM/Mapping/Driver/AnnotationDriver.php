@@ -195,6 +195,9 @@ class AnnotationDriver implements DriverInterface
             if (isset($referenceAnnot->entityName)) {
                 $mapping['references']  = $referenceAnnot->entityName;
             }
+
+            // todo add Id Generator strategy support
+
             foreach ($this->reader->getPropertyAnnotations($property) as $fieldAnnot) {
                 if ($fieldAnnot instanceof \Doctrine\OXM\Mapping\XmlField) {
                     if ($fieldAnnot->type == null) {

@@ -19,43 +19,18 @@
 
 namespace Doctrine\Tests\OXM\Mapping;
 
+use Doctrine\OXM\Mapping\ClassMetadata;
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\Driver\StaticPHPDriver;
 
-class MappingTest extends \PHPUnit_Framework_TestCase
+class StaticPHPMappingDriverTest extends AbstractMappingDriverTest
 {
     /**
-     * @var \Doctrine\OXM\Mapping\ClassMetadataInfo
+     * @return \Doctrine\OXM\Mapping\Driver\Driver
      */
-    private $mapping;
-
-    public function setUp()
+    protected function _loadDriver()
     {
-        $this->mapping = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\User');
+        return new StaticPHPDriver(__DIR__ . DIRECTORY_SEPARATOR . 'php');
     }
 
-
-    public function testMappingInitialization()
-    {
-//        print_r($this->mapping);
-        $this->assertEquals('User', $this->mapping->getReflectionClass()->getShortName());
-    }
-
-    /**
-     * @test
-     */
-    public function itShouldRecordXmlNamespacesProperly()
-    {
-        $this->mapping->setXmlNamespaces(array(array(
-            'url' => 'http://example.com/schema',
-        )));
-
-//        $this->assertEquals('http://example.com', $this->mapping->getXmlNamespaces());
-    }
 }
-
-class User
-{
-    private $id;
-}
-
-
