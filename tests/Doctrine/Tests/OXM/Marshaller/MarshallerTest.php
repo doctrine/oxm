@@ -25,12 +25,12 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\OXM\Marshaller\XmlMarshaller,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\Tests\OXM\Entities\User,
-    \Doctrine\Tests\OXM\Entities\Simple,
-    \Doctrine\Tests\OXM\Entities\SimpleChild,
-    \Doctrine\Tests\OXM\Entities\SimpleChildExtendsWithChildField,
-    \Doctrine\Tests\OXM\Entities\SimpleChildExtendsWithParentField,
-    \Doctrine\Tests\OXM\Entities\SimpleWithField,
-    \Doctrine\Tests\OXM\Entities\SimpleCompound,
+    \Doctrine\Tests\OXM\Entities\Simple\Simple,
+    \Doctrine\Tests\OXM\Entities\Simple\SimpleChild,
+    \Doctrine\Tests\OXM\Entities\Simple\SimpleChildExtendsWithChildField,
+    \Doctrine\Tests\OXM\Entities\Simple\SimpleChildExtendsWithParentField,
+    \Doctrine\Tests\OXM\Entities\Simple\SimpleWithField,
+    \Doctrine\Tests\OXM\Entities\Simple\SimpleCompound,
     \Doctrine\Tests\OXM\Entities\Order,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
     \Doctrine\Tests\OXM\Entities\Address;
@@ -53,7 +53,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $config = new Configuration();
-        $config->setMetadataDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver("tests/Doctrine/Tests/OXM/Entities"));
         $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
 
         $this->metadataFactory = new ClassMetadataFactory($config);
