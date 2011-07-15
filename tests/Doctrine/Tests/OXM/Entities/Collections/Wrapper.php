@@ -19,7 +19,10 @@
 
 namespace Doctrine\Tests\OXM\Entities\Collections;
 
-/** @XmlEntity @XmlNamespace(url="http://www.foo.bar.baz.com/schema", prefix="prfx") */
+/**
+ * @XmlEntity
+ * @XmlNamespace(url="http://www.foo.bar.baz.com/schema", prefix="prfx")
+ */
 class Wrapper
 {
     /** @var array @XmlText(type="string", collection=true, wrapper="foo") */

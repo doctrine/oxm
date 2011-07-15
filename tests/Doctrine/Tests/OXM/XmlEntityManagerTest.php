@@ -26,8 +26,7 @@ use \Doctrine\OXM\Mapping\ClassMetadataInfo,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\Common\EventManager,
     \Doctrine\Tests\OXM\Entities\Order,
-    \Doctrine\Tests\OXM\Entities\Simple\Simple,
-    \Doctrine\Tests\OXM\Entities\Simple\SimpleWithField;
+    \Doctrine\Tests\OXM\Entities\SimpleWithField;
 
 class XmlEntityManagerTest extends OxmTestCase
 {
@@ -149,7 +148,7 @@ class XmlEntityManagerTest extends OxmTestCase
         $this->xem->flush();
 
         for ($i = 1; $i <= 10; $i++) {
-            $filepath = __DIR__ . "/../Workspace/Doctrine/Tests/OXM/Entities/Simple/SimpleWithField/$i.xml";
+            $filepath = __DIR__ . "/../Workspace/Doctrine/Tests/OXM/Entities/SimpleWithField/$i.xml";
             $this->assertFileExists($filepath);
             $this->assertXmlStringEqualsXmlFile($filepath, '<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="' . $i . '"/>');
             unlink($filepath);
@@ -166,7 +165,7 @@ class XmlEntityManagerTest extends OxmTestCase
 
             $this->xem->flush();
 
-            $filepath = __DIR__ . "/../Workspace/Doctrine/Tests/OXM/Entities/Simple/SimpleWithField/$i.xml";
+            $filepath = __DIR__ . "/../Workspace/Doctrine/Tests/OXM/Entities/SimpleWithField/$i.xml";
             $this->assertFileExists($filepath);
             $this->assertXmlStringEqualsXmlFile($filepath, '<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="' . $i . '"/>');
             unlink($filepath);

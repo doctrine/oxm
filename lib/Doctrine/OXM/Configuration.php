@@ -21,6 +21,10 @@ namespace Doctrine\OXM;
 
 use Doctrine\Common\Cache\Cache;
 use Doctrine\OXM\Mapping\Driver\Driver;
+use Doctrine\OXM\Mapping\Driver\AnnotationDriver;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Cache\ArrayCache;
 
 /**
  * Configuration container for all configuration options of Doctrine OXM.
@@ -127,10 +131,28 @@ class Configuration
      */
     public function newDefaultAnnotationDriver($paths = array())
     {
-        $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-        $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
-        
-        return new \Doctrine\OXM\Mapping\Driver\AnnotationDriver($reader, (array)$paths);
+        if (version_compare(\Doctrine\Common\Version::VERSION, '3.0.0-DEV', '>=')) {
+            // Register the ORM Annotations in the AnnotationRegistry
+            AnnotationRegistry::registerFile(__DIR__ . '/Mapping/Driver/DoctrineAnnotations.php');
+
+            $reader = new AnnotationReader();
+            $reader = new \Doctrine\Common\Annotations\CachedReader($reader, new ArrayCache());
+        } else if (version_compare(\Doctrine\Common\Version::VERSION, '2.1.0-DEV', '>=')) {
+            // Register the ORM Annotations in the AnnotationRegistry
+            AnnotationRegistry::registerFile(__DIR__ . '/Mapping/Driver/DoctrineAnnotations.php');
+
+            $reader = new AnnotationReader();
+            $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
+            $reader->setIgnoreNotImportedAnnotations(true);
+            $reader->setEnableParsePhpImports(false);
+            $reader = new \Doctrine\Common\Annotations\CachedReader(
+                new \Doctrine\Common\Annotations\IndexedReader($reader), new ArrayCache()
+            );
+        } else {
+            $reader = new AnnotationReader();
+            $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
+        }
+        return new AnnotationDriver($reader, (array)$paths);
     }
 
     /**
