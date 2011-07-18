@@ -26,6 +26,7 @@ use Doctrine\Common\NotifyPropertyChanged;
 use Doctrine\Common\PropertyChangedListener;
 use Doctrine\OXM\Mapping\ClassMetadata;
 use Doctrine\OXM\Event;
+use Doctrine\OXM\Proxy\Proxy;
 
 /**
  * The UnitOfWork is responsible for tracking changes to objects during an
@@ -296,7 +297,7 @@ class UnitOfWork implements PropertyChangedListener
 
 
         foreach ($this->entityDeletions as $oid => $xmlEntity) {
-            if (get_class($xmlEntity) == $className && $xmlEntity instanceof $className) {
+            if (get_class($xmlEntity) == $className && $xmlEntity instanceof Proxy && $xmlEntity instanceof $className) {
 //                if ( ! $class->isEmbeddedDocument) {
                 $persister->delete($xmlEntity, $options);
 //                }
@@ -349,7 +350,7 @@ class UnitOfWork implements PropertyChangedListener
         $hasPostUpdateListeners = $this->evm->hasListeners(Events::postUpdate);
 
         foreach ($this->entityUpdates as $oid => $xmlEntity) {
-            if (get_class($xmlEntity) == $className && $xmlEntity instanceof $className) {
+            if (get_class($xmlEntity) == $className && $xmlEntity  instanceof Proxy && $xmlEntity instanceof $className) {
 //                if ( ! $class->isEmbeddedDocument) {
                 if ($hasPreUpdateLifecycleCallbacks) {
                     $class->invokeLifecycleCallbacks(Events::preUpdate, $xmlEntity);
@@ -378,7 +379,32 @@ class UnitOfWork implements PropertyChangedListener
 
     public function refresh($xmlEntity)
     {
-        
+        $visited = array();
+        $this->doRefresh($xmlEntity, $visited);
+    }
+    
+    /**
+     * Executes a refresh operation on an xml-entity.
+     *
+     * @param object $xmlEntity The xml-entity to refresh.
+     * @param array $visited The already visited xml-entities during cascades.
+     * @throws InvalidArgumentException If the xml-entity is not MANAGED.
+     */
+    private function doRefresh($xmlEntity, array &$visited)
+    {
+        $oid = spl_object_hash($xmlEntity);
+        if (isset($visited[$oid])) {
+            return; // Prevent infinite recursion
+        }
+
+        $visited[$oid] = $xmlEntity; // mark visited
+
+        $class = $this->xem->getClassMetadata(get_class($xmlEntity));
+        if ($this->getXmlEntityState($xmlEntity) == self::STATE_MANAGED) {
+            // @todo refresh xml-entity
+        } else {
+            throw new \InvalidArgumentException("XmlEntity is not MANAGED.");
+        }
     }
 
 

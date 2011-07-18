@@ -117,6 +117,71 @@ class Configuration
         return isset($this->_attributes['storagePath']) ?
                 $this->_attributes['storagePath'] : null;
     }
+    
+    /**
+     * Sets the directory where Doctrine generates any necessary proxy class files.
+     *
+     * @param string $dir
+     */
+    public function setProxyDir($dir)
+    {
+        $this->attributes['proxyDir'] = $dir;
+    }
+
+    /**
+     * Gets the directory where Doctrine generates any necessary proxy class files.
+     *
+     * @return string
+     */
+    public function getProxyDir()
+    {
+        return isset($this->attributes['proxyDir']) ?
+                $this->attributes['proxyDir'] : null;
+    }
+
+    /**
+     * Gets a boolean flag that indicates whether proxy classes should always be regenerated
+     * during each script execution.
+     *
+     * @return boolean
+     */
+    public function getAutoGenerateProxyClasses()
+    {
+        return isset($this->attributes['autoGenerateProxyClasses']) ?
+                $this->attributes['autoGenerateProxyClasses'] : true;
+    }
+
+    /**
+     * Sets a boolean flag that indicates whether proxy classes should always be regenerated
+     * during each script execution.
+     *
+     * @param boolean $bool
+     */
+    public function setAutoGenerateProxyClasses($bool)
+    {
+        $this->attributes['autoGenerateProxyClasses'] = $bool;
+    }
+
+    /**
+     * Gets the namespace where proxy classes reside.
+     * 
+     * @return string
+     */
+    public function getProxyNamespace()
+    {
+        return isset($this->attributes['proxyNamespace']) ?
+                $this->attributes['proxyNamespace'] : null;
+    }
+
+    /**
+     * Sets the namespace where proxy classes reside.
+     * 
+     * @param string $ns
+     */
+    public function setProxyNamespace($ns)
+    {
+        $this->attributes['proxyNamespace'] = $ns;
+    }
 
 
     /**
