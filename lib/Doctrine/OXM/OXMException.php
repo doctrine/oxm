@@ -89,4 +89,9 @@ class OXMException extends Exception
     {
         return new self("The XmlEntityManager is closed");
     }
+    
+    public static function xmlEntityNotFound($className, $identifier)
+    {
+        return new self(sprintf('The "%s" XmlEntity with identifier "%s" could not be found.', $className, $identifier));
+    }
 }
