@@ -56,6 +56,8 @@ class ConsoleRunner
         $cli->addCommands(array(
             // OXM Commands
             new \Doctrine\OXM\Tools\Console\Command\ClearCache\MetadataCommand(),
+            new \Doctrine\OXM\Tools\Console\Command\GenerateProxiesCommand(),
+            new \Doctrine\OXM\Tools\Console\Command\GenerateRepositoriesCommand(),
         ));
     }
 }
