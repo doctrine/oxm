@@ -61,7 +61,7 @@ class <className> extends XmlEntityRepository
 
     public function writeXmlEntityRepositoryClass($fullClassName, $outputDirectory)
     {
-        $code = $this->generateDocumentRepositoryClass($fullClassName);
+        $code = $this->generateXmlEntityRepositoryClass($fullClassName);
 
         $path = $outputDirectory . DIRECTORY_SEPARATOR
               . str_replace('\\', \DIRECTORY_SEPARATOR, $fullClassName) . '.php';
