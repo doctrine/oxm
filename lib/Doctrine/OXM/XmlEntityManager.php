@@ -115,6 +115,7 @@ class XmlEntityManager implements ObjectManager
         );
     }
     
+    
     /**
      * Gets the proxy factory used by the XmlEntityManager to create xml-entity proxies.
      *

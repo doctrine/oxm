@@ -94,4 +94,14 @@ class OXMException extends Exception
     {
         return new self(sprintf('The "%s" XmlEntity with identifier "%s" could not be found.', $className, $identifier));
     }
+    
+    public static function fileMappingDriversRequireConfiguredDirectoryPath()
+    {
+        return new self('File mapping drivers must have a valid directory path, however the given path seems to be incorrect!');
+    }
+    
+    public static function mappingNotFound($className, $fieldName)
+    {
+        return new self("No mapping found for field '$fieldName' in class '$className'.");
+    }
 }

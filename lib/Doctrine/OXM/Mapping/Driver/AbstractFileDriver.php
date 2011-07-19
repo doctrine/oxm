@@ -107,9 +107,11 @@ abstract class AbstractFileDriver implements DriverInterface
      */
     public function getElement($className)
     {
-        $result = $this->loadMappingFile($this->findMappingFile($className));
-
-        return $result[$className];
+        if ($file = $this->findMappingFile($className)) {
+            $result = $this->loadMappingFile($file);
+            return $result[$className];
+        }
+        return false;
     }
 
     /**
@@ -168,6 +170,8 @@ abstract class AbstractFileDriver implements DriverInterface
         return $classes;
     }
 
+    
+    
     /**
      * Finds the mapping file for the class with the given name by searching
      * through the configured paths.
@@ -186,8 +190,9 @@ abstract class AbstractFileDriver implements DriverInterface
                 return $path . DIRECTORY_SEPARATOR . $fileName;
             }
         }
+        return false;
 
-        throw MappingException::mappingFileNotFound($className, $fileName);
+        //throw MappingException::mappingFileNotFound($className, $fileName);
     }
 
     /**

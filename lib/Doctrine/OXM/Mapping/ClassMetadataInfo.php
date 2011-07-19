@@ -903,4 +903,19 @@ class ClassMetadataInfo implements BaseClassMetadata
     {
         return $this->xmlNamespaces;
     }
+    
+    public function getFieldNames()
+    {
+        throw new \BadMethodCallException(__METHOD__.'() is not implemented yet.');
+    }
+
+    public function getAssociationNames()
+    {
+        throw new \BadMethodCallException(__METHOD__.'() is not implemented yet.');
+    }
+
+    public function getAssociationTargetClass($assocName)
+    {
+        throw new \BadMethodCallException(__METHOD__.'($assocName) is not implemented yet.');
+    }
 }

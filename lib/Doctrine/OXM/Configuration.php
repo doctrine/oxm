@@ -101,22 +101,22 @@ class Configuration
         $this->_attributes['marshallerclassName'] = $marshallerClassName;
     }
 
-    /**
-     *
-     */
-    public function setStoragePath($path)
-    {
-        $this->_attributes['storagePath'] = $path;
-    }
-
-    /**
-     * 
-     */
-    public function getStoragePath()
-    {
-        return isset($this->_attributes['storagePath']) ?
-                $this->_attributes['storagePath'] : null;
-    }
+//    /**
+//     *
+//     */
+//    public function setStoragePath($path)
+//    {
+//        $this->_attributes['storagePath'] = $path;
+//    }
+//
+//    /**
+//     * 
+//     */
+//    public function getStoragePath()
+//    {
+//        return isset($this->_attributes['storagePath']) ?
+//                $this->_attributes['storagePath'] : null;
+//    }
     
     /**
      * Sets the directory where Doctrine generates any necessary proxy class files.
