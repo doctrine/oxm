@@ -152,7 +152,7 @@ class XmlDriver extends AbstractFileDriver
     }
 
 
-    protected function _loadMappingFile($file)
+    protected function loadMappingFile($file)
     {
         $result = array();
         $xmlElement = simplexml_load_file($file);
