@@ -32,8 +32,8 @@ use Doctrine\OXM\Mapping\ClassMetadataInfo;
 class PHPDriver extends AbstractFileDriver
 {
 
-    protected $_fileExtension = '.php';
-    protected $_metadata;
+    protected $fileExtension = '.php';
+    protected $metadata;
 
     /**
      * Loads the mapping for the specified class into the provided container.
@@ -43,13 +43,13 @@ class PHPDriver extends AbstractFileDriver
      */
     public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
     {
-        $this->_metadata = $metadata;
-        $this->_loadMappingFile($this->_findMappingFile($className));
+        $this->metadata = $metadata;
+        $this->loadMappingFile($this->findMappingFile($className));
     }
 
     protected function _loadMappingFile($file)
     {
-        $metadata = $this->_metadata;
+        $metadata = $this->metadata;
         include $file;
     }
 }

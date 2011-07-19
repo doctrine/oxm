@@ -38,7 +38,7 @@ class XmlDriver extends AbstractFileDriver
     /**
      * {@inheritdoc}
      */
-    protected $_fileExtension = '.dcm.xml';
+    protected $fileExtension = '.dcm.xml';
 
     /**
      * {@inheritdoc}

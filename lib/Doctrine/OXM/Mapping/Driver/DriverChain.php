@@ -40,7 +40,7 @@ class DriverChain implements Driver
     /**
      * @var array
      */
-    private $_drivers = array();
+    private $drivers = array();
 
     /**
      * Add a nested driver.
@@ -50,7 +50,7 @@ class DriverChain implements Driver
      */
     public function addDriver(Driver $nestedDriver, $namespace)
     {
-        $this->_drivers[$namespace] = $nestedDriver;
+        $this->drivers[$namespace] = $nestedDriver;
     }
 
     /**
@@ -60,7 +60,7 @@ class DriverChain implements Driver
      */
     public function getDrivers()
     {
-        return $this->_drivers;
+        return $this->drivers;
     }
 
     /**
@@ -71,7 +71,7 @@ class DriverChain implements Driver
      */
     public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
     {
-        foreach ($this->_drivers as $namespace => $driver) {
+        foreach ($this->drivers as $namespace => $driver) {
             if (strpos($className, $namespace) === 0) {
                 $driver->loadMetadataForClass($className, $metadata);
                 return;
@@ -89,7 +89,7 @@ class DriverChain implements Driver
     public function getAllClassNames()
     {
         $classNames = array();
-        foreach ($this->_drivers as $namespace => $driver) {
+        foreach ($this->drivers as $namespace => $driver) {
             $driverClasses = $driver->getAllClassNames();
             foreach ($driverClasses AS $className) {
                 if (strpos($className, $namespace) === 0) {
@@ -110,7 +110,7 @@ class DriverChain implements Driver
      */
     public function isTransient($className)
     {
-        foreach ($this->_drivers as $namespace => $driver) {
+        foreach ($this->drivers as $namespace => $driver) {
             if (strpos($className, $namespace) === 0) {
                 return $driver->isTransient($className);
             }
