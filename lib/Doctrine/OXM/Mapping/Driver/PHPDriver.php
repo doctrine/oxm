@@ -47,7 +47,7 @@ class PHPDriver extends AbstractFileDriver
         $this->loadMappingFile($this->findMappingFile($className));
     }
 
-    protected function _loadMappingFile($file)
+    protected function loadMappingFile($file)
     {
         $metadata = $this->metadata;
         include $file;

@@ -297,7 +297,7 @@ class UnitOfWork implements PropertyChangedListener
 
 
         foreach ($this->entityDeletions as $oid => $xmlEntity) {
-            if (get_class($xmlEntity) == $className && $xmlEntity instanceof Proxy && $xmlEntity instanceof $className) {
+            if (get_class($xmlEntity) == $className || $xmlEntity instanceof Proxy && $xmlEntity instanceof $className) {
 //                if ( ! $class->isEmbeddedDocument) {
                 $persister->delete($xmlEntity, $options);
 //                }
@@ -350,7 +350,7 @@ class UnitOfWork implements PropertyChangedListener
         $hasPostUpdateListeners = $this->evm->hasListeners(Events::postUpdate);
 
         foreach ($this->entityUpdates as $oid => $xmlEntity) {
-            if (get_class($xmlEntity) == $className && $xmlEntity  instanceof Proxy && $xmlEntity instanceof $className) {
+            if (get_class($xmlEntity) == $className || $xmlEntity  instanceof Proxy && $xmlEntity instanceof $className) {
 //                if ( ! $class->isEmbeddedDocument) {
                 if ($hasPreUpdateLifecycleCallbacks) {
                     $class->invokeLifecycleCallbacks(Events::preUpdate, $xmlEntity);
@@ -407,16 +407,61 @@ class UnitOfWork implements PropertyChangedListener
         }
     }
 
-
+    /**
+     * Detaches an xml-entity from the persistence management. It's persistence will
+     * no longer be managed by Doctrine.
+     *
+     * @param object $xmlEntity The xml-entity to detach.
+     */
     public function detach($xmlEntity)
     {
+        $visited = array();
+        $this->doDetach($xmlEntity, $visited);
+    }
+    
+    /**
+     * Executes a detach operation on the given xml-entity.
+     *
+     * @param object $xmlEntity
+     * @param array $visited
+     * @internal This method always considers xml-entities with an assigned identifier as DETACHED.
+     */
+    private function doDetach($xmlEntity, array &$visited)
+    {
+        $oid = spl_object_hash($xmlEntity);
+        if (isset($visited[$oid])) {
+            return; // Prevent infinite recursion
+        }
 
+        $visited[$oid] = $xmlEntity; // mark visited
+
+        switch ($this->getXmlEntityState($xmlEntity, self::STATE_DETACHED)) {
+            case self::STATE_MANAGED:
+                $this->removeFromIdentityMap($xmlEntity);
+                unset($this->entityIdentifiers[$oid], $this->entityUpdates[$oid],
+                        $this->entityDeletions[$oid], $this->entityIdentifiers[$oid],
+                        $this->entityStates[$oid], $this->originalEntityData[$oid]);
+                break;
+            case self::STATE_NEW:
+            case self::STATE_DETACHED:
+                return;
+        }
+
+        //$this->cascadeDetach($document, $visited);
     }
 
+    /**
+     * Merges the state of the given detached xml-entity into this UnitOfWork.
+     *
+     * @param object $xmlEntity
+     * @return object The managed copy of the xml-entity.
+     */
     public function merge($xmlEntity)
     {
         
     }
+    
+
 
     public function remove($xmlEntity)
     {

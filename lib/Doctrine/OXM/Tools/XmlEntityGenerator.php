@@ -20,27 +20,27 @@
 namespace Doctrine\OXM\Tools;
 
 use Doctrine\OXM\Mapping\ClassMetadataInfo,
-    Doctrine\OXM\Util\Inflector;
+    Doctrine\Common\Util\Inflector;
 
 /**
-* Generic class used to generate PHP5 xml-entity classes from ClassMetadataInfo instances
-*
-* [php]
-* $classes = $dm->getClassMetadataInfoFactory()->getAllMetadata();
-*
-* $generator = new \Doctrine\OXM\Tools\XmlEntityGenerator();
-* $generator->setGenerateAnnotations(true);
-* $generator->setGenerateStubMethods(true);
-* $generator->setRegenerateDocumentIfExists(false);
-* $generator->setUpdateDocumentIfExists(true);
-* $generator->generate($classes, '/path/to/generate/documents');
-*
-* @license http://www.opensource.org/licenses/lgpl-license.php LGPL
-* @link www.doctrine-project.org
-* @since 2.0
-* @version $Revision$
-* @author Igor Golovanov <igor.golovanov@gmail.com>
-*/
+ * Generic class used to generate PHP5 xml-entity classes from ClassMetadataInfo instances
+ *
+ *     [php]
+ *     $classes = $xem->getClassMetadataInfoFactory()->getAllMetadata();
+ *
+ *     $generator = new \Doctrine\OXM\MongoDB\Tools\XmlEntityGenerator();
+ *     $generator->setGenerateAnnotations(true);
+ *     $generator->setGenerateStubMethods(true);
+ *     $generator->setRegenerateXmlEntityIfExists(false);
+ *     $generator->setUpdateXmlEntityIfExists(true);
+ *     $generator->generate($classes, '/path/to/generate/xml-entitys');
+ *
+ * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @link    www.doctrine-project.org
+ * @since   1.0
+ * @version $Revision$
+ * @author  Igor Golovanov <igor.golovanov@gmail.com>
+ */
 class XmlEntityGenerator
 {
     /**
@@ -60,9 +60,9 @@ class XmlEntityGenerator
     private $numSpaces = 4;
 
     /** The actual spaces to use for indention */
-    private $spaces = ' ';
+    private $spaces = '    ';
 
-    /** The class all generated documents should extend */
+    /** The class all generated xml-entities should extend */
     private $classToExtend;
 
     /** Whether or not to generation annotations */
@@ -92,10 +92,10 @@ class XmlEntityGenerator
 
     private static $getMethodTemplate =
 '/**
-* <description>
-*
-* @return <variableType>$<variableName>
-*/
+ * <description>
+ *
+ * @return <variableType>$<variableName>
+ */
 public function <methodName>()
 {
 <spaces>return $this-><fieldName>;
@@ -103,10 +103,10 @@ public function <methodName>()
 
     private static $setMethodTemplate =
 '/**
-* <description>
-*
-* @param <variableType>$<variableName>
-*/
+ * <description>
+ *
+ * @param <variableType>$<variableName>
+ */
 public function <methodName>(<methodTypeHint>$<variableName>)
 {
 <spaces>$this-><fieldName> = $<variableName>;
@@ -114,10 +114,10 @@ public function <methodName>(<methodTypeHint>$<variableName>)
 
     private static $addMethodTemplate =
 '/**
-* <description>
-*
-* @param <variableType>$<variableName>
-*/
+ * <description>
+ *
+ * @param <variableType>$<variableName>
+ */
 public function <methodName>(<methodTypeHint>$<variableName>)
 {
 <spaces>$this-><fieldName>[] = $<variableName>;
@@ -138,12 +138,12 @@ public function <methodName>()
 ';
 
     /**
-* Generate and write document classes for the given array of ClassMetadataInfo instances
-*
-* @param array $metadatas
-* @param string $outputDirectory
-* @return void
-*/
+     * Generate and write xml-entity classes for the given array of ClassMetadataInfo instances
+     *
+     * @param array $metadatas
+     * @param string $outputDirectory 
+     * @return void
+     */
     public function generate(array $metadatas, $outputDirectory)
     {
         foreach ($metadatas as $metadata) {
@@ -152,12 +152,12 @@ public function <methodName>()
     }
 
     /**
-* Generated and write document class to disk for the given ClassMetadataInfo instance
-*
-* @param ClassMetadataInfo $metadata
-* @param string $outputDirectory
-* @return void
-*/
+     * Generated and write xml-entity class to disk for the given ClassMetadataInfo instance
+     *
+     * @param ClassMetadataInfo $metadata
+     * @param string $outputDirectory 
+     * @return void
+     */
     public function writeXmlEntityClass(ClassMetadataInfo $metadata, $outputDirectory)
     {
         $path = $outputDirectory . '/' . str_replace('\\', DIRECTORY_SEPARATOR, $metadata->name) . $this->extension;
@@ -174,43 +174,43 @@ public function <methodName>()
         }
 
         if ($this->backupExisting && file_exists($path)) {
-            $backupPath = dirname($path) . DIRECTORY_SEPARATOR . "~" . basename($path);
+            $backupPath = dirname($path) . DIRECTORY_SEPARATOR .  "~" . basename($path);
             if (!copy($path, $backupPath)) {
-                throw new \RuntimeException("Attempt to backup overwritten document file but copy operation failed.");
+                throw new \RuntimeException("Attempt to backup overwritten xml-entity file but copy operation failed.");
             }
         }
 
-        // If document doesn't exist or we're re-generating the documents entirely
+        // If xml-entity doesn't exist or we're re-generating the xml-entities entirely
         if ($this->isNew) {
-            file_put_contents($path, $this->generateDocumentClass($metadata));
-        // If document exists and we're allowed to update the document class
-        } else if ( ! $this->isNew && $this->updateDocumentIfExists) {
-            file_put_contents($path, $this->generateUpdatedDocumentClass($metadata, $path));
+            file_put_contents($path, $this->generateXmlEntityClass($metadata));
+        // If xml-entity exists and we're allowed to update the xml-entity class
+        } else if ( ! $this->isNew && $this->updateXmlEntityIfExists) {
+            file_put_contents($path, $this->generateUpdatedXmlEntityClass($metadata, $path));
         }
     }
 
     /**
-* Generate a PHP5 Doctrine 2 document class from the given ClassMetadataInfo instance
-*
-* @param ClassMetadataInfo $metadata
-* @return string $code
-*/
-    public function generateDocumentClass(ClassMetadataInfo $metadata)
+     * Generate a PHP5 Doctrine 2 xml-entity class from the given ClassMetadataInfo instance
+     *
+     * @param ClassMetadataInfo $metadata 
+     * @return string $code
+     */
+    public function generateXmlEntityClass(ClassMetadataInfo $metadata)
     {
         $placeHolders = array(
             '<namespace>',
             '<imports>',
-            '<documentAnnotation>',
-            '<documentClassName>',
-            '<documentBody>'
+            '<xmlEntityAnnotation>',
+            '<xmlEntityClassName>',
+            '<xmlEntityBody>'
         );
 
         $replacements = array(
-            $this->generateDocumentNamespace($metadata),
-            $this->generateDocumentImports($metadata),
-            $this->generateDocumentDocBlock($metadata),
-            $this->generateDocumentClassName($metadata),
-            $this->generateDocumentBody($metadata)
+            $this->generateXmlEntityNamespace($metadata),
+            $this->generateXmlEntityImports($metadata),
+            $this->generateXmlEntityDocBlock($metadata),
+            $this->generateXmlEntityClassName($metadata),
+            $this->generateXmlEntityBody($metadata)
         );
 
         $code = str_replace($placeHolders, $replacements, self::$classTemplate);
@@ -220,15 +220,15 @@ public function <methodName>()
     /**
      * Generate the updated code for the given ClassMetadataInfo and xml-entity at path
      *
-     * @param ClassMetadataInfo $metadata
-     * @param string $path
+     * @param ClassMetadataInfo $metadata 
+     * @param string $path 
      * @return string $code;
      */
     public function generateUpdatedXmlEntityClass(ClassMetadataInfo $metadata, $path)
     {
         $currentCode = file_get_contents($path);
 
-        $body = $this->generateDocumentBody($metadata);
+        $body = $this->generateXmlEntityBody($metadata);
         $body = str_replace('<spaces>', $this->spaces, $body);
         $last = strrpos($currentCode, '}');
 
@@ -238,7 +238,7 @@ public function <methodName>()
     /**
      * Set the number of spaces the exported class should have
      *
-     * @param integer $numSpaces
+     * @param integer $numSpaces 
      * @return void
      */
     public function setNumSpaces($numSpaces)
@@ -250,7 +250,7 @@ public function <methodName>()
     /**
      * Set the extension to use when writing php files to disk
      *
-     * @param string $extension
+     * @param string $extension 
      * @return void
      */
     public function setExtension($extension)
@@ -259,86 +259,86 @@ public function <methodName>()
     }
 
     /**
-* Set the name of the class the generated classes should extend from
-*
-* @return void
-*/
+     * Set the name of the class the generated classes should extend from
+     *
+     * @return void
+     */
     public function setClassToExtend($classToExtend)
     {
         $this->classToExtend = $classToExtend;
     }
 
     /**
-* Set whether or not to generate annotations for the document
-*
-* @param bool $bool
-* @return void
-*/
+     * Set whether or not to generate annotations for the xml-entity
+     *
+     * @param bool $bool 
+     * @return void
+     */
     public function setGenerateAnnotations($bool)
     {
         $this->generateAnnotations = $bool;
     }
 
     /**
-* Set whether or not to try and update the document if it already exists
-*
-* @param bool $bool
-* @return void
-*/
-    public function setUpdateDocumentIfExists($bool)
+     * Set whether or not to try and update the xml-entity if it already exists
+     *
+     * @param bool $bool 
+     * @return void
+     */
+    public function setUpdateXmlEntityIfExists($bool)
     {
-        $this->updateDocumentIfExists = $bool;
+        $this->updateXmlEntityIfExists = $bool;
     }
 
     /**
-* Set whether or not to regenerate the document if it exists
-*
-* @param bool $bool
-* @return void
-*/
-    public function setRegenerateDocumentIfExists($bool)
+     * Set whether or not to regenerate the xml-entity if it exists
+     *
+     * @param bool $bool
+     * @return void
+     */
+    public function setRegenerateXmlEntityIfExists($bool)
     {
-        $this->regenerateDocumentIfExists = $bool;
+        $this->regenerateXmlEntityIfExists = $bool;
     }
 
     /**
-* Set whether or not to generate stub methods for the document
-*
-* @param bool $bool
-* @return void
-*/
+     * Set whether or not to generate stub methods for the xml-entity
+     *
+     * @param bool $bool
+     * @return void
+     */
     public function setGenerateStubMethods($bool)
     {
-        $this->generateDocumentStubMethods = $bool;
+        $this->generateXmlEntityStubMethods = $bool;
     }
 
     /**
-* Should an existing document be backed up if it already exists?
-*/
+     * Should an existing xml-entity be backed up if it already exists?
+     */
     public function setBackupExisting($bool)
     {
         $this->backupExisting = $bool;
     }
 
-    private function generateDocumentNamespace(ClassMetadataInfo $metadata)
+    private function generateXmlEntityNamespace(ClassMetadataInfo $metadata)
     {
         if ($this->hasNamespace($metadata)) {
             return 'namespace ' . $this->getNamespace($metadata) .';';
         }
     }
 
-    private function generateDocumentClassName(ClassMetadataInfo $metadata)
+    private function generateXmlEntityClassName(ClassMetadataInfo $metadata)
     {
         return 'class ' . $this->getClassName($metadata) .
             ($this->extendsClass() ? ' extends ' . $this->getClassToExtendName() : null);
     }
 
-    private function generateDocumentBody(ClassMetadataInfo $metadata)
+    private function generateXmlEntityBody(ClassMetadataInfo $metadata)
     {
-        $fieldMappingProperties = $this->generateDocumentFieldMappingProperties($metadata);
-        $associationMappingProperties = $this->generateDocumentAssociationMappingProperties($metadata);
-        $stubMethods = $this->generateDocumentStubMethods ? $this->generateDocumentStubMethods($metadata) : null;
-        $lifecycleCallbackMethods = $this->generateDocumentLifecycleCallbackMethods($metadata);
+        $fieldMappingProperties = $this->generateXmlEntityFieldMappingProperties($metadata);
+        
+        $stubMethods = $this->generateXmlEntityStubMethods ? $this->generateXmlEntityStubMethods($metadata) : null;
+        $lifecycleCallbackMethods = $this->generateXmlEntityLifecycleCallbackMethods($metadata);
 
         $code = array();
 
@@ -346,11 +346,7 @@ public function <methodName>()
             $code[] = $fieldMappingProperties;
         }
 
-        if ($associationMappingProperties) {
-            $code[] = $associationMappingProperties;
-        }
-
-        $code[] = $this->generateDocumentConstructor($metadata);
+        $code[] = $this->generateXmlEntityConstructor($metadata);
 
         if ($stubMethods) {
             $code[] = $stubMethods;
@@ -363,29 +359,20 @@ public function <methodName>()
         return implode("\n", $code);
     }
 
-    private function generateDocumentConstructor(ClassMetadataInfo $metadata)
+    private function generateXmlEntityConstructor(ClassMetadataInfo $metadata)
     {
         if ($this->hasMethod('__construct', $metadata)) {
             return '';
         }
 
-        $collections = array();
-        foreach ($metadata->fieldMappings AS $mapping) {
-            if ($mapping['type'] === ClassMetadataInfo::MANY) {
-                $collections[] = '$this->'.$mapping['fieldName'].' = new \Doctrine\Common\Collections\ArrayCollection();';
-            }
-        }
-        if ($collections) {
-            return $this->prefixCodeWithSpaces(str_replace("<collections>", $this->spaces.implode("\n".$this->spaces, $collections), self::$constructorMethodTemplate));
-        }
         return '';
     }
 
     /**
-* @todo this won't work if there is a namespace in brackets and a class outside of it.
-* @param string $path
-*/
-    private function parseTokensInDocumentFile($path)
+     * @todo this won't work if there is a namespace in brackets and a class outside of it.
+     * @param string $path
+     */
+    private function parseTokensInXmlEntityFile($path)
     {
         $tokens = token_get_all(file_get_contents($path));
         $lastSeenNamespace = '';
@@ -468,14 +455,14 @@ public function <methodName>()
         return substr($metadata->name, 0, strrpos($metadata->name, '\\'));
     }
 
-    private function generateDocumentImports(ClassMetadataInfo $metadata)
+    private function generateXmlEntityImports(ClassMetadataInfo $metadata)
     {
         if ($this->generateAnnotations) {
-            return 'use Doctrine\\ODM\\MongoDB\\Mapping\\Annotations as ODM;';
+            return 'use Doctrine\\OXM\\Mapping as OXM;';
         }
     }
 
-    private function generateDocumentDocBlock(ClassMetadataInfo $metadata)
+    private function generateXmlEntityDocBlock(ClassMetadataInfo $metadata)
     {
         $lines = array();
         $lines[] = '/**';
@@ -485,53 +472,31 @@ public function <methodName>()
             $lines[] = ' *';
 
             if ($metadata->isMappedSuperclass) {
-                $lines[] = ' * @ODM\\MappedSupperClass';
-            } else if ($metadata->isEmbeddedDocument) {
-                $lines[] = ' * @ODM\\EmbeddedDocument';
+                $lines[] = ' * @OXM\\MappedSupperClass';
+            } else if ($metadata->isRoot) {
+                $lines[] = ' * @OXM\\XmlRootEntity';
             } else {
-                $lines[] = ' * @ODM\\Document';
+                $lines[] = ' * @OXM\\XmlEntity';
             }
 
-            $document = array();
-            if (! $metadata->isMappedSuperclass && ! $metadata->isEmbeddedDocument) {
+            $xmlEntity = array();
+            if (! $metadata->isMappedSuperclass && ! $metadata->isRoot) {
                 if ($metadata->collection) {
-                    $document[] = ' * collection="' . $metadata->collection . '"';
+                    $xmlEntity[] = ' *     collection="' . $metadata->collection . '"';
                 }
                 if ($metadata->customRepositoryClassName) {
-                    $document[] = ' * repositoryClass="' . $metadata->customRepositoryClassName . '"';
+                    $xmlEntity[] = ' *     repositoryClass="' . $metadata->customRepositoryClassName . '"';
                 }
             }
-            if ($metadata->indexes) {
-                $indexes = array();
-                $indexLines = array();
-                $indexLines[] = " * indexes={";
-                foreach ($metadata->indexes as $index) {
-                    $keys = array();
-                    foreach ($index['keys'] as $key => $value) {
-                        $keys[] = '"'.$key.'"="'.$value.'"';
-                    }
-                    $options = array();
-                    foreach ($index['options'] as $key => $value) {
-                        $options[] = '"'.$key.'"="'.$value.'"';
-                    }
-                    $indexes[] = '@ODM\\Index(keys={' . implode(', ', $keys) . '}, options={' . implode(', ', $options) . '})';
-                }
-                $indexLines[] = "\n * " . implode(",\n * ", $indexes);
-                $indexLines[] = "\n * }";
+            
 
-                $document[] = implode(null, $indexLines);
-            }
-
-            if ($document) {
+            if ($xmlEntity) {
                 $lines[count($lines) - 1] .= '(';
-                $lines[] = implode(",\n", $document);
+                $lines[] = implode(",\n", $xmlEntity);
                 $lines[] = ' * )';
             }
 
             $methods = array(
-                'generateInheritanceAnnotation',
-                'generateDiscriminatorFieldAnnotation',
-                'generateDiscriminatorMapAnnotation',
                 'generateChangeTrackingPolicyAnnotation'
             );
 
@@ -546,72 +511,45 @@ public function <methodName>()
         return implode("\n", $lines);
     }
 
-    private function generateInheritanceAnnotation($metadata)
-    {
-        if ($metadata->inheritanceType != ClassMetadataInfo::INHERITANCE_TYPE_NONE) {
-            return '@ODM\\InheritanceType("'.$this->getInheritanceTypeString($metadata->inheritanceType).'")';
-        }
-    }
-
-    private function generateDiscriminatorFieldAnnotation($metadata)
-    {
-        if ($metadata->inheritanceType != ClassMetadataInfo::INHERITANCE_TYPE_NONE) {
-            $discrField = $metadata->discriminatorField;
-            return '@ODM\\DiscriminatorField(fieldName="' . $discrField['fieldName'] . '")';
-        }
-    }
-
-    private function generateDiscriminatorMapAnnotation(ClassMetadataInfo $metadata)
-    {
-        if ($metadata->inheritanceType != ClassMetadataInfo::INHERITANCE_TYPE_NONE) {
-            $inheritanceClassMap = array();
-
-            foreach ($metadata->discriminatorMap as $type => $class) {
-                $inheritanceClassMap[] .= '"' . $type . '" = "' . $class . '"';
-            }
-
-            return '@ODM\\DiscriminatorMap({' . implode(', ', $inheritanceClassMap) . '})';
-        }
-    }
 
     private function generateChangeTrackingPolicyAnnotation(ClassMetadataInfo $metadata)
     {
-        return '@ODM\\ChangeTrackingPolicy("' . $this->getChangeTrackingPolicyString($metadata->changeTrackingPolicy) . '")';
+        return '@OXM\\ChangeTrackingPolicy("' . $this->getChangeTrackingPolicyString($metadata->changeTrackingPolicy) . '")';
     }
 
-    private function generateDocumentStubMethods(ClassMetadataInfo $metadata)
+    private function generateXmlEntityStubMethods(ClassMetadataInfo $metadata)
     {
         $methods = array();
 
         foreach ($metadata->fieldMappings as $fieldMapping) {
             if (isset($fieldMapping['id'])) {
                 if ($metadata->generatorType == ClassMetadataInfo::GENERATOR_TYPE_NONE) {
-                    if ($code = $this->generateDocumentStubMethod($metadata, 'set', $fieldMapping['fieldName'], $fieldMapping['type'])) {
+                    if ($code = $this->generateXmlEntityStubMethod($metadata, 'set', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                         $methods[] = $code;
                     }
                 }
-                if ($code = $code = $this->generateDocumentStubMethod($metadata, 'get', $fieldMapping['fieldName'], $fieldMapping['type'])) {
+                if ($code = $code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                     $methods[] = $code;
                 }
             } else if ( ! isset($fieldMapping['association'])) {
-                if ($code = $code = $this->generateDocumentStubMethod($metadata, 'set', $fieldMapping['fieldName'], $fieldMapping['type'])) {
+                if ($code = $code = $this->generateXmlEntityStubMethod($metadata, 'set', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                     $methods[] = $code;
                 }
-                if ($code = $code = $this->generateDocumentStubMethod($metadata, 'get', $fieldMapping['fieldName'], $fieldMapping['type'])) {
+                if ($code = $code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                     $methods[] = $code;
                 }
             } else if ($fieldMapping['type'] === ClassMetadataInfo::ONE) {
-                if ($code = $this->generateDocumentStubMethod($metadata, 'set', $fieldMapping['fieldName'], isset($fieldMapping['targetDocument']) ? $fieldMapping['targetDocument'] : null)) {
+                if ($code = $this->generateXmlEntityStubMethod($metadata, 'set', $fieldMapping['fieldName'], isset($fieldMapping['targetXmlEntity']) ? $fieldMapping['targetXmlEntity'] : null)) {
                     $methods[] = $code;
                 }
-                if ($code = $this->generateDocumentStubMethod($metadata, 'get', $fieldMapping['fieldName'], isset($fieldMapping['targetDocument']) ? $fieldMapping['targetDocument'] : null)) {
+                if ($code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], isset($fieldMapping['targetXmlEntity']) ? $fieldMapping['targetXmlEntity'] : null)) {
                     $methods[] = $code;
                 }
             } else if ($fieldMapping['type'] === ClassMetadataInfo::MANY) {
-                if ($code = $this->generateDocumentStubMethod($metadata, 'add', $fieldMapping['fieldName'], isset($fieldMapping['targetDocument']) ? $fieldMapping['targetDocument'] : null)) {
+                if ($code = $this->generateXmlEntityStubMethod($metadata, 'add', $fieldMapping['fieldName'], isset($fieldMapping['targetXmlEntity']) ? $fieldMapping['targetXmlEntity'] : null)) {
                     $methods[] = $code;
                 }
-                if ($code = $this->generateDocumentStubMethod($metadata, 'get', $fieldMapping['fieldName'], 'Doctrine\Common\Collections\Collection')) {
+                if ($code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], 'Doctrine\Common\Collections\Collection')) {
                     $methods[] = $code;
                 }
             }
@@ -620,7 +558,7 @@ public function <methodName>()
         return implode("\n\n", $methods);
     }
 
-    private function generateDocumentLifecycleCallbackMethods(ClassMetadataInfo $metadata)
+    private function generateXmlEntityLifecycleCallbackMethods(ClassMetadataInfo $metadata)
     {
         if (isset($metadata->lifecycleCallbacks) && $metadata->lifecycleCallbacks) {
             $methods = array();
@@ -639,28 +577,8 @@ public function <methodName>()
         return "";
     }
 
-    private function generateDocumentAssociationMappingProperties(ClassMetadataInfo $metadata)
-    {
-        $lines = array();
 
-        foreach ($metadata->fieldMappings as $fieldMapping) {
-            if ($this->hasProperty($fieldMapping['fieldName'], $metadata) ||
-                $metadata->isInheritedField($fieldMapping['fieldName'])) {
-                continue;
-            }
-            if ( ! isset($fieldMapping['association'])) {
-                continue;
-            }
-    
-            $lines[] = $this->generateAssociationMappingPropertyDocBlock($fieldMapping, $metadata);
-            $lines[] = $this->spaces . 'private $' . $fieldMapping['fieldName']
-                     . ($fieldMapping['type'] === ClassMetadataInfo::MANY ? ' = array()' : null) . ";\n";
-        }
-
-        return implode("\n", $lines);
-    }
-
-    private function generateDocumentFieldMappingProperties(ClassMetadataInfo $metadata)
+    private function generateXmlEntityFieldMappingProperties(ClassMetadataInfo $metadata)
     {
         $lines = array();
 
@@ -681,7 +599,7 @@ public function <methodName>()
         return implode("\n", $lines);
     }
 
-    private function generateDocumentStubMethod(ClassMetadataInfo $metadata, $type, $fieldName, $typeHint = null)
+    private function generateXmlEntityStubMethod(ClassMetadataInfo $metadata, $type, $fieldName, $typeHint = null)
     {
         $methodName = $type . Inflector::classify($fieldName);
 
@@ -694,16 +612,16 @@ public function <methodName>()
 
         $variableType = $typeHint ? $typeHint . ' ' : null;
 
-        $types = \Doctrine\ODM\MongoDB\Mapping\Types\Type::getTypesMap();
+        $types = \Doctrine\OXM\Types\Type::getTypesMap();
         $methodTypeHint = $typeHint && ! isset($types[$typeHint]) ? '\\' . $typeHint . ' ' : null;
 
         $replacements = array(
-          '<description>' => ucfirst($type) . ' ' . $fieldName,
-          '<methodTypeHint>' => $methodTypeHint,
-          '<variableType>' => $variableType,
-          '<variableName>' => Inflector::camelize($fieldName),
-          '<methodName>' => $methodName,
-          '<fieldName>' => $fieldName
+          '<description>'       => ucfirst($type) . ' ' . $fieldName,
+          '<methodTypeHint>'    => $methodTypeHint,
+          '<variableType>'      => $variableType,
+          '<variableName>'      => Inflector::camelize($fieldName),
+          '<methodName>'        => $methodName,
+          '<fieldName>'         => $fieldName
         );
 
         $method = str_replace(
@@ -722,7 +640,7 @@ public function <methodName>()
         }
 
         $replacements = array(
-            '<comment>' => $this->generateAnnotations ? '/** @ODM\\'.ucfirst($name).' */' : '',
+            '<comment>'    => $this->generateAnnotations ? '/** @OXM\\'.ucfirst($name).' */' : '',
             '<methodName>' => $methodName,
         );
 
@@ -733,56 +651,6 @@ public function <methodName>()
         );
 
         return $this->prefixCodeWithSpaces($method);
-    }
-
-    private function generateAssociationMappingPropertyDocBlock(array $fieldMapping, ClassMetadataInfo $metadata)
-    {
-        $lines = array();
-        $lines[] = $this->spaces . '/**';
-        $lines[] = $this->spaces . ' * @var ' . (isset($fieldMapping['targetDocument']) ? $fieldMapping['targetDocument'] : 'object');
-
-        if ($this->generateAnnotations) {
-            $lines[] = $this->spaces . ' *';
-
-            $type = null;
-            switch ($fieldMapping['association']) {
-                case ClassMetadataInfo::EMBED_ONE:
-                    $type = 'EmbedOne';
-                    break;
-                case ClassMetadataInfo::EMBED_MANY:
-                    $type = 'EmbedMany';
-                    break;
-                case ClassMetadataInfo::REFERENCE_ONE:
-                    $type = 'ReferenceOne';
-                    break;
-                case ClassMetadataInfo::REFERENCE_MANY:
-                    $type = 'ReferenceMany';
-                    break;
-            }
-            $typeOptions = array();
-
-            if (isset($fieldMapping['targetDocument'])) {
-                $typeOptions[] = 'targetDocument="' . $fieldMapping['targetDocument'] . '"';
-            }
-
-            if (isset($fieldMapping['cascade']) && $fieldMapping['cascade']) {
-                $cascades = array();
-
-                if ($fieldMapping['isCascadePersist']) $cascades[] = '"persist"';
-                if ($fieldMapping['isCascadeRemove']) $cascades[] = '"remove"';
-                if ($fieldMapping['isCascadeDetach']) $cascades[] = '"detach"';
-                if ($fieldMapping['isCascadeMerge']) $cascades[] = '"merge"';
-                if ($fieldMapping['isCascadeRefresh']) $cascades[] = '"refresh"';
-
-                $typeOptions[] = 'cascade={' . implode(',', $cascades) . '}';
-            }
-
-            $lines[] = $this->spaces . ' * @ODM\\' . $type . '(' . implode(', ', $typeOptions) . ')';
-        }
-
-        $lines[] = $this->spaces . ' */';
-
-        return implode("\n", $lines);
     }
 
     private function generateFieldMappingPropertyDocBlock(array $fieldMapping, ClassMetadataInfo $metadata)
@@ -825,7 +693,7 @@ public function <methodName>()
                 }
 
                 if (isset($fieldMapping['nullable']) && $fieldMapping['nullable'] === true) {
-                    $field[] = 'nullable=' . var_export($fieldMapping['nullable'], true);
+                    $field[] = 'nullable=' .  var_export($fieldMapping['nullable'], true);
                 }
                 if (isset($fieldMapping['options'])) {
                     $options = array();
@@ -858,22 +726,6 @@ public function <methodName>()
         return implode("\n", $lines);
     }
 
-//    private function getInheritanceTypeString($type)
-//    {
-//        switch ($type) {
-//            case ClassMetadataInfo::INHERITANCE_TYPE_NONE:
-//                return 'NONE';
-//
-//            case ClassMetadataInfo::INHERITANCE_TYPE_SINGLE_COLLECTION:
-//                return 'SINGLE_COLLECTION';
-//
-//            case ClassMetadataInfo::INHERITANCE_TYPE_COLLECTION_PER_CLASS:
-//                return 'COLLECTION_PER_CLASS';
-//
-//            default:
-//                throw new \InvalidArgumentException('Invalid provided InheritanceType: ' . $type);
-//        }
-//    }
 
     private function getChangeTrackingPolicyString($policy)
     {
