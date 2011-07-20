@@ -179,7 +179,6 @@ public function <methodName>()
                 throw new \RuntimeException("Attempt to backup overwritten xml-entity file but copy operation failed.");
             }
         }
-
         // If xml-entity doesn't exist or we're re-generating the xml-entities entirely
         if ($this->isNew) {
             file_put_contents($path, $this->generateXmlEntityClass($metadata));
@@ -481,9 +480,9 @@ public function <methodName>()
 
             $xmlEntity = array();
             if (! $metadata->isMappedSuperclass && ! $metadata->isRoot) {
-                if ($metadata->collection) {
-                    $xmlEntity[] = ' *     collection="' . $metadata->collection . '"';
-                }
+//                if ($metadata->collection) {
+//                    $xmlEntity[] = ' *     collection="' . $metadata->collection . '"';
+//                }
                 if ($metadata->customRepositoryClassName) {
                     $xmlEntity[] = ' *     repositoryClass="' . $metadata->customRepositoryClassName . '"';
                 }
@@ -506,6 +505,7 @@ public function <methodName>()
                 }
             }
         }
+        
 
         $lines[] = ' */';
         return implode("\n", $lines);
@@ -523,36 +523,22 @@ public function <methodName>()
 
         foreach ($metadata->fieldMappings as $fieldMapping) {
             if (isset($fieldMapping['id'])) {
-                if ($metadata->generatorType == ClassMetadataInfo::GENERATOR_TYPE_NONE) {
+                //if ($metadata->getgeneratorType == ClassMetadataInfo::GENERATOR_TYPE_NONE) {
                     if ($code = $this->generateXmlEntityStubMethod($metadata, 'set', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                         $methods[] = $code;
                     }
-                }
+                //}
                 if ($code = $code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                     $methods[] = $code;
                 }
-            } else if ( ! isset($fieldMapping['association'])) {
+            } else {
                 if ($code = $code = $this->generateXmlEntityStubMethod($metadata, 'set', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                     $methods[] = $code;
                 }
                 if ($code = $code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], $fieldMapping['type'])) {
                     $methods[] = $code;
                 }
-            } else if ($fieldMapping['type'] === ClassMetadataInfo::ONE) {
-                if ($code = $this->generateXmlEntityStubMethod($metadata, 'set', $fieldMapping['fieldName'], isset($fieldMapping['targetXmlEntity']) ? $fieldMapping['targetXmlEntity'] : null)) {
-                    $methods[] = $code;
-                }
-                if ($code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], isset($fieldMapping['targetXmlEntity']) ? $fieldMapping['targetXmlEntity'] : null)) {
-                    $methods[] = $code;
-                }
-            } else if ($fieldMapping['type'] === ClassMetadataInfo::MANY) {
-                if ($code = $this->generateXmlEntityStubMethod($metadata, 'add', $fieldMapping['fieldName'], isset($fieldMapping['targetXmlEntity']) ? $fieldMapping['targetXmlEntity'] : null)) {
-                    $methods[] = $code;
-                }
-                if ($code = $this->generateXmlEntityStubMethod($metadata, 'get', $fieldMapping['fieldName'], 'Doctrine\Common\Collections\Collection')) {
-                    $methods[] = $code;
-                }
-            }
+            } 
         }
 
         return implode("\n\n", $methods);
@@ -602,7 +588,7 @@ public function <methodName>()
     private function generateXmlEntityStubMethod(ClassMetadataInfo $metadata, $type, $fieldName, $typeHint = null)
     {
         $methodName = $type . Inflector::classify($fieldName);
-
+        
         if ($this->hasMethod($methodName, $metadata)) {
             return;
         }
@@ -630,6 +616,7 @@ public function <methodName>()
             $template
         );
 
+        
         return $this->prefixCodeWithSpaces($method);
     }
 

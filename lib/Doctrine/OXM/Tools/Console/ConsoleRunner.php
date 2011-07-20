@@ -58,6 +58,7 @@ class ConsoleRunner
             new \Doctrine\OXM\Tools\Console\Command\ClearCache\MetadataCommand(),
             new \Doctrine\OXM\Tools\Console\Command\GenerateProxiesCommand(),
             new \Doctrine\OXM\Tools\Console\Command\GenerateRepositoriesCommand(),
+            new \Doctrine\OXM\Tools\Console\Command\GenerateXmlEntitiesCommand(),
         ));
     }
 }
