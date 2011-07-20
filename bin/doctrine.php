@@ -17,12 +17,12 @@
  * <http://www.doctrine-project.org>.
  */
 
-require_once __DIR__ . '/../lib/vendor/Doctrine/Common/ClassLoader.php';
+require_once __DIR__ . '/../lib/vendor/doctrine-common/lib/Doctrine/Common/ClassLoader.php';
 
-$classLoader = new \Doctrine\Common\ClassLoader('Doctrine');
+$classLoader = new \Doctrine\Common\ClassLoader('Doctrine', __DIR__ . '/../lib');
 $classLoader->register();
 
-$classLoader = new \Doctrine\Common\ClassLoader('Symfony', 'Doctrine');
+$classLoader = new \Doctrine\Common\ClassLoader('Symfony', __DIR__ . '/../lib/vendor');
 $classLoader->register();
 
 $configFile = getcwd() . DIRECTORY_SEPARATOR . 'cli-config.php';
