@@ -53,7 +53,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $config = new Configuration();
-        $config->setMetadataDriverImpl(AnnotationDriver::create("tests/Doctrine/Tests/OXM/Entities"));
+        $config->setMetadataDriverImpl($config->newDefaultAnnotationDriver("tests/Doctrine/Tests/OXM/Entities"));
         $config->setMetadataCacheImpl(new \Doctrine\Common\Cache\ArrayCache());
 
         $this->metadataFactory = new ClassMetadataFactory($config);
