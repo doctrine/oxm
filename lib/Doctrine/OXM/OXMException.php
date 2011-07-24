@@ -33,6 +33,11 @@ class OXMException extends Exception
             "to Doctrine\\OXM\\Configuration::setMappingDriverImpl().");
     }
 
+    public static function entityMissingAssignedId($entity)
+    {
+        return new self("Entity of type " . get_class($entity) . " is missing an assigned ID.");
+    }
+
     public static function unrecognizedField($field)
     {
         return new self("Unrecognized field: $field");
