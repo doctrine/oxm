@@ -19,11 +19,6 @@
 
 namespace Doctrine\Tests\OXM\Mapping;
 
-use Doctrine\Common\Cache\ArrayCache;
-use Doctrine\OXM\Mapping\ClassMetadata;
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
-use Doctrine\OXM\Mapping\Driver\Driver;
-
 class AnnotationDriverTest extends AbstractMappingDriverTest
 {
     /**
@@ -31,23 +26,9 @@ class AnnotationDriverTest extends AbstractMappingDriverTest
      */
     protected function _loadDriver()
     {
-        if (version_compare(\Doctrine\Common\Version::VERSION, '3.0.0', '>=')) {
-            $reader = new \Doctrine\Common\Annotations\CachedReader(
-                new \Doctrine\Common\Annotations\AnnotationReader(), new ArrayCache()
-            );
-        } else if (version_compare(\Doctrine\Common\Version::VERSION, '2.1.0-BETA3-DEV', '>=')) {
-            $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-            $reader->setIgnoreNotImportedAnnotations(true);
-            $reader->setEnableParsePhpImports(false);
-                $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
-            $reader = new \Doctrine\Common\Annotations\CachedReader(
-                new \Doctrine\Common\Annotations\IndexedReader($reader), new ArrayCache()
-            );
-        } else {
-            $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-            $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
-        }
-        return new \Doctrine\OXM\Mapping\Driver\AnnotationDriver($reader, array(__DIR__));
+        $config = new \Doctrine\OXM\Configuration();
+        
+        return $config->newDefaultAnnotationDriver();
     }
 
 }
