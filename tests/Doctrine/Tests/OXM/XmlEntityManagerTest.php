@@ -26,7 +26,6 @@ use \Doctrine\OXM\Mapping\ClassMetadataInfo,
     \Doctrine\OXM\Mapping\Driver\AnnotationDriver,
     \Doctrine\Common\EventManager,
     \Doctrine\Tests\OXM\Entities\Order,
-    \Doctrine\Tests\OXM\Entities\Simple\Simple,
     \Doctrine\Tests\OXM\Entities\Simple\SimpleWithField;
 
 class XmlEntityManagerTest extends OxmTestCase
