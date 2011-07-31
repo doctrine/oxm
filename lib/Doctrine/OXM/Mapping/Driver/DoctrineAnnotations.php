@@ -22,24 +22,37 @@ namespace Doctrine\OXM\Mapping;
 use Doctrine\Common\Annotations\Annotation;
 
 /* Annotations for OXM Entities */
+/** @Annotation */
 class XmlEntity extends Annotation {
     public $xml;        // implied
 }
+
+/** @Annotation */
 final class XmlRootEntity extends XmlEntity {
     public $repositoryClass;
 }
+
+/** @Annotation */
 final class XmlChangeTrackingPolicy extends Annotation {
     public $value;
 }
+
+/** @Annotation */
 final class XmlMappedSuperclass extends Annotation {}
 
+/** @Annotation */
 final class XmlNamespace extends Annotation {
     public $url;
     public $prefix;
 }
+
+/** @Annotation */
 final class XmlNamespaces extends Annotation {}
 
+/** @Annotation */
 final class XmlId extends Annotation {}
+
+/** @Annotation */
 class XmlField extends Annotation {
     public $type;       // required
     public $name;       // implied (xml element name)
@@ -54,33 +67,65 @@ class XmlField extends Annotation {
     public $wrapper;
 }
 
+/** @Annotation */
 final class XmlAttribute extends XmlField {
     public $node = "attribute";
 }
+
+/** @Annotation */
 final class XmlElement extends XmlField {
     public $node = "element";
 }
+
+/** @Annotation */
 final class XmlText extends XmlField {
     public $node = "text";
 }
 
+/** @Annotation */
 final class XmlReferences extends Annotation {
     public $entityName;
 }
 
 
 /* Annotations for lifecycle callbacks */
+
+/** @Annotation */
 final class HasLifecycleCallbacks extends Annotation {}
+
+/** @Annotation */
 final class PreMarshal extends Annotation {}
+
+/** @Annotation */
 final class PostMarshal extends Annotation {}
+
+/** @Annotation */
 final class PreUnmarshal extends Annotation {}
+
+/** @Annotation */
 final class PostUnmarshal extends Annotation {}
+
+/** @Annotation */
 final class PrePersist extends Annotation {}
+
+/** @Annotation */
 final class PostPersist extends Annotation {}
+
+/** @Annotation */
 final class PreUpdate extends Annotation {}
+
+/** @Annotation */
 final class PostUpdate extends Annotation {}
+
+/** @Annotation */
 final class PreRemove extends Annotation {}
+
+/** @Annotation */
 final class PostRemove extends Annotation {}
+
+/** @Annotation */
 final class PreLoad extends Annotation {}
+
+/** @Annotation */
 final class PostLoad extends Annotation {}
 

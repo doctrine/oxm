@@ -1,5 +1,7 @@
 <?php
 /*
+ *  $Id$
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -15,20 +17,19 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the LGPL. For more information, see
  * <http://www.doctrine-project.org>.
- */
+*/
 
-namespace Doctrine\Tests\OXM\Entities\Collections;
+namespace Doctrine\OXM;
 
 /**
- * @XmlEntity
- * @XmlNamespace(url="http://www.foo.bar.baz.com/schema", prefix="prfx")
+ * Is thrown when a transaction is required for the current operation, but there is none open.
+ *
+ * @author Dmitry Petrov <dmitry.petrov@opensoftdev.ru>>
  */
-class Wrapper
+class TransactionRequiredException extends OXMException
 {
-    /** @var array @XmlText(type="string", collection=true, wrapper="foo") */
-    public $list;
-
-
-    /** @var array @XmlText(type="string", collection=true, wrapper="bar", prefix="prfx") */
-    public $enum;
+    static public function transactionRequired()
+    {
+        return new self('An open transaction is required for this operation.');
+    }
 }

@@ -274,6 +274,43 @@ class ClassMetadataInfo implements BaseClassMetadata
         $this->name = $entityName;
     }
 
+    /**
+     * A numerically indexed list of field names of this persistent class.
+     *
+     * This array includes identifier fields if present on this class.
+     *
+     * @return array
+     */
+    public function getFieldNames()
+    {
+        return array_keys($this->fieldMappings);
+    }
+
+    /**
+     * A numerically indexed list of association names of this persistent class.
+     *
+     * This array includes identifier associations if present on this class.
+     *
+     * @return array
+     */
+    public function getAssociationNames()
+    {
+        // not implemented
+        return array();
+    }
+
+    /**
+     * Returns the target class name of the given association.
+     *
+     * @param string $assocName
+     * @return string
+     */
+    public function getAssociationTargetClass($assocName)
+    {
+        // Not implemented
+        return '';
+    }
+
 
     /**
      * Gets the xml node name used to map this class to an xml node

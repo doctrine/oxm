@@ -26,8 +26,6 @@ use Doctrine\OXM\Mapping\ClassMetadataInfo;
 use Doctrine\OXM\Mapping\MappingException;
 use Doctrine\OXM\Mapping\Driver\Driver as DriverInterface;
 
-require __DIR__ . '/DoctrineAnnotations.php';
-
 /**
  * The AnnotationDriver reads the mapping metadata from docblock annotations.
  *
@@ -69,10 +67,10 @@ class AnnotationDriver implements DriverInterface
      * Initializes a new AnnotationDriver that uses the given AnnotationReader for reading
      * docblock annotations.
      * 
-     * @param $reader The AnnotationReader to use.
+     * @param AnnotationReader $reader The AnnotationReader to use.
      * @param string|array $paths One or multiple paths where mapping classes can be found. 
      */
-    public function __construct(AnnotationReader $reader, $paths = null)
+    public function __construct($reader, $paths = null)
     {
         $this->reader = $reader;
         if ($paths) {
@@ -129,6 +127,15 @@ class AnnotationDriver implements DriverInterface
         $reflClass = $metadata->getReflectionClass();
 
         $classAnnotations = $this->reader->getClassAnnotations($reflClass);
+
+        // Compatibility with Doctrine Common 3.x
+        if ($classAnnotations && is_int(key($classAnnotations))) {
+            foreach ($classAnnotations as $annot) {
+                $classAnnotations[get_class($annot)] = $annot;
+            }
+        }
+
+        // Evaluate XmlEntity Annotations
         if (isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity'])) {
             $entityAnnot = $classAnnotations['Doctrine\OXM\Mapping\XmlEntity'];
         } elseif (isset($classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity'])) {

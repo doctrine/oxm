@@ -19,10 +19,6 @@
 
 namespace Doctrine\Tests\OXM\Mapping;
 
-use Doctrine\OXM\Mapping\ClassMetadata;
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
-use Doctrine\OXM\Mapping\Driver\Driver;
-
 class AnnotationDriverTest extends AbstractMappingDriverTest
 {
     /**
@@ -30,10 +26,9 @@ class AnnotationDriverTest extends AbstractMappingDriverTest
      */
     protected function _loadDriver()
     {
-        $cache = new \Doctrine\Common\Cache\ArrayCache();
-        $reader = new \Doctrine\Common\Annotations\AnnotationReader($cache);
-        $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
-        return new \Doctrine\OXM\Mapping\Driver\AnnotationDriver($reader);
+        $config = new \Doctrine\OXM\Configuration();
+        
+        return $config->newDefaultAnnotationDriver();
     }
 
 }
