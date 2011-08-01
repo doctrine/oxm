@@ -45,24 +45,24 @@ class MetadataFilter extends \FilterIterator implements \Countable
         return iterator_to_array($metadatas);
     }
 
-    private $_filter = array();
+    private $filter = array();
 
     public function __construct(\ArrayIterator $metadata, $filter)
     {
-        $this->_filter = (array)$filter;
+        $this->filter = (array)$filter;
         parent::__construct($metadata);
     }
 
     public function accept()
     {
-        if (count($this->_filter) == 0) {
+        if (count($this->filter) == 0) {
             return true;
         }
 
         $it = $this->getInnerIterator();
         $metadata = $it->current();
 
-        foreach ($this->_filter AS $filter) {
+        foreach ($this->filter AS $filter) {
             if (strpos($metadata->name, $filter) !== false) {
                 return true;
             }
