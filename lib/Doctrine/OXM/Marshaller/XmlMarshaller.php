@@ -422,8 +422,8 @@ class XmlMarshaller implements Marshaller
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
 
-                if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
-                    $this->_writeAttribute($writer, $classMetadata, $fieldName, $fieldValue);
+                if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
+                    $this->writeAttribute($writer, $classMetadata, $fieldName, $fieldValue);
                 }
             }
         }
@@ -439,8 +439,8 @@ class XmlMarshaller implements Marshaller
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
 
-                if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
-                    $this->_writeText($writer, $classMetadata, $fieldName, $fieldValue);
+                if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
+                    $this->writeText($writer, $classMetadata, $fieldName, $fieldValue);
                 }
             }
         }
@@ -456,8 +456,8 @@ class XmlMarshaller implements Marshaller
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
 
-                if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
-                    $this->_writeElement($writer, $classMetadata, $fieldName,  $fieldValue);   
+                if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
+                    $this->writeElement($writer, $classMetadata, $fieldName,  $fieldValue);   
                 }
             }
         }
@@ -476,7 +476,7 @@ class XmlMarshaller implements Marshaller
      * @param string $fieldName
      * @param mixed $fieldValue
      */
-    private function _writeAttribute(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName, $fieldValue)
+    private function writeAttribute(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName, $fieldValue)
     {
         $name    = $classMetadata->getFieldXmlName($fieldName);
         $type    = $classMetadata->getTypeOfField($fieldName);
@@ -501,7 +501,7 @@ class XmlMarshaller implements Marshaller
      * @param string $fieldName
      * @param mixed $fieldValue
      */
-    private function _writeText(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName, $fieldValue)
+    private function writeText(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName, $fieldValue)
     {
         $xmlName = $classMetadata->getFieldXmlName($fieldName);
         $type    = $classMetadata->getTypeOfField($fieldName);
@@ -529,7 +529,7 @@ class XmlMarshaller implements Marshaller
      * @param string $fieldName
      * @param mixed $fieldValue
      */
-    private function _writeElement(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName,  $fieldValue)
+    private function writeElement(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName,  $fieldValue)
     {
         $fieldType = $classMetadata->getTypeOfField($fieldName);
 

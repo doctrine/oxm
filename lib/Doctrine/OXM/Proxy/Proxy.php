@@ -17,39 +17,14 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Mapping\Driver;
-
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
+namespace Doctrine\OXM\Proxy;
 
 /**
+ * XmlEntity Proxy interface.
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @version $Revision$
- * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
+ * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @link        www.doctrine-project.com
+ * @since       1.0
+ * @author      Igor Golovanov <igor.golovanov@gmail.com>
  */
-class PHPDriver extends AbstractFileDriver
-{
-
-    protected $fileExtension = '.php';
-    protected $metadata;
-
-    /**
-     * Loads the mapping for the specified class into the provided container.
-     *
-     * @param string $className
-     * @param Mapping $mapping
-     */
-    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
-    {
-        $this->metadata = $metadata;
-        $this->loadMappingFile($this->findMappingFile($className));
-    }
-
-    protected function loadMappingFile($file)
-    {
-        $metadata = $this->metadata;
-        include $file;
-    }
-}
+interface Proxy {}

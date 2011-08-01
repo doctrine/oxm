@@ -23,6 +23,7 @@ use Doctrine\OXM\Marshaller\Marshaller;
 use Doctrine\OXM\Storage\Storage;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\OXM\Proxy\ProxyFactory;
 
 /**
  *
@@ -75,6 +76,11 @@ class XmlEntityManager implements ObjectManager
      * @var array
      */
     private $repositories = array();
+    
+    /**
+     * @var Proxy\ProxyFactory
+     */
+    private $proxyFactory;
 
     /**
      * Creates a new XmlEntityManager that uses the given Configuration and EventManager implementations.
@@ -101,6 +107,23 @@ class XmlEntityManager implements ObjectManager
         $this->marshaller = new $marshallerClassName($this->metadataFactory);
 
         $this->unitOfWork = new UnitOfWork($this);
+        
+        $this->proxyFactory = new ProxyFactory($this,
+                $this->config->getProxyDir(),
+                $this->config->getProxyNamespace(),
+                $this->config->getAutoGenerateProxyClasses()
+        );
+    }
+    
+    
+    /**
+     * Gets the proxy factory used by the XmlEntityManager to create xml-entity proxies.
+     *
+     * @return ProxyFactory
+     */
+    public function getProxyFactory()
+    {
+        return $this->proxyFactory;
     }
 
 

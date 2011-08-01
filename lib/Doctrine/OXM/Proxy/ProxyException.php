@@ -1,5 +1,7 @@
 <?php
 /*
+ *  $Id$
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -15,41 +17,34 @@
  * This software consists of voluntary contributions made by many individuals
  * and is licensed under the LGPL. For more information, see
  * <http://www.doctrine-project.org>.
- */
+*/
 
-namespace Doctrine\OXM\Mapping\Driver;
+namespace Doctrine\OXM\Proxy;
 
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\OXMException;
 
 /**
+ * XmlEntity Proxy Exception
  *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @version $Revision$
- * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
+ * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
+ * @link        www.doctrine-project.com
+ * @since       1.0
+ * @author      Igor Golovanov <igor.golovanov@gmail.com>
  */
-class PHPDriver extends AbstractFileDriver
+class ProxyException extends OXMException
 {
-
-    protected $fileExtension = '.php';
-    protected $metadata;
-
-    /**
-     * Loads the mapping for the specified class into the provided container.
-     *
-     * @param string $className
-     * @param Mapping $mapping
-     */
-    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
+    public static function proxyDirectoryRequired()
     {
-        $this->metadata = $metadata;
-        $this->loadMappingFile($this->findMappingFile($className));
+        return new self("You must configure a proxy directory. See docs for details");
     }
 
-    protected function loadMappingFile($file)
+    public static function proxyNamespaceRequired()
     {
-        $metadata = $this->metadata;
-        include $file;
+        return new self("You must configure a proxy namespace. See docs for details");
+    }
+
+    public static function proxyDirectoryMustExist()
+    {
+        return new self("You must create a proxy directory specified");
     }
 }

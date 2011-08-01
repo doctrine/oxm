@@ -77,7 +77,7 @@ class FileSystemStorage implements Storage
      */
     public function load(ClassMetadataInfo $classMetadata, $id)
     {
-        return file_get_contents($this->_getFilename($classMetadata, $id));
+        return file_get_contents($this->getFilename($classMetadata, $id));
     }
 
     /**
@@ -85,7 +85,7 @@ class FileSystemStorage implements Storage
      */
     public function exists(ClassMetadataInfo $classMetadata, $id)
     {
-        return is_file($this->_getFilename($classMetadata, $id));
+        return is_file($this->getFilename($classMetadata, $id));
     }
 
     /**
@@ -99,9 +99,9 @@ class FileSystemStorage implements Storage
      */
     public function insert(ClassMetadataInfo $classMetadata, $id, $xmlContent)
     {
-        $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
+        $this->prepareStoragePathForClass($this->resolveClassName($classMetadata));
 
-        $filePath = $this->_getFilename($classMetadata, $id);
+        $filePath = $this->getFilename($classMetadata, $id);
         $result = file_put_contents($filePath, $xmlContent);
 
         if (false === $result) {
@@ -125,9 +125,9 @@ class FileSystemStorage implements Storage
      */
     public function update(ClassMetadataInfo $classMetadata, $id, $xmlContent)
     {
-        $this->_prepareStoragePathForClass($this->_resolveClassName($classMetadata));
+        $this->prepareStoragePathForClass($this->resolveClassName($classMetadata));
 
-        $filePath = $this->_getFilename($classMetadata, $id);
+        $filePath = $this->getFilename($classMetadata, $id);
         $result = file_put_contents($filePath, $xmlContent);
 
         if (false === $result) {
@@ -144,7 +144,7 @@ class FileSystemStorage implements Storage
      */
     public function delete(ClassMetadataInfo $classMetadata, $id, array $options = array())
     {
-        $filePath = $this->_getFilename($classMetadata, $id);
+        $filePath = $this->getFilename($classMetadata, $id);
         $result = unlink($filePath);
         if (false === $result) {
             // @codeCoverageIgnoreStart
@@ -158,7 +158,7 @@ class FileSystemStorage implements Storage
      * @param ClassMetadataInfo $classMetadata
      * @return string
      */
-    private function _resolveClassName(ClassMetadataInfo $classMetadata)
+    private function resolveClassName(ClassMetadataInfo $classMetadata)
     {
         if ($this->useNamespaceInPath) {
             return $classMetadata->rootXmlEntityName;
@@ -174,9 +174,9 @@ class FileSystemStorage implements Storage
      * @param string $className
      * @return string
      */
-    private function _prepareStoragePathForClass($className)
+    private function prepareStoragePathForClass($className)
     {
-        $filePath = $this->_buildStoragePath($className);
+        $filePath = $this->buildStoragePath($className);
         if (!file_exists($filePath)) {
             mkdir($filePath, $this->fileModeBits, true);
         }
@@ -187,7 +187,7 @@ class FileSystemStorage implements Storage
      * @param string
      * @return string
      */
-    private function _buildStoragePath($className)
+    private function buildStoragePath($className)
     {
         return $this->storagePath . '/' . implode('/', explode("\\", $className));
     }
@@ -197,9 +197,9 @@ class FileSystemStorage implements Storage
      * @param mixed $id
      * @return string The filename for the given entity
      */
-    protected function _getFilename(ClassMetadataInfo $classMetadata, $id)
+    protected function getFilename(ClassMetadataInfo $classMetadata, $id)
     {
-        $baseFilePath = $this->_buildStoragePath($this->_resolveClassName($classMetadata));
+        $baseFilePath = $this->buildStoragePath($this->resolveClassName($classMetadata));
 
         // todo - id should be sanitized for the filesystem
 

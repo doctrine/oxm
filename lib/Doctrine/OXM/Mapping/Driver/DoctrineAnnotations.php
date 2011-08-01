@@ -53,12 +53,17 @@ final class XmlNamespaces extends Annotation {}
 final class XmlId extends Annotation {}
 
 /** @Annotation */
+final class XmlGeneratedValue extends Annotation {
+    public $strategy = 'AUTO';
+}
+
+/** @Annotation */
 class XmlField extends Annotation {
     public $type;       // required
     public $name;       // implied (xml element name)
     public $node;       // implied (attribute, text, element)
     public $direct = true;
-    public $nillable = false;
+    public $nullable = false;
     public $required = false;
     public $collection = false;
     public $getMethod;  // implied

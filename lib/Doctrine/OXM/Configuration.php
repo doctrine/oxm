@@ -37,7 +37,7 @@ class Configuration
      *
      * @var array
      */
-    protected $_attributes = array();
+    protected $attributes = array();
 
     /**
      * Sets the cache driver implementation that is used for metadata caching.
@@ -48,7 +48,7 @@ class Configuration
      */
     public function setMetadataDriverImpl(Driver $driverImpl)
     {
-        $this->_attributes['classMetadataDriverImpl'] = $driverImpl;
+        $this->attributes['classMetadataDriverImpl'] = $driverImpl;
     }
 
     /**
@@ -58,8 +58,8 @@ class Configuration
      */
     public function getMetadataDriverImpl()
     {
-        return isset($this->_attributes['classMetadataDriverImpl']) ?
-                $this->_attributes['classMetadataDriverImpl'] : null;
+        return isset($this->attributes['classMetadataDriverImpl']) ?
+                $this->attributes['classMetadataDriverImpl'] : null;
     }
 
 
@@ -71,8 +71,8 @@ class Configuration
      */
     public function getMetadataCacheImpl()
     {
-        return isset($this->_attributes['classMetadataCacheImpl']) ?
-                $this->_attributes['classMetadataCacheImpl'] : null;
+        return isset($this->attributes['classMetadataCacheImpl']) ?
+                $this->attributes['classMetadataCacheImpl'] : null;
     }
 
     /**
@@ -82,7 +82,7 @@ class Configuration
      */
     public function setMetadataCacheImpl(Cache $cacheImpl)
     {
-        $this->_attributes['classMetadataCacheImpl'] = $cacheImpl;
+        $this->attributes['classMetadataCacheImpl'] = $cacheImpl;
     }
 
     /**
@@ -90,10 +90,10 @@ class Configuration
      */
     public function getMarshallerClassName()
     {
-        if (!isset($this->_attributes['marshallerclassName'])) {
-            $this->_attributes['marshallerclassName'] = 'Doctrine\OXM\Marshaller\XmlMarshaller';
+        if (!isset($this->attributes['marshallerclassName'])) {
+            $this->attributes['marshallerclassName'] = 'Doctrine\OXM\Marshaller\XmlMarshaller';
         }
-        return $this->_attributes['marshallerclassName'];
+        return $this->attributes['marshallerclassName'];
     }
 
     /**
@@ -102,24 +102,89 @@ class Configuration
      */
     public function setMarshallerClassName($marshallerClassName)
     {
-        $this->_attributes['marshallerclassName'] = $marshallerClassName;
+        $this->attributes['marshallerclassName'] = $marshallerClassName;
     }
 
+//    /**
+//     *
+//     */
+//    public function setStoragePath($path)
+//    {
+//        $this->attributes['storagePath'] = $path;
+//    }
+//
+//    /**
+//     * 
+//     */
+//    public function getStoragePath()
+//    {
+//        return isset($this->attributes['storagePath']) ?
+//                $this->attributes['storagePath'] : null;
+//    }
+    
     /**
+     * Sets the directory where Doctrine generates any necessary proxy class files.
      *
+     * @param string $dir
      */
-    public function setStoragePath($path)
+    public function setProxyDir($dir)
     {
-        $this->_attributes['storagePath'] = $path;
+        $this->attributes['proxyDir'] = $dir;
     }
 
     /**
-     * 
+     * Gets the directory where Doctrine generates any necessary proxy class files.
+     *
+     * @return string
      */
-    public function getStoragePath()
+    public function getProxyDir()
     {
-        return isset($this->_attributes['storagePath']) ?
-                $this->_attributes['storagePath'] : null;
+        return isset($this->attributes['proxyDir']) ?
+                $this->attributes['proxyDir'] : null;
+    }
+
+    /**
+     * Gets a boolean flag that indicates whether proxy classes should always be regenerated
+     * during each script execution.
+     *
+     * @return boolean
+     */
+    public function getAutoGenerateProxyClasses()
+    {
+        return isset($this->attributes['autoGenerateProxyClasses']) ?
+                $this->attributes['autoGenerateProxyClasses'] : true;
+    }
+
+    /**
+     * Sets a boolean flag that indicates whether proxy classes should always be regenerated
+     * during each script execution.
+     *
+     * @param boolean $bool
+     */
+    public function setAutoGenerateProxyClasses($bool)
+    {
+        $this->attributes['autoGenerateProxyClasses'] = $bool;
+    }
+
+    /**
+     * Gets the namespace where proxy classes reside.
+     * 
+     * @return string
+     */
+    public function getProxyNamespace()
+    {
+        return isset($this->attributes['proxyNamespace']) ?
+                $this->attributes['proxyNamespace'] : null;
+    }
+
+    /**
+     * Sets the namespace where proxy classes reside.
+     * 
+     * @param string $ns
+     */
+    public function setProxyNamespace($ns)
+    {
+        $this->attributes['proxyNamespace'] = $ns;
     }
 
 
@@ -164,11 +229,11 @@ class Configuration
      */
     public function getEntityNamespace($entityNamespaceAlias)
     {
-        if ( ! isset($this->_attributes['entityNamespaces'][$entityNamespaceAlias])) {
+        if ( ! isset($this->attributes['entityNamespaces'][$entityNamespaceAlias])) {
             throw OXMException::unknownEntityNamespace($entityNamespaceAlias);
         }
 
-        return trim($this->_attributes['entityNamespaces'][$entityNamespaceAlias], '\\');
+        return trim($this->attributes['entityNamespaces'][$entityNamespaceAlias], '\\');
     }
 
     /**
@@ -179,7 +244,7 @@ class Configuration
      */
     public function setEntityNamespaces(array $entityNamespaces)
     {
-        $this->_attributes['entityNamespaces'] = $entityNamespaces;
+        $this->attributes['entityNamespaces'] = $entityNamespaces;
     }
 
 
@@ -205,7 +270,7 @@ class Configuration
      */
     public function setClassMetadataFactoryName($cmfName)
     {
-        $this->_attributes['classMetadataFactoryName'] = $cmfName;
+        $this->attributes['classMetadataFactoryName'] = $cmfName;
     }
 
     /**
@@ -213,9 +278,9 @@ class Configuration
      */
     public function getClassMetadataFactoryName()
     {
-        if (!isset($this->_attributes['classMetadataFactoryName'])) {
-            $this->_attributes['classMetadataFactoryName'] = 'Doctrine\OXM\Mapping\ClassMetadataFactory';
+        if (!isset($this->attributes['classMetadataFactoryName'])) {
+            $this->attributes['classMetadataFactoryName'] = 'Doctrine\OXM\Mapping\ClassMetadataFactory';
         }
-        return $this->_attributes['classMetadataFactoryName'];
+        return $this->attributes['classMetadataFactoryName'];
     }
 }

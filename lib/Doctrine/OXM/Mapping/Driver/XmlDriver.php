@@ -38,7 +38,7 @@ class XmlDriver extends AbstractFileDriver
     /**
      * {@inheritdoc}
      */
-    protected $_fileExtension = '.dcm.xml';
+    protected $fileExtension = '.dcm.xml';
 
     /**
      * {@inheritdoc}
@@ -110,8 +110,8 @@ class XmlDriver extends AbstractFileDriver
                     $mapping['direct'] = (boolean)$fieldMapping['direct'];
                 }
 
-                if (isset($fieldMapping['nillable'])) {
-                    $mapping['nillable'] = (boolean)$fieldMapping['nillable'];
+                if (isset($fieldMapping['nulable'])) {
+                    $mapping['nullable'] = (boolean)$fieldMapping['nullable'];
                 }
 
                 if (isset($fieldMapping['required'])) {
@@ -152,7 +152,7 @@ class XmlDriver extends AbstractFileDriver
     }
 
 
-    protected function _loadMappingFile($file)
+    protected function loadMappingFile($file)
     {
         $result = array();
         $xmlElement = simplexml_load_file($file);

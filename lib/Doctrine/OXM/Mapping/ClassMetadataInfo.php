@@ -41,7 +41,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     const XML_TEXT      = 'text';
 
     /** The map of supported xml node types. */
-    private static $_nodeTypes = array(
+    private static $nodeTypes = array(
         self::XML_TEXT,
         self::XML_ATTRIBUTE,
         self::XML_ELEMENT,
@@ -166,7 +166,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      * - <b>required</b> (boolean, optional)
      * Defines if this field is required or not.  Checked during marshalling and unmarshalling.
      *
-     * - <b>nillable</b> (boolean, optional)
+     * - <b>nullable</b> (boolean, optional)
      * Defines if this field is required to be marshalled/unmarshalled if null.
      *
      * - <b>getMethod</b> (string, optional)
@@ -587,8 +587,8 @@ class ClassMetadataInfo implements BaseClassMetadata
             $mapping['direct'] = true;
         }
 
-        if (!isset($mapping['nillable'])) {
-            $mapping['nillable'] = false;
+        if (!isset($mapping['nullable'])) {
+            $mapping['nullable'] = false;
         }
 
         if (!isset($mapping['required'])) {
@@ -865,16 +865,16 @@ class ClassMetadataInfo implements BaseClassMetadata
      * @return boolean
      *
      */
-    public function isNillable($fieldName)
+    public function isNullable($fieldName)
     {
         if ( ! isset($this->fieldMappings[$fieldName])) {
             throw MappingException::mappingNotFound($this->name, $fieldName);
         }
-        return $this->fieldMappings[$fieldName]['nillable'] ? true : false;
+        return $this->fieldMappings[$fieldName]['nullable'] ? true : false;
     }
 
     /**
-     * Checks whether the class will generate a new \MongoId instance for us.
+     * Checks whether the class will generate a new \XmlId instance for us.
      *
      * @return boolean TRUE if the class uses the AUTO generator, FALSE otherwise.
      */
@@ -921,7 +921,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     public static function getXmlNodeTypes()
     {
-        return self::$_nodeTypes;
+        return self::$nodeTypes;
     }
 
     /**
@@ -940,4 +940,5 @@ class ClassMetadataInfo implements BaseClassMetadata
     {
         return $this->xmlNamespaces;
     }
+
 }
