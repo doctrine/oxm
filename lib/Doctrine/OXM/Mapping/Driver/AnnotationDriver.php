@@ -220,9 +220,17 @@ class AnnotationDriver implements DriverInterface
         // Evaluate @HasLifecycleCallbacks annotations
         if (isset($classAnnotations['Doctrine\OXM\Mapping\HasLifecycleCallbacks'])) {
             foreach ($reflClass->getMethods() as $method) {
-                if ($method->isPublic()) {
+                // filter for the declaring class only, callbacks from parents will already be registered.
+                if ($method->isPublic() && $method->getDeclaringClass()->getName() == $reflClass->name) {
                     $annotations = $this->reader->getMethodAnnotations($method);
-
+                    
+                    // Compatibility with Doctrine Common 3.x
+                    if ($annotations && is_int(key($annotations))) {
+                        foreach ($annotations as $annot) {
+                            $annotations[get_class($annot)] = $annot;
+                        }
+                    }
+                    
                     if (isset($annotations['Doctrine\OXM\Mapping\PreMarshal'])) {
                         $metadata->addLifecycleCallback($method->getName(), \Doctrine\OXM\Events::preMarshal);
                     }
