@@ -17,39 +17,44 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Mapping\Driver;
+namespace Doctrine\OXM\Tools\Console\Helper;
 
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Symfony\Component\Console\Helper\Helper;
+use Doctrine\OXM\XmlEntityManager;
 
 /**
- *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @version $Revision$
- * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
- */
-class PHPDriver extends AbstractFileDriver
+* @author Igor Golovanov <igor.golovanov@gmail.com>
+*/
+class XmlEntityManagerHelper extends Helper
 {
-
-    protected $fileExtension = '.php';
-    protected $metadata;
-
     /**
-     * Loads the mapping for the specified class into the provided container.
      *
-     * @param string $className
-     * @param Mapping $mapping
+     * @var XmlEntityManager
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
+    protected $xem;
+    
+    /**
+     * @param XmlEntityManager $xem 
+     */
+    public function __construct(XmlEntityManager $xem)
     {
-        $this->metadata = $metadata;
-        $this->loadMappingFile($this->findMappingFile($className));
+        $this->xem = $xem;
     }
-
-    protected function loadMappingFile($file)
+    
+    /**
+     * @return XmlEntityManager
+     */
+    public function getXmlEntityManager()
     {
-        $metadata = $this->metadata;
-        include $file;
+        return $this->xem;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return 'xmlEntityManager';
     }
 }
+

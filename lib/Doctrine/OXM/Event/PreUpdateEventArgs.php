@@ -18,7 +18,7 @@ class PreUpdateEventArgs extends LifecycleEventArgs
     /**
      * @var array
      */
-    private $_entityChangeSet;
+    private $entityChangeSet;
 
     /**
      *
@@ -29,12 +29,12 @@ class PreUpdateEventArgs extends LifecycleEventArgs
     public function __construct($entity, $xem, array &$changeSet)
     {
         parent::__construct($entity, $xem);
-        $this->_entityChangeSet = &$changeSet;
+        $this->entityChangeSet = &$changeSet;
     }
 
     public function getEntityChangeSet()
     {
-        return $this->_entityChangeSet;
+        return $this->entityChangeSet;
     }
 
     /**
@@ -44,7 +44,7 @@ class PreUpdateEventArgs extends LifecycleEventArgs
      */
     public function hasChangedField($field)
     {
-        return isset($this->_entityChangeSet[$field]);
+        return isset($this->entityChangeSet[$field]);
     }
 
     /**
@@ -55,9 +55,9 @@ class PreUpdateEventArgs extends LifecycleEventArgs
      */
     public function getOldValue($field)
     {
-    	$this->_assertValidField($field);
+    	$this->assertValidField($field);
 
-        return $this->_entityChangeSet[$field][0];
+        return $this->entityChangeSet[$field][0];
     }
 
     /**
@@ -68,9 +68,9 @@ class PreUpdateEventArgs extends LifecycleEventArgs
      */
     public function getNewValue($field)
     {
-        $this->_assertValidField($field);
+        $this->assertValidField($field);
 
-        return $this->_entityChangeSet[$field][1];
+        return $this->entityChangeSet[$field][1];
     }
 
     /**
@@ -81,14 +81,14 @@ class PreUpdateEventArgs extends LifecycleEventArgs
      */
     public function setNewValue($field, $value)
     {
-        $this->_assertValidField($field);
+        $this->assertValidField($field);
 
-        $this->_entityChangeSet[$field][1] = $value;
+        $this->entityChangeSet[$field][1] = $value;
     }
 
-    private function _assertValidField($field)
+    private function assertValidField($field)
     {
-    	if (!isset($this->_entityChangeSet[$field])) {
+    	if (!isset($this->entityChangeSet[$field])) {
             throw new \InvalidArgumentException(
                 "Field '".$field."' is not a valid field of the entity ".
                 "'".get_class($this->getXmlEntity())."' in PreInsertUpdateEventArgs."

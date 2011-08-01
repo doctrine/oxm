@@ -17,39 +17,34 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Mapping\Driver;
+require_once __DIR__ . '/../lib/vendor/doctrine-common/lib/Doctrine/Common/ClassLoader.php';
 
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
+$classLoader = new \Doctrine\Common\ClassLoader('Doctrine', __DIR__ . '/../lib');
+$classLoader->register();
 
-/**
- *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @version $Revision$
- * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
- */
-class PHPDriver extends AbstractFileDriver
-{
+$classLoader = new \Doctrine\Common\ClassLoader('Symfony', __DIR__ . '/../lib/vendor');
+$classLoader->register();
 
-    protected $fileExtension = '.php';
-    protected $metadata;
+$configFile = getcwd() . DIRECTORY_SEPARATOR . 'cli-config.php';
 
-    /**
-     * Loads the mapping for the specified class into the provided container.
-     *
-     * @param string $className
-     * @param Mapping $mapping
-     */
-    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
-    {
-        $this->metadata = $metadata;
-        $this->loadMappingFile($this->findMappingFile($className));
+$helperSet = null;
+if (file_exists($configFile)) {
+    if ( ! is_readable($configFile)) {
+        trigger_error(
+            'Configuration file [' . $configFile . '] does not have read permission.', E_ERROR
+        );
     }
 
-    protected function loadMappingFile($file)
-    {
-        $metadata = $this->metadata;
-        include $file;
+    require $configFile;
+
+    foreach ($GLOBALS as $helperSetCandidate) {
+        if ($helperSetCandidate instanceof \Symfony\Component\Console\Helper\HelperSet) {
+            $helperSet = $helperSetCandidate;
+            break;
+        }
     }
 }
+
+$helperSet = ($helperSet) ?: new \Symfony\Component\Console\Helper\HelperSet();
+
+\Doctrine\OXM\Tools\Console\ConsoleRunner::run($helperSet);

@@ -37,21 +37,21 @@ class StaticPHPDriver implements Driver
      *
      * @var array
      */
-    private $_paths = array();
+    private $paths = array();
 
     /**
      * Map of all class names.
      *
      * @var array
      */
-    private $_classNames;
+    private $classNames;
 
     /**
      * The file extension of mapping documents
      *
      * @var string
      */
-    private $_fileExtension = '.php';
+    private $fileExtension = '.php';
 
     public function __construct($paths)
     {
@@ -60,7 +60,7 @@ class StaticPHPDriver implements Driver
 
     public function addPaths(array $paths)
     {
-        $this->_paths = array_unique(array_merge($this->_paths, $paths));
+        $this->paths = array_unique(array_merge($this->paths, $paths));
     }
 
     /**
@@ -81,18 +81,18 @@ class StaticPHPDriver implements Driver
      */
     public function getAllClassNames()
     {
-        if ($this->_classNames !== null) {
-            return $this->_classNames;
+        if ($this->classNames !== null) {
+            return $this->classNames;
         }
 
-        if (!$this->_paths) {
+        if (!$this->paths) {
             throw MappingException::pathRequired();
         }
 
         $classes = array();
         $includedFiles = array();
 
-        foreach ($this->_paths as $path) {
+        foreach ($this->paths as $path) {
             if (!is_dir($path)) {
                 throw MappingException::fileMappingDriversRequiresConfiguredDirectoryPath($path);
             }
@@ -103,7 +103,7 @@ class StaticPHPDriver implements Driver
             );
 
             foreach ($iterator as $file) {
-                if (($fileName = $file->getBasename($this->_fileExtension)) == $file->getBasename()) {
+                if (($fileName = $file->getBasename($this->fileExtension)) == $file->getBasename()) {
                     continue;
                 }
 
@@ -123,7 +123,7 @@ class StaticPHPDriver implements Driver
             }
         }
 
-        $this->_classNames = $classes;
+        $this->classNames = $classes;
 
         return $classes;
     }

@@ -47,8 +47,8 @@ class OxmTestCase extends \PHPUnit_Framework_TestCase
 
         $storage = new \Doctrine\OXM\Storage\FileSystemStorage(__DIR__ .'/Workspace');
         
-//        $config->setProxyDir(__DIR__ . '/Proxies');
-//        $config->setProxyNamespace('Doctrine\Tests\Proxies');
+        $config->setProxyDir(__DIR__ . '/Proxies');
+        $config->setProxyNamespace('Doctrine\Tests\Proxies');
         $eventManager = new \Doctrine\Common\EventManager();
 
         return \Doctrine\Tests\Mocks\XmlEntityManagerMock::create($storage, $config, $eventManager);
