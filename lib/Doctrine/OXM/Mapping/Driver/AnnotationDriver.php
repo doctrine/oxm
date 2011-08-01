@@ -331,13 +331,12 @@ class AnnotationDriver implements DriverInterface
         foreach ($declared as $className) {
             $rc = new \ReflectionClass($className);
             $sourceFile = $rc->getFileName();
-            if (in_array($sourceFile, $includedFiles) && ! $this->isTransient($className)) {
+            if (in_array($sourceFile, $includedFiles) && !$this->isTransient($className)) {
                 $classes[] = $className;
             }
         }
-
         $this->classNames = $classes;
-
+        
         return $classes;
     }
 
@@ -353,7 +352,14 @@ class AnnotationDriver implements DriverInterface
     public function isTransient($className)
     {
         $classAnnotations = $this->reader->getClassAnnotations(new \ReflectionClass($className));
-
+        
+        // Compatibility with Doctrine Common 3.x
+        if ($classAnnotations && is_int(key($classAnnotations))) {
+            foreach ($classAnnotations as $annot) {
+                $classAnnotations[get_class($annot)] = $annot;
+            }
+        }
+        
         return ! isset($classAnnotations['Doctrine\OXM\Mapping\XmlEntity']) &&
                ! isset($classAnnotations['Doctrine\OXM\Mapping\XmlRootEntity']) &&
                ! isset($classAnnotations['Doctrine\OXM\Mapping\XmlMappedSuperclass']);
