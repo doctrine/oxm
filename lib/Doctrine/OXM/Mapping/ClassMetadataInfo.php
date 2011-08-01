@@ -41,7 +41,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     const XML_TEXT      = 'text';
 
     /** The map of supported xml node types. */
-    private static $_nodeTypes = array(
+    private static $nodeTypes = array(
         self::XML_TEXT,
         self::XML_ATTRIBUTE,
         self::XML_ELEMENT,
@@ -921,7 +921,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     public static function getXmlNodeTypes()
     {
-        return self::$_nodeTypes;
+        return self::$nodeTypes;
     }
 
     /**
