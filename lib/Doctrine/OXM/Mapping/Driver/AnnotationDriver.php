@@ -198,6 +198,12 @@ class AnnotationDriver implements DriverInterface
             if ($idAnnot = $this->reader->getPropertyAnnotation($property, 'Doctrine\OXM\Mapping\XmlId')) {
                 $mapping['id']  = true;
             }
+            
+            if ($generatedValueAnnot = $this->reader->getPropertyAnnotation($property, 'Doctrine\OXM\Mapping\XmlGeneratedValue')) {
+                $metadata->setIdGeneratorType(constant('Doctrine\OXM\Mapping\ClassMetadata::GENERATOR_TYPE_' . $generatedValueAnnot->strategy));
+            }
+            
+            
             $referenceAnnot = $this->reader->getPropertyAnnotation($property, 'Doctrine\OXM\Mapping\XmlReferences');
             if (isset($referenceAnnot->entityName)) {
                 $mapping['references']  = $referenceAnnot->entityName;

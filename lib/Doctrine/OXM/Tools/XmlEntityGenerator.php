@@ -471,7 +471,7 @@ public function <methodName>()
             $lines[] = ' *';
 
             if ($metadata->isMappedSuperclass) {
-                $lines[] = ' * @OXM\\MappedSupperClass';
+                $lines[] = ' * @OXM\\XmlMappedSupperClass';
             } else if ($metadata->isRoot) {
                 $lines[] = ' * @OXM\\XmlRootEntity';
             } else {
@@ -479,20 +479,22 @@ public function <methodName>()
             }
 
             $xmlEntity = array();
-            if (! $metadata->isMappedSuperclass && ! $metadata->isRoot) {
-//                if ($metadata->collection) {
-//                    $xmlEntity[] = ' *     collection="' . $metadata->collection . '"';
-//                }
+            if ($metadata->isRoot) {
                 if ($metadata->customRepositoryClassName) {
                     $xmlEntity[] = ' *     repositoryClass="' . $metadata->customRepositoryClassName . '"';
                 }
             }
+            
             
 
             if ($xmlEntity) {
                 $lines[count($lines) - 1] .= '(';
                 $lines[] = implode(",\n", $xmlEntity);
                 $lines[] = ' * )';
+            }
+            
+            if (isset($metadata->lifecycleCallbacks) && $metadata->lifecycleCallbacks) {
+                $lines[] = ' * @OXM\\HasLifecycleCallbacks';
             }
 
             $methods = array(
@@ -514,7 +516,7 @@ public function <methodName>()
 
     private function generateChangeTrackingPolicyAnnotation(ClassMetadataInfo $metadata)
     {
-        return '@OXM\\ChangeTrackingPolicy("' . $this->getChangeTrackingPolicyString($metadata->changeTrackingPolicy) . '")';
+        return '@OXM\\XmlChangeTrackingPolicy("' . $this->getChangeTrackingPolicyString($metadata->changeTrackingPolicy) . '")';
     }
 
     private function generateXmlEntityStubMethods(ClassMetadataInfo $metadata)
@@ -636,6 +638,7 @@ public function <methodName>()
             array_values($replacements),
             self::$lifecycleCallbackMethodTemplate
         );
+        
 
         return $this->prefixCodeWithSpaces($method);
     }
@@ -644,57 +647,50 @@ public function <methodName>()
     {
         $lines = array();
         $lines[] = $this->spaces . '/**';
-        if (isset($fieldMapping['id']) && $fieldMapping['id']) {
-            $fieldMapping['strategy'] = isset($fieldMapping['strategy']) ? $fieldMapping['strategy'] : ClassMetadataInfo::GENERATOR_TYPE_AUTO;
-            if ($fieldMapping['strategy'] === ClassMetadataInfo::GENERATOR_TYPE_AUTO) {
-                $lines[] = $this->spaces . ' * @var MongoId $' . $fieldMapping['fieldName'];
-            } elseif ($fieldMapping['strategy'] === ClassMetadataInfo::GENERATOR_TYPE_INCREMENT) {
-                $lines[] = $this->spaces . ' * @var integer $' . $fieldMapping['fieldName'];
-            } elseif ($fieldMapping['strategy'] === ClassMetadataInfo::GENERATOR_TYPE_UUID) {
-                $lines[] = $this->spaces . ' * @var string $' . $fieldMapping['fieldName'];
-            } elseif ($fieldMapping['strategy'] === ClassMetadataInfo::GENERATOR_TYPE_NONE) {
-                $lines[] = $this->spaces . ' * @var $' . $fieldMapping['fieldName'];
-            } else {
-                $lines[] = $this->spaces . ' * @var $' . $fieldMapping['fieldName'];
-            }
-        } else {
-            $lines[] = $this->spaces . ' * @var ' . $fieldMapping['type'] . ' $' . $fieldMapping['fieldName'];
-        }
+            
+
+        $lines[] = $this->spaces . ' * @var ' . $fieldMapping['type'] . ' $' . $fieldMapping['fieldName'];
 
         if ($this->generateAnnotations) {
             $lines[] = $this->spaces . ' *';
 
+            if (isset($fieldMapping['id']) && $fieldMapping['id']) {                
+                $lines[] = $this->spaces . ' * @OXM\\XmlId';
+                
+                if ($generatorType = $this->getIdGeneratorTypeString($metadata->generatorType)) {
+                    $lines[] = $this->spaces.' * @OXM\\XmlGeneratedValue(strategy="' . $generatorType . '")';
+                }
+            }
+            
+            if(isset($fieldMapping['references'])) {
+                $lines[] = $this->spaces.' * @OXM\\XmlReferences(entityName="' . $fieldMapping['references'] . '")';
+            }
+            
             $field = array();
-            if (isset($fieldMapping['id']) && $fieldMapping['id']) {
-                if (isset($fieldMapping['strategy'])) {
-                    $field[] = 'strategy="' . $this->getIdGeneratorTypeString($metadata->generatorType) . '"';
-                }
-                $lines[] = $this->spaces . ' * @OXM\\Id(' . implode(', ', $field) . ')';
-            } else {
-                if (isset($fieldMapping['name'])) {
-                    $field[] = 'name="' . $fieldMapping['name'] . '"';
-                }
-
-                if (isset($fieldMapping['type'])) {
-                    $field[] = 'type="' . $fieldMapping['type'] . '"';
-                }
-
-                if (isset($fieldMapping['nullable']) && $fieldMapping['nullable'] === true) {
-                    $field[] = 'nullable=' .  var_export($fieldMapping['nullable'], true);
-                }
-                if (isset($fieldMapping['options'])) {
-                    $options = array();
-                    foreach ($fieldMapping['options'] as $key => $value) {
-                        $options[] = '"' . $key . '" = "' . $value . '"';
-                    }
-                    $field[] = "options={".implode(', ', $options)."}";
-                }
-                $lines[] = $this->spaces . ' * @OXM\\Field(' . implode(', ', $field) . ')';
+            if (isset($fieldMapping['name'])) {
+                $field[] = 'name="' . $fieldMapping['name'] . '"';
             }
 
-            if (isset($fieldMapping['version']) && $fieldMapping['version']) {
-                $lines[] = $this->spaces . ' * @OXM\\Version';
+            if (isset($fieldMapping['type'])) {
+                $field[] = 'type="' . $fieldMapping['type'] . '"';
             }
+
+            if (isset($fieldMapping['nullable']) && $fieldMapping['nullable'] === true) {
+                $field[] = 'nullable=' .  var_export($fieldMapping['nullable'], true);
+            }
+            if (isset($fieldMapping['options'])) {
+                $options = array();
+                foreach ($fieldMapping['options'] as $key => $value) {
+                    $options[] = '"' . $key . '" = "' . $value . '"';
+                }
+                $field[] = "options={".implode(', ', $options)."}";
+            }
+            $lines[] = $this->spaces . ' * @OXM\\XmlField(' . implode(', ', $field) . ')';
+            
+
+//            if (isset($fieldMapping['version']) && $fieldMapping['version']) {
+//                $lines[] = $this->spaces . ' * @OXM\\Version';
+//            }
         }
 
         $lines[] = $this->spaces . ' */';

@@ -166,7 +166,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      * - <b>required</b> (boolean, optional)
      * Defines if this field is required or not.  Checked during marshalling and unmarshalling.
      *
-     * - <b>nillable</b> (boolean, optional)
+     * - <b>nullable</b> (boolean, optional)
      * Defines if this field is required to be marshalled/unmarshalled if null.
      *
      * - <b>getMethod</b> (string, optional)
@@ -587,8 +587,8 @@ class ClassMetadataInfo implements BaseClassMetadata
             $mapping['direct'] = true;
         }
 
-        if (!isset($mapping['nillable'])) {
-            $mapping['nillable'] = false;
+        if (!isset($mapping['nullable'])) {
+            $mapping['nullable'] = false;
         }
 
         if (!isset($mapping['required'])) {
@@ -865,16 +865,16 @@ class ClassMetadataInfo implements BaseClassMetadata
      * @return boolean
      *
      */
-    public function isNillable($fieldName)
+    public function isNullable($fieldName)
     {
         if ( ! isset($this->fieldMappings[$fieldName])) {
             throw MappingException::mappingNotFound($this->name, $fieldName);
         }
-        return $this->fieldMappings[$fieldName]['nillable'] ? true : false;
+        return $this->fieldMappings[$fieldName]['nullable'] ? true : false;
     }
 
     /**
-     * Checks whether the class will generate a new \MongoId instance for us.
+     * Checks whether the class will generate a new \XmlId instance for us.
      *
      * @return boolean TRUE if the class uses the AUTO generator, FALSE otherwise.
      */
@@ -940,19 +940,5 @@ class ClassMetadataInfo implements BaseClassMetadata
     {
         return $this->xmlNamespaces;
     }
-    
-    public function getFieldNames()
-    {
-        throw new \BadMethodCallException(__METHOD__.'() is not implemented yet.');
-    }
 
-    public function getAssociationNames()
-    {
-        throw new \BadMethodCallException(__METHOD__.'() is not implemented yet.');
-    }
-
-    public function getAssociationTargetClass($assocName)
-    {
-        throw new \BadMethodCallException(__METHOD__.'($assocName) is not implemented yet.');
-    }
 }

@@ -40,9 +40,9 @@ class XmlEntityGeneratorTest extends OxmTestCase
     public function generateBookXmlEntityFixture()
     {
         $metadata = new ClassMetadataInfo($this->namespace . '\XmlEntityGeneratorBook');
-       // $metadata->namespace = $this->namespace;
-        $metadata->customRepositoryClassName = $this->namespace  . '\XmlEntityGeneratorBookRepository';
 
+        $metadata->customRepositoryClassName = $this->namespace  . '\XmlEntityGeneratorBookRepository';
+        $metadata->isRoot = true;
         $metadata->mapField(array('fieldName' => 'name', 'type' => 'string'));
         $metadata->mapField(array('fieldName' => 'status', 'type' => 'string'));
         $metadata->mapField(array('fieldName' => 'id', 'type' => 'integer', 'id' => true));       
@@ -61,7 +61,7 @@ class XmlEntityGeneratorTest extends OxmTestCase
      */
     public function newInstance($metadata)
     {
-        $path = $this->tmpDir . '/'. $this->namespace . '/XmlEntityGeneratorBook.php';
+        $path = $this->tmpDir . '/'. $this->namespace . '/XmlEntityGeneratorBook.php'; 
         $this->assertFileExists($path);
         require_once $path;
 
@@ -139,24 +139,7 @@ class XmlEntityGeneratorTest extends OxmTestCase
         $reader = new \Doctrine\Common\Annotations\AnnotationReader();
         $driver = new \Doctrine\OXM\Mapping\Driver\AnnotationDriver($reader);
         $driver->loadMetadataForClass($cm->name, $cm);
-
-        //$this->assertEquals($cm->getCollection(), $metadata->getCollection());
-        $this->assertEquals($cm->lifecycleCallbacks, $metadata->lifecycleCallbacks);
-        $this->assertEquals($cm->identifier, $metadata->identifier);
-        $this->assertEquals($cm->idGenerator, $metadata->idGenerator);
-        $this->assertEquals($cm->customRepositoryClassName, $metadata->customRepositoryClassName);
-    }
-
-    public function testLoadPrefixedMetadata()
-    {
-        $metadata = $this->generateBookXmlEntityFixture();
-
-        $book = $this->newInstance($metadata);
-
-        $cm = new \Doctrine\OXM\Mapping\ClassMetadataInfo($metadata->name);
-        $reader = new \Doctrine\Common\Annotations\AnnotationReader();
-        $driver = new \Doctrine\OXM\Mapping\Driver\AnnotationDriver($reader);
-        $driver->loadMetadataForClass($cm->name, $cm);
+        
 
         //$this->assertEquals($cm->getCollection(), $metadata->getCollection());
         $this->assertEquals($cm->lifecycleCallbacks, $metadata->lifecycleCallbacks);

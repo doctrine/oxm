@@ -22,6 +22,7 @@ namespace Doctrine\Tests\OXM\Mapping;
 use \Doctrine\Tests\OxmTestCase,
     \Doctrine\OXM\Mapping\ClassMetadataInfo;
 
+
 class ClassMetadataInfoTest extends OxmTestCase
 {
     /**
@@ -120,7 +121,7 @@ class ClassMetadataInfoTest extends OxmTestCase
             'direct' => true,
             'id' => true,
             'collection' => false,
-            'nillable' => false,
+            'nullable' => false,
             'getMethod' => 'getSquibble',
             'setMethod' => 'setSquibble',
         ));
@@ -130,6 +131,6 @@ class ClassMetadataInfoTest extends OxmTestCase
         $this->assertTrue($class->isRequired('squibble'));
         $this->assertTrue($class->isDirect('squibble'));
         $this->assertFalse($class->isCollection('squibble'));
-        $this->assertFalse($class->isNillable('squibble'));
+        $this->assertFalse($class->isNullable('squibble'));
     }
 }

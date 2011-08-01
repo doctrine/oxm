@@ -422,7 +422,7 @@ class XmlMarshaller implements Marshaller
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
 
-                if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
+                if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
                     $this->_writeAttribute($writer, $classMetadata, $fieldName, $fieldValue);
                 }
             }
@@ -439,7 +439,7 @@ class XmlMarshaller implements Marshaller
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
 
-                if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
+                if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
                     $this->_writeText($writer, $classMetadata, $fieldName, $fieldValue);
                 }
             }
@@ -456,7 +456,7 @@ class XmlMarshaller implements Marshaller
                     throw MarshallerException::fieldRequired($className, $fieldName);
                 }
 
-                if ($fieldValue !== null || $classMetadata->isNillable($fieldName)) {
+                if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
                     $this->_writeElement($writer, $classMetadata, $fieldName,  $fieldValue);   
                 }
             }
