@@ -118,7 +118,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      *
      * @var array
      */
-    public $xmlNamespaces;
+    public $xmlNamespaces = array();
 
     /**
      * The ReflectionClass instance of the mapped class.
