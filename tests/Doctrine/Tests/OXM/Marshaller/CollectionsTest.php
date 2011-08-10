@@ -22,6 +22,8 @@ namespace Doctrine\Tests\OXM\Marshaller;
 use Doctrine\Tests\OxmTestCase,
     Doctrine\Tests\OXM\Entities\Collections\CollectionClass,
     Doctrine\Tests\OXM\Entities\Collections\CollectionAttributeClass,
+    Doctrine\Tests\OXM\Entities\Collections\WrapperForElement,
+    Doctrine\Tests\OXM\Entities\Collections\Element,
     Doctrine\Tests\OXM\Entities\Collections\Wrapper;
 
 class CollectionsTest extends OxmTestCase
@@ -115,5 +117,45 @@ class CollectionsTest extends OxmTestCase
         $this->assertContains('two', $otherWrapper->enum);
         $this->assertContains('three', $otherWrapper->enum);
         $this->assertContains('four', $otherWrapper->enum);
+    }
+
+    /**
+     * @test
+     */
+    public function collectionWrapsXmlElement()
+    {
+        $wrapperForElement = new WrapperForElement();
+        $element = new Element();
+        $element->attribute = 'blue';
+
+        $element2 = new Element();
+        $element2->attribute = 'red';
+
+        $wrapperForElement->attributes = array($element, $element2);
+
+        $xml = $this->marshaller->marshalToString($wrapperForElement);
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+        <wrapper-for-element>
+            <foo>
+                <element>
+                    <attribute>blue</attribute>
+                </element>
+                <element>
+                    <attribute>red</attribute>
+                </element>
+            </foo>
+        </wrapper-for-element>', $xml);
+
+        $otherWrapperForElement = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertEquals(2, count($otherWrapperForElement->attributes));
+        $this->assertContains('blue', $otherWrapperForElement->attributes[0]->attribute);
+        $this->assertContains('red', $otherWrapperForElement->attributes[1]->attribute);
+    }
+
+    public function collectionWrapsXmlMappedSuperclass()
+    {
+
     }
 }

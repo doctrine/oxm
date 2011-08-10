@@ -532,11 +532,19 @@ class XmlMarshaller implements Marshaller
     private function writeElement(WriterHelper $writer, ClassMetadata $classMetadata, $fieldName,  $fieldValue)
     {
         $fieldType = $classMetadata->getTypeOfField($fieldName);
+        $mapping = $classMetadata->getFieldMapping($fieldName);
+        $prefix  = (isset($mapping['prefix']) ? $mapping['prefix'] : null);
 
         if ($this->classMetadataFactory->hasMetadataFor($fieldType)) {
             if ($classMetadata->isCollection($fieldName)) {
+                if ($classMetadata->hasFieldWrapping($fieldName)) {
+                    $writer->startElement($mapping['wrapper'], $prefix);
+                }
                 foreach ($fieldValue as $value) {
                     $this->doMarshal($value, $writer);
+                }
+                if ($classMetadata->hasFieldWrapping($fieldName)) {
+                    $writer->endElement();
                 }
             } else {
                 $this->doMarshal($fieldValue, $writer);
