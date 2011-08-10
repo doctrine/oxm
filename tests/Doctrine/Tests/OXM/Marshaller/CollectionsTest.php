@@ -24,6 +24,9 @@ use Doctrine\Tests\OxmTestCase,
     Doctrine\Tests\OXM\Entities\Collections\CollectionAttributeClass,
     Doctrine\Tests\OXM\Entities\Collections\WrapperForElement,
     Doctrine\Tests\OXM\Entities\Collections\Element,
+    Doctrine\Tests\OXM\Entities\Collections\WrapperForSuperclass,
+    Doctrine\Tests\OXM\Entities\Collections\ChildA,
+    Doctrine\Tests\OXM\Entities\Collections\ChildB,
     Doctrine\Tests\OXM\Entities\Collections\Wrapper;
 
 class CollectionsTest extends OxmTestCase
@@ -154,8 +157,38 @@ class CollectionsTest extends OxmTestCase
         $this->assertContains('red', $otherWrapperForElement->attributes[1]->attribute);
     }
 
+    /**
+     * @test
+     */
     public function collectionWrapsXmlMappedSuperclass()
     {
+        $wrapperForSuperclass = new WrapperForSuperclass();
+        $childA = new ChildA();
+        $childA->aField = 'blue';
 
+        $childB = new ChildB();
+        $childB->bField = 'red';
+
+        $wrapperForSuperclass->children = array($childA, $childB);
+
+        $xml = $this->marshaller->marshalToString($wrapperForSuperclass);
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+        <wrapper-for-superclass>
+            <foo>
+                <child-a>
+                    <a-field>blue</a-field>
+                </child-a>
+                <child-b>
+                    <b-field>red</b-field>
+                </child-b>
+            </foo>
+        </wrapper-for-superclass>', $xml);
+
+        $otherWrapperForSuperclass = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertEquals(2, count($otherWrapperForSuperclass->children));
+        $this->assertContains('blue', $otherWrapperForSuperclass->children[0]->aField);
+        $this->assertContains('red', $otherWrapperForSuperclass->children[1]->bField);
     }
 }
