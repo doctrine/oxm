@@ -46,9 +46,15 @@ class User
     /**
      * @var string
      *
-     * @XmlAttribute(type="string", name="LastName")
+     * @XmlAttribute(type="string", name="LastName", nullable=true)
      */
-    private $lastName;
+    private $lastName=null;
+    /**
+     * @var string
+     *
+     * @XmlText(type="string",  nullable=true)
+     */
+    private $signature;
 
     /**
      * @var Address
@@ -61,9 +67,23 @@ class User
     /**
      * @var CustomerContact[]
      *
-     * @XmlElement(type="Doctrine\Tests\OXM\Entities\CustomerContact", collection=true, direct=true, name="customer-contact")
+     * @XmlElement(type="Doctrine\Tests\OXM\Entities\CustomerContact", collection=true, direct=true, name="customer-contact", nullable=true)
      */
     private $contacts;
+
+
+    /**
+     * @var Article[]
+     *
+     *
+     * @XmlElement(type="Doctrine\Tests\OXM\Entities\Article", collection=true, name="article", nullable=true)
+     */
+    private $articles;
+
+    public function __construct()
+    {
+        $this->articles = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * @return void
@@ -129,6 +149,39 @@ class User
     public function getContacts()
     {
         return $this->contacts;
+    }
+
+    public function addArticle(Article $contact)
+    {
+        $this->articles[] = $contact;
+    }
+
+    public function getArticles()
+    {
+        return $this->articles;
+    }
+
+    public function setArticles($articles)
+    {
+        $this->articles = $articles;
+    }
+
+    /**
+     * @param string $signature
+     * @return Signature
+     */
+    public function setSignature($signature)
+    {
+        $this->signature = $signature;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSignature()
+    {
+        return $this->signature;
     }
 
 }

@@ -62,16 +62,16 @@ class MarshallerTypeTest extends \PHPUnit_Framework_TestCase
     public function typeMappingProvider()
     {
         return array(
-            array(new ArrayType(array(1=>1)), '<array-type i="a:1:{i:1;i:1;}"/>'),
-            array(new BooleanType(true), '<boolean-type i="true"/>'),
-            array(new BooleanType(false), '<boolean-type i="false"/>'),
-            array(new DateTimeType(new \DateTime('1911-02-06 12:00:00')), '<date-time-type i="1911-02-06 12:00:00"/>'),
-            array(new DateTimeTzType(new \DateTime('1911-02-06 12:00:00+0200')), '<date-time-tz-type i="1911-02-06 12:00:00+0200"/>'),
-            array(new DateType(new \DateTime('1911-02-06')), '<date-type i="1911-02-06"/>'),
-            array(new TimeType(new \DateTime('12:34:56')), '<time-type i="12:34:56"/>'),
-            array(new FloatType(3.1415), '<float-type i="3.1415"/>'),
-            array(new IntegerType(1), '<integer-type i="1"/>'),
-            array(new StringType('Demon\'s Barber'), '<string-type i="Demon\'s Barber"/>'),
+            array(new ArrayType(array(1=>1)), '<array-type repositoryBy="0" i="a:1:{i:1;i:1;}"/>'),
+            array(new BooleanType(true), '<boolean-type repositoryBy="0" i="true"/>'),
+            array(new BooleanType(false), '<boolean-type repositoryBy="0" i="false"/>'),
+            array(new DateTimeType(new \DateTime('1911-02-06 12:00:00')), '<date-time-type repositoryBy="0" i="1911-02-06 12:00:00"/>'),
+            array(new DateTimeTzType(new \DateTime('1911-02-06 12:00:00+0200')), '<date-time-tz-type repositoryBy="0" i="1911-02-06 12:00:00+0200"/>'),
+            array(new DateType(new \DateTime('1911-02-06')), '<date-type repositoryBy="0" i="1911-02-06"/>'),
+            array(new TimeType(new \DateTime('12:34:56')), '<time-type repositoryBy="0" i="12:34:56"/>'),
+            array(new FloatType(3.1415), '<float-type repositoryBy="0" i="3.1415"/>'),
+            array(new IntegerType(1), '<integer-type repositoryBy="0" i="1"/>'),
+            array(new StringType('Demon\'s Barber'), '<string-type repositoryBy="0" i="Demon\'s Barber"/>'),
 //            array(new ObjectType($obj), '<object-type i="Demon Barber"/>'),
         );
     }
