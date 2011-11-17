@@ -79,7 +79,7 @@ class XmlMarshaller implements Marshaller
      */
     protected $repository;
 
-    const DOCTRINE_PROXY_INTERFACE = 'Doctrine\ORM\Proxy\Proxy';
+    const DOCTRINE_PROXY_INTERFACE = 'Doctrine\OXM\Proxy\Proxy';
 
     /**
      * @param ClassMetadataFactory
