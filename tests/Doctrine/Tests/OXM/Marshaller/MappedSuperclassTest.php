@@ -50,8 +50,8 @@ class MappedSuperclassTest extends OxmTestCase
         $xml = $this->marshaller->marshalToString($request);
 
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
-            <request id="1">
-                <concrete-bo1 inherit="1">
+            <request repositoryBy="0" id="1">
+                <concrete-bo1 repositoryBy="1" inherit="1">
                     <overridden>yes</overridden>
                 </concrete-bo1>
             </request>', $xml);
@@ -80,8 +80,8 @@ class MappedSuperclassTest extends OxmTestCase
         $xml = $this->marshaller->marshalToString($request);
 
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
-            <request id="1">
-                <concrete-bo3 inherit="1" description="Scooby Doo">
+            <request repositoryBy="0" id="1">
+                <concrete-bo3 repositoryBy="1" inherit="1" description="Scooby Doo">
                     <overridden>yes</overridden>
                 </concrete-bo3>
             </request>', $xml);

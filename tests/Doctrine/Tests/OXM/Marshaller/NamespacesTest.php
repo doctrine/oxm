@@ -42,7 +42,7 @@ class NamespacesTest extends OxmTestCase
 
         $xml = $this->marshaller->marshalToString($request);
 
-        $this->assertXmlStringEqualsXmlString('<foo xmlns="http://www.foobar.com/schema" xmlns:baz="http://www.foobaz.com/schema">
+        $this->assertXmlStringEqualsXmlString('<foo xmlns="http://www.foobar.com/schema" xmlns:baz="http://www.foobaz.com/schema" repositoryBy="0">
             <id>1</id>
                 <baz:bo>bar</baz:bo>
             </foo>', $xml);

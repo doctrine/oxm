@@ -84,11 +84,25 @@ class WriterHelper
 
     public function writeElement($name, $value, $prefix = null, $url = null)
     {
+        $result = preg_grep('{[\&,\<,\>,\#]}',array($value));
+        if(!empty($result)) {
+            $this->writeCdataElement($name, $value, $prefix, $url);
+            return;
+        }
+
         if ($prefix !== null) {
             $this->cursor->writeElementNs($prefix, $name, $url, $value);
         } else {
             $this->cursor->writeElement($name, $value);
         }
+    }
+
+    public function writeCdataElement($name, $value, $prefix = null, $url = null)
+    {
+        $this->startElement($name, $prefix, $url);
+        //A CDATA section cannot contain the string "]]>" and therefore it is not possible for a CDATA section to contain nested CDATA sections.
+        $this->cursor->writeCdata(preg_replace('/]]>/', ']]]]><![CDATA[>', $value));
+        $this->endElement();
     }
 
     public function writeNamespace($url, $prefix = null)
