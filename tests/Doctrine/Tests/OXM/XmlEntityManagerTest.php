@@ -150,7 +150,7 @@ class XmlEntityManagerTest extends OxmTestCase
         for ($i = 1; $i <= 10; $i++) {
             $filepath = __DIR__ . "/../Workspace/Doctrine/Tests/OXM/Entities/Simple/SimpleWithField/$i.xml";
             $this->assertFileExists($filepath);
-            $this->assertXmlStringEqualsXmlFile($filepath, '<?xml version="1.0" encoding="UTF-8"?><simple-with-field repositoryBy="0" id="' . $i . '"/>');
+            $this->assertXmlStringEqualsXmlFile($filepath, '<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="' . $i . '"/>');
             unlink($filepath);
         }
     }
@@ -167,7 +167,7 @@ class XmlEntityManagerTest extends OxmTestCase
 
             $filepath = __DIR__ . "/../Workspace/Doctrine/Tests/OXM/Entities/Simple/SimpleWithField/$i.xml";
             $this->assertFileExists($filepath);
-            $this->assertXmlStringEqualsXmlFile($filepath, '<?xml version="1.0" encoding="UTF-8"?><simple-with-field repositoryBy="0" id="' . $i . '"/>');
+            $this->assertXmlStringEqualsXmlFile($filepath, '<?xml version="1.0" encoding="UTF-8"?><simple-with-field id="' . $i . '"/>');
             unlink($filepath);
         }
     }

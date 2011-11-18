@@ -184,6 +184,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     public function getMetadataFor($className)
     {
         if ( ! isset($this->loadedMetadata[$className])) {
+//            print_r('loading class ' . $className . "\n");
             $realClassName = $className;
 
             // Check for namespace alias
@@ -333,8 +334,6 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
 
             $class->setParentClasses($visited);
 
-
-
             // Todo - ensure that root elements have an ID mapped
 
             if ($this->evm->hasListeners(Events::loadClassMetadata)) {
@@ -342,10 +341,6 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
                 $this->evm->dispatchEvent(Events::loadClassMetadata, $eventArgs);
             }
 
-            /**
-             * Firstly, we must save parsing object in the repository, then proceed to parsing of dependent objects.
-             * This guarantees the absence of infinite loops.
-             */
             $this->loadedMetadata[$className] = $class;
             $this->completeMappingTypeValidation($className, $class);
 
@@ -382,6 +377,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
             if (!$this->hasMetadataFor($mapping['type']) && !$this->getMetadataFor($mapping['type'])) {
                 throw MappingException::fieldTypeNotFound($className, $fieldName, $mapping['type']);
             }
+
             // Mapped classes must have binding node type XML_ELEMENT
             if ($mapping['node'] !== ClassMetadataInfo::XML_ELEMENT) {
                 throw MappingException::customTypeWithoutNodeElement($className, $fieldName);

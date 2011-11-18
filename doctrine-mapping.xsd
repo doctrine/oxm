@@ -102,7 +102,7 @@
     <xs:attribute name="identifier" type="xs:boolean" default="false" />
     <xs:attribute name="id-generator" type="oxm:generator-strategy" use="optional" default="AUTO" />
     <xs:attribute name="direct" type="xs:boolean" default="true" />
-    <xs:attribute name="nullable" type="xs:boolean" default="false" />
+    <xs:attribute name="nillable" type="xs:boolean" default="false" />
     <xs:attribute name="required" type="xs:boolean" default="false" />
     <xs:attribute name="collection" type="xs:boolean" default="false" />
     <xs:attribute name="get-method" type="xs:NMTOKEN" />
