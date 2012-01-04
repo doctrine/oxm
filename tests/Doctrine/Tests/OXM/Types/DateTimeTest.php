@@ -26,8 +26,8 @@ class DateTimeTest extends \PHPUnit_Framework_TestCase
     {
         $date = new \DateTime('1985-09-01 10:10:10');
 
-        $expected = DateTimeType::FORMAT;
-        $actual = is_string($this->_type->convertToXmlValue($date));
+        $expected = '1985-09-01 10:10:10';
+        $actual = $this->_type->convertToXmlValue($date);
 
         $this->assertEquals($expected, $actual);
     }

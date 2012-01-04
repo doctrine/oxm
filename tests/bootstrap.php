@@ -20,6 +20,9 @@
 // execution point is at doctrine-oxm/
 require_once __DIR__.'/../lib/vendor/doctrine-common/lib/Doctrine/Common/ClassLoader.php';
 
+$classLoader = new \Doctrine\Common\ClassLoader('Symfony\Component\Console', realpath(__DIR__ . '/../lib/vendor'));
+$classLoader->register();
+
 $classLoader = new \Doctrine\Common\ClassLoader('Doctrine\Common', realpath(__DIR__.'/../lib/vendor/doctrine-common/lib'));
 $classLoader->register();
 

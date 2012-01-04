@@ -32,6 +32,19 @@ use Doctrine\OXM\Mapping\ClassMetadataInfo;
 class YAMLDriver extends AbstractFileDriver
 {
     /**
+     * Loads a mapping file with the given name and returns a map
+     * from class/entity names to their corresponding elements.
+     *
+     * @param string $file The mapping file to load.
+     * @return array
+     */
+    protected function loadMappingFile($file)
+    {
+        // TODO: Implement loadMappingFile() method.
+        throw new \Exception("Not yet implemented");
+    }
+
+    /**
      * Whether the class with the specified name should have its metadata loaded.
      * This is only the case if it is either mapped as an XmlEntity
      *
