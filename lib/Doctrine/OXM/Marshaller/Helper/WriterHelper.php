@@ -94,7 +94,7 @@ class WriterHelper
     public function writeNamespace($url, $prefix = null)
     {
         $attributeName = 'xmlns';
-        if ($prefix !== null) {
+        if ($prefix) {
             $attributeName .= ":$prefix";
         }
         
