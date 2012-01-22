@@ -66,6 +66,30 @@ class CollectionsTest extends OxmTestCase
     /**
      * @test
      */
+    public function itShouldHandleTextCdataCollectionProperly()
+    {
+        $request = new CollectionClass();
+        $request->list = array('<one>', '<two>', '<three>');
+
+        $xml = $this->marshaller->marshalToString($request);
+
+        $this->assertXmlStringEqualsXmlString('<collection-class>
+            <list><![CDATA[<one>]]></list>
+            <list><![CDATA[<two>]]></list>
+            <list><![CDATA[<three>]]></list>
+        </collection-class>', $xml);
+
+        $otherRequest = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertEquals(3, count($otherRequest->list));
+        $this->assertContains('<one>', $otherRequest->list);
+        $this->assertContains('<two>', $otherRequest->list);
+        $this->assertContains('<three>', $otherRequest->list);
+    }
+
+    /**
+     * @test
+     */
     public function itShouldHandleXmlAttributeCollectionsProperly()
     {
         $colorContainer = new CollectionAttributeClass();

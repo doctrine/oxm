@@ -209,7 +209,7 @@ class XmlMarshaller implements Marshaller
         $allMappedXmlNodes = $this->classMetadataFactory->getAllXmlNodes();
         $knownMappedNodes = array_keys($allMappedXmlNodes);
 
-        if ($cursor->nodeType !== XMLReader::ELEMENT) {
+        if ($cursor->nodeType !== XMLReader::ELEMENT && $cursor->nodeType !== XMLReader::CDATA) {
             throw MarshallerException::invalidMarshallerState($cursor);
 
         }
@@ -263,7 +263,7 @@ class XmlMarshaller implements Marshaller
                     break;
                 }
 
-                if ($cursor->nodeType !== XMLReader::ELEMENT) {
+                if ($cursor->nodeType !== XMLReader::ELEMENT && $cursor->nodeType !== XMLReader::CDATA) {
                     // skip insignificant elements
                     continue;
                 }
@@ -284,7 +284,7 @@ class XmlMarshaller implements Marshaller
                     } else {
                         // assume text element (dangerous?)
                         $cursor->read();
-                        if ($cursor->nodeType !== XMLReader::TEXT) {
+                        if ($cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {
                             throw MarshallerException::invalidMarshallerState($cursor);
                         }
 

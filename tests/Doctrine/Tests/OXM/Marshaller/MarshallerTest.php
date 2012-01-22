@@ -32,6 +32,7 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\Tests\OXM\Entities\Simple\SimpleWithField,
     \Doctrine\Tests\OXM\Entities\Simple\SimpleCompound,
     \Doctrine\Tests\OXM\Entities\Order,
+    \Doctrine\Tests\OXM\Entities\Bar,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
     \Doctrine\Tests\OXM\Entities\Address;
 
@@ -251,5 +252,22 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $obj = $this->marshaller->unmarshalFromString($xml);
         $this->assertEquals('yes', $obj->other);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldSupportCDataWrapping()
+    {
+        $foo = new Bar();
+
+        $foo->baz = "http://www.example.com/index.html?requires=true&cdata=true";
+
+        $xml = $this->marshaller->marshalToString($foo);
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <bar>
+             <baz><![CDATA[http://www.example.com/index.html?requires=true&cdata=true]]></baz>
+            </bar>', $xml);
     }
 }
