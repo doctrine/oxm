@@ -166,12 +166,13 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     public function itShouldMarshalToFilenameStream()
     {
         $simple = new SimpleWithField();
-        $xml = $this->marshaller->marshalToStream($simple, "file://" . realpath(__DIR__) . "/../Workspace/Foo.xml");
+        $path = realpath(__DIR__."/../Workspace") . '/Foo.xml';
+        $xml = $this->marshaller->marshalToStream($simple, "file://".$path);
 
         $this->assertTrue(strlen($xml) > 0);
-        $this->assertXmlStringEqualsXmlFile(realpath(__DIR__) . "/../Workspace/Foo.xml", '<?xml version="1.0" encoding="UTF-8"?><simple-with-field/>');
+        $this->assertXmlStringEqualsXmlFile($path, '<?xml version="1.0" encoding="UTF-8"?><simple-with-field/>');
 
-        @unlink(realpath(__DIR__) . "/../Workspace/Foo.xml");
+        @unlink($path);
     }
 
 
