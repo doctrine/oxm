@@ -276,4 +276,31 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
              <baz><![CDATA[http://www.example.com/index.html?requires=true&cdata=true]]></baz>
             </bar>', $xml);
     }
+
+    /**
+     * @test
+     */
+    public function itShouldSupportEmptyTextElements()
+    {
+        $foo = new Bar();
+        $foo->baz = '';
+
+        $xml = $this->marshaller->marshalToString($foo);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <bar>
+             <baz/>
+            </bar>', $xml);
+
+        $obj = $this->marshaller->unmarshalFromString($xml);
+        $this->assertEquals('', $obj->baz);
+
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <bar>
+             <baz></baz>
+            </bar>', $xml);
+
+        $obj2 = $this->marshaller->unmarshalFromString($xml);
+        $this->assertEquals('', $obj2->baz);
+    }
 }

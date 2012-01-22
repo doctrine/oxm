@@ -284,18 +284,21 @@ class XmlMarshaller implements Marshaller
                     } else {
                         // assume text element (dangerous?)
                         $cursor->read();
-                        if ($cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {
-                            throw MarshallerException::invalidMarshallerState($cursor);
-                        }
 
-                        $type = Type::getType($fieldMapping['type']);
-                        if ($classMetadata->isCollection($fieldName)) {
-                            $collectionElements[$fieldName][] = $type->convertToPHPValue($cursor->value);
-                        } else {
-                            $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
+                        if (!$cursor->isEmptyElement && $cursor->nodeType !== XMLReader::END_ELEMENT) {
+                            if ($cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {
+                                throw MarshallerException::invalidMarshallerState($cursor);
+                            }
+
+                            $type = Type::getType($fieldMapping['type']);
+                            if ($classMetadata->isCollection($fieldName)) {
+                                $collectionElements[$fieldName][] = $type->convertToPHPValue($cursor->value);
+                            } else {
+                                $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
+                            }
+
+                            $cursor->read();
                         }
-                        
-                        $cursor->read();
                     }
                 } elseif (in_array($cursor->name, $knownMappedNodes)) {  // look for inherited child directly
                     $childClassMetadata = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$cursor->name]);
