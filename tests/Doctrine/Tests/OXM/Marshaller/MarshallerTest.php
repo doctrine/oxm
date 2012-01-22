@@ -32,6 +32,8 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\Tests\OXM\Entities\Simple\SimpleWithField,
     \Doctrine\Tests\OXM\Entities\Simple\SimpleCompound,
     \Doctrine\Tests\OXM\Entities\Order,
+    \Doctrine\Tests\OXM\Entities\Article,
+    \Doctrine\Tests\OXM\Entities\Tag,
     \Doctrine\Tests\OXM\Entities\Bar,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
     \Doctrine\Tests\OXM\Entities\Address;
@@ -302,5 +304,81 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $obj2 = $this->marshaller->unmarshalFromString($xml);
         $this->assertEquals('', $obj2->baz);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldHandleCircularReferences()
+    {
+        $article = new Article();
+        $article->name = 'article one';
+        $tag = new Tag();
+        $tag->name = 'oxm';
+        $tag->article = $article;
+
+        $tag2 = new Tag();
+        $tag2->name = 'xml';
+        $tag2->article = $article;
+
+        $article->tags = array($tag, $tag2);
+
+        $xml = $this->marshaller->marshalToString($article);
+
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <article name="article one">
+             <tag name="oxm" />
+             <tag name="xml" />
+            </article>', $xml);
+
+        $otherArticle = $this->marshaller->unmarshalFromString($xml);
+        $this->assertTrue($otherArticle instanceof Article);
+        $this->assertEquals('article one', $otherArticle->name);
+        $this->assertCount(2, $otherArticle->tags);
+        $this->assertEquals('oxm', $otherArticle->tags[0]->name);
+        $this->assertEquals('xml', $otherArticle->tags[1]->name);
+
+        $article2 = new Article();
+        $article2->name = 'article two';
+        $tag3 = new Tag();
+        $tag3->name = 'three';
+        $tag3->article = $article2;
+
+        $tag4 = new Tag();
+        $tag4->name = 'four';
+        $tag4->article = $article2;
+
+        $article2->tags = array($tag3, $tag4);
+
+        $xml = $this->marshaller->marshalToString($article2);
+
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+            <article name="article two">
+             <tag name="three" />
+             <tag name="four" />
+            </article>', $xml);
+
+        $article2 = $this->marshaller->unmarshalFromString($xml);
+        $this->assertTrue($article2 instanceof Article);
+        $this->assertEquals('article two', $article2->name);
+        $this->assertCount(2, $article2->tags);
+        $this->assertEquals('three', $article2->tags[0]->name);
+        $this->assertEquals('four', $article2->tags[1]->name);
+//        $this->assertEquals($article2, $article2->tags[1]->article);
+
+        $tag4Article = new Article();
+        $tag4Article->name = 'article for tag4';
+        $tag4->article = $tag4Article;
+        $xml = $this->marshaller->marshalToString($tag4);
+        $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?>
+             <tag name="four">
+                <article name="article for tag4" />
+             </tag>', $xml);
+
+        $otherTag4 = $this->marshaller->unmarshalFromString($xml);
+        $this->assertTrue($otherTag4 instanceof Tag);
+        $this->assertEquals('article for tag4', $otherTag4->article->name);
+        $this->assertEquals('four', $otherTag4->name);
     }
 }

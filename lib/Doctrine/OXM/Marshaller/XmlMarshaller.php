@@ -73,11 +73,17 @@ class XmlMarshaller implements Marshaller
     private $schemaVersion = '1.0';
 
     /**
+     * @var string
+     */
+    private $visited = array();
+
+    /**
      * @param ClassMetadataFactory
      */
     public function __construct(ClassMetadataFactory $classMetadataFactory)
     {
         $this->classMetadataFactory = $classMetadataFactory;
+
     }
 
     /**
@@ -351,6 +357,8 @@ class XmlMarshaller implements Marshaller
     function marshalToString($mappedObject)
     {
         $writer = new WriterHelper($this);
+        // clear the internal visited list
+        $this->visited = array();
 
         // Begin marshalling
         $this->doMarshal($mappedObject, $writer);
@@ -367,6 +375,8 @@ class XmlMarshaller implements Marshaller
     public function marshalToStream($mappedObject, $streamUri)
     {
         $writer = new WriterHelper($this, $streamUri);
+        // clear the internal visited list
+        $this->visited = array();
 
         // Begin marshalling
         $this->doMarshal($mappedObject, $writer);
@@ -395,6 +405,13 @@ class XmlMarshaller implements Marshaller
         if ($classMetadata->hasLifecycleCallbacks(Events::preMarshal)) {
             $classMetadata->invokeLifecycleCallbacks(Events::preMarshal, $mappedObject);
         }
+
+        if (isset($this->visited[spl_object_hash($mappedObject)])) {
+            return;
+        }
+
+        print_r('visited ' . spl_object_hash($mappedObject) . "\n");
+        $this->visited[spl_object_hash($mappedObject)] = true;
 
         $writer->startElement($classMetadata->getXmlName());
 
@@ -464,6 +481,7 @@ class XmlMarshaller implements Marshaller
                 }
             }
         }
+
 
         // PostMarshal hook
         if ($classMetadata->hasLifecycleCallbacks(Events::postMarshal)) {
