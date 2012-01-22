@@ -33,7 +33,7 @@ class Version
     /**
      * Current Doctrine OXM Version
      */
-    const VERSION = '2.0.0-DEV';
+    const VERSION = '2.1.0-DEV';
 
     /**
      * Compares a Doctrine OXM version with the current one.
