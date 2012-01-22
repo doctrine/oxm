@@ -165,8 +165,13 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
      */
     public function itShouldMarshalToFilenameStream()
     {
+        $workspace = realpath(__DIR__."/../Workspace");
+        if (!is_writable($workspace)) {
+            $this->markTestSkipped(sprintf("Cannot write xml to workspace at '%s'", $workspace));
+        }
+        $path = $workspace . '/Foo.xml';
+
         $simple = new SimpleWithField();
-        $path = realpath(__DIR__."/../Workspace") . '/Foo.xml';
         $xml = $this->marshaller->marshalToStream($simple, "file://".$path);
 
         $this->assertTrue(strlen($xml) > 0);
