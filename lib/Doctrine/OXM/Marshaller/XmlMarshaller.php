@@ -410,7 +410,6 @@ class XmlMarshaller implements Marshaller
             return;
         }
 
-        print_r('visited ' . spl_object_hash($mappedObject) . "\n");
         $this->visited[spl_object_hash($mappedObject)] = true;
 
         $writer->startElement($classMetadata->getXmlName());
