@@ -284,7 +284,9 @@ class XmlMarshaller implements Marshaller
                     } else {
                         // assume text element (dangerous?)
                         $cursor->read();
-                        if ($cursor->nodeType !== XMLReader::TEXT) {
+                        if (in_array($cursor->nodeType, array(XMLReader::WHITESPACE, XMLReader::SIGNIFICANT_WHITESPACE, XMLReader::END_ELEMENT))) {
+                            continue;
+                        } elseif ($cursor->nodeType !== XMLReader::TEXT) {
                             throw MarshallerException::invalidMarshallerState($cursor);
                         }
 

@@ -129,7 +129,7 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     {
         $simple = new Simple();
         $xml = $this->marshaller->marshalToString($simple);
-        
+
         $this->assertTrue(strlen($xml) > 0);
         $this->assertXmlStringEqualsXmlString('<?xml version="1.0" encoding="UTF-8"?><simple/>', $xml);
     }
@@ -251,5 +251,27 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $obj = $this->marshaller->unmarshalFromString($xml);
         $this->assertEquals('yes', $obj->other);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldSupportEmptyElement()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <address street="street">
+                <city></city>
+            </address>';
+
+        $address = $this->marshaller->unmarshalFromString($xml);
+        $this->assertEquals('', $address->getCity());
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <address street="street">
+                <city />
+            </address>';
+
+        $address = $this->marshaller->unmarshalFromString($xml);
+        $this->assertEquals('', $address->getCity());
     }
 }
