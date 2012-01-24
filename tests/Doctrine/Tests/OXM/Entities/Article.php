@@ -16,37 +16,26 @@
  * and is licensed under the LGPL. For more information, see
  * <http://www.doctrine-project.org>.
  */
- 
-namespace Doctrine\OXM;
+
+namespace Doctrine\Tests\OXM\Entities;
 
 /**
- * Class to store and retrieve the version of Doctrine OXM
- *
- * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link    www.doctrine-project.org
- * @since   2.0
- * @version $Revision$
- * @author  Richard Fullmer <richardfullmer@gmail.com>
+ * @XmlRootEntity
  */
-class Version
+class Article
 {
     /**
-     * Current Doctrine OXM Version
+     * @var string
+     *
+     * @XmlAttribute(type="string")
      */
-    const VERSION = '2.1.0-DEV';
+    public $name;
 
     /**
-     * Compares a Doctrine OXM version with the current one.
+     * @var Tag[]
      *
-     * @param string $version Doctrine OXM version to compare.
-     * @return int Returns -1 if older, 0 if it is the same, 1 if version 
-     *             passed as argument is newer.
+     * @XmlElement(type="Doctrine\Tests\OXM\Entities\Tag", collection=true, name="tag")
      */
-    public static function compare($version)
-    {
-        $currentVersion = str_replace(' ', '', strtolower(self::VERSION));
-        $version = str_replace(' ', '', $version);
-
-        return version_compare($version, $currentVersion);
-    }
+    public $tags;
 }
+ 

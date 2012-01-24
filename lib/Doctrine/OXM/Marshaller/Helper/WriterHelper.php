@@ -86,6 +86,10 @@ class WriterHelper
     {
         if ($prefix !== null) {
             $this->cursor->writeElementNs($prefix, $name, $url, $value);
+        } elseif ($this->needsCdataWrapping($value)) {
+            $this->startElement($name, $prefix, $url);
+            $this->cursor->writeCdata($value);
+            $this->endElement();
         } else {
             $this->cursor->writeElement($name, $value);
         }
@@ -94,7 +98,7 @@ class WriterHelper
     public function writeNamespace($url, $prefix = null)
     {
         $attributeName = 'xmlns';
-        if ($prefix !== null) {
+        if ($prefix) {
             $attributeName .= ":$prefix";
         }
         
@@ -120,5 +124,10 @@ class WriterHelper
         $this->cursor->endDocument();
         
         return $this->cursor->flush();
+    }
+
+    private function needsCdataWrapping($value)
+    {
+        return preg_match('/[<>&]/', $value);
     }
 }
