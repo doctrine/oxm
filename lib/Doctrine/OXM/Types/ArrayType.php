@@ -26,13 +26,13 @@ namespace Doctrine\OXM\Types;
  */
 class ArrayType extends Type
 {
-    public function convertToXmlValue($value)
+    public function convertToXmlValue($value, array $options = array())
     {
         return serialize($value);
     }
 
     // todo - use something more friendly here?  like implode/explode?
-    public function convertToPHPValue($value)
+    public function convertToPHPValue($value, array $options = array())
     {
         if ($value === null) {
             return null;

@@ -34,7 +34,7 @@ class FloatType extends Type
      * @param mixed $value The value to convert.
      * @return mixed The PHP representation of the value.
      */
-    public function convertToPHPValue($value)
+    public function convertToPHPValue($value, array $options = array())
     {
         return (null === $value) ? null : (float) $value;
     }

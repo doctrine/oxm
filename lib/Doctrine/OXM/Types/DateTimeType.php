@@ -26,28 +26,50 @@ namespace Doctrine\OXM\Types;
  */
 class DateTimeType extends Type
 {
-    const FORMAT = "Y-m-d G:i:s";
+    const DEFAULT_FORMAT = "Y-m-d G:i:s";
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return Type::DATETIME;
     }
 
-    public function convertToXmlValue($value)
+    /**
+     * @param \DateTime $value
+     * @param array     $options
+     * @return string
+     */
+    public function convertToXmlValue($value, array $options = array())
     {
-        return ($value !== null) ? $value->format(static::FORMAT) : null;
+        $format = array_key_exists('format', $options) ? $options['format'] : static::DEFAULT_FORMAT;
+
+        return !is_null($value) ? $value->format($format) : null;
     }
-    
-    public function convertToPHPValue($value)
+
+    /**
+     * @param string $value
+     * @param array  $options
+     * @return \DateTime
+     */
+    public function convertToPHPValue($value, array $options = array())
     {
-        if ($value === null) {
+        if (is_null($value)) {
             return null;
         }
 
-        $val = \DateTime::createFromFormat(static::FORMAT, $value);
-        if (!$val) {
+        try {
+            $format = array_key_exists('format', $options) ? $options['format'] : static::DEFAULT_FORMAT;
+            $val = \DateTime::createFromFormat($format, $value);
+
+            if ($val) {
+                return $val;
+            } else {
+                return new \DateTime($value);
+            }
+        } catch (\Exception $exception) {
             throw ConversionException::conversionFailed($value, $this->getName());
         }
-        return $val;
     }
 }
