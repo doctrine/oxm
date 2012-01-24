@@ -256,8 +256,7 @@ class XmlMarshaller implements Marshaller
         if (!$cursor->isEmptyElement) {
             $collectionElements = array();
 
-            while (true) {
-                $cursor->read();
+            while ($cursor->read()) {
                 if ($cursor->nodeType === XMLReader::END_ELEMENT && $cursor->name === $elementName) {
                     // we're at the original element closing node, bug out
                     break;
