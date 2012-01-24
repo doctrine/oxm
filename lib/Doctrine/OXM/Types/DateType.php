@@ -38,14 +38,14 @@ class DateType extends DateTimeType
 
     /**
      * @param string $value
-     * @param array  $options
+     * @param array  $parameters
      * @return \DateTime
      */
-    public function convertToPHPValue($value, array $options = array())
+    public function convertToPHPValue($value, array $parameters = array())
     {
-        $format = array_key_exists('format', $options) ? $options['format'] : static::DEFAULT_FORMAT;
-        $options['format'] = '!'.$format;
+        $format = array_key_exists('format', $parameters) ? $parameters['format'] : static::DEFAULT_FORMAT;
+        $parameters['format'] = '!'.$format;
 
-        return parent::convertToPHPValue($value, $options);
+        return parent::convertToPHPValue($value, $parameters);
     }
 }

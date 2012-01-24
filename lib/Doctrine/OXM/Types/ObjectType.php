@@ -26,12 +26,12 @@ namespace Doctrine\OXM\Types;
  */
 class ObjectType extends Type
 {
-    public function convertToXmlValue($value, array $options = array())
+    public function convertToXmlValue($value, array $parameters = array())
     {
         return serialize($value);
     }
 
-    public function convertToPHPValue($value, array $options = array())
+    public function convertToPHPValue($value, array $parameters = array())
     {
         if ($value === null) {
             return null;

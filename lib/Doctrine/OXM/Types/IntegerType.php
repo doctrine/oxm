@@ -34,7 +34,7 @@ class IntegerType extends Type
         return Type::INTEGER;
     }
 
-    public function convertToPHPValue($value, array $options = array())
+    public function convertToPHPValue($value, array $parameters = array())
     {
         return (null === $value) ? null : (int) $value;
     }

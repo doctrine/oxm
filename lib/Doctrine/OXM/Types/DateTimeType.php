@@ -38,29 +38,29 @@ class DateTimeType extends Type
 
     /**
      * @param \DateTime $value
-     * @param array     $options
+     * @param array     $parameters
      * @return string
      */
-    public function convertToXmlValue($value, array $options = array())
+    public function convertToXmlValue($value, array $parameters = array())
     {
-        $format = array_key_exists('format', $options) ? $options['format'] : static::DEFAULT_FORMAT;
+        $format = array_key_exists('format', $parameters) ? $parameters['format'] : static::DEFAULT_FORMAT;
 
         return !is_null($value) ? $value->format($format) : null;
     }
 
     /**
      * @param string $value
-     * @param array  $options
+     * @param array  $parameters
      * @return \DateTime
      */
-    public function convertToPHPValue($value, array $options = array())
+    public function convertToPHPValue($value, array $parameters = array())
     {
         if (is_null($value)) {
             return null;
         }
 
         try {
-            $format = array_key_exists('format', $options) ? $options['format'] : static::DEFAULT_FORMAT;
+            $format = array_key_exists('format', $parameters) ? $parameters['format'] : static::DEFAULT_FORMAT;
             $val = \DateTime::createFromFormat($format, $value);
 
             if ($val) {

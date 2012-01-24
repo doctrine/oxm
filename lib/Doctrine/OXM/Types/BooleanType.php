@@ -28,12 +28,12 @@ namespace Doctrine\OXM\Types;
  */
 class BooleanType extends Type
 {
-    public function convertToXmlValue($value, array $options = array())
+    public function convertToXmlValue($value, array $parameters = array())
     {
         return $value ? "true" : "false";
     }
 
-    public function convertToPHPValue($value, array $options = array())
+    public function convertToPHPValue($value, array $parameters = array())
     {
         if ($value == "false") {
             return false;
