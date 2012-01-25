@@ -310,15 +310,32 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    public function itShouldSupportElementsWithBothAttributesAndText()
+    public function itShouldUnmarshalTextElementsWithAttributes()
     {
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <role is-active="true">Manager</role>';
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><role is-active="true">Manager</role>';
 
         $role = $this->marshaller->unmarshalFromString($xml);
 
         $this->assertTrue($role->isActive);
         $this->assertEquals('Manager', $role->name);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldMarshalTextElementsWithAttributes()
+    {
+        $role = new Role();
+        $role->isActive = true;
+        $role->name = 'Manager';
+
+        $xml = $this->marshaller->marshalToString($role);
+
+        $expectedXml = '<?xml version="1.0" encoding="UTF-8"?>
+<role is-active="true">Manager</role>
+';
+
+        $this->assertEquals($expectedXml, $xml);
     }
 
     /**

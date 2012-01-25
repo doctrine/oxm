@@ -539,6 +539,8 @@ class XmlMarshaller implements Marshaller
             if ($classMetadata->hasFieldWrapping($fieldName)) {
                 $writer->endElement();
             }
+        } elseif ('#text' === $xmlName) {
+            $writer->writeText(Type::getType($type)->convertToXmlValue($fieldValue));
         } else {
             $writer->writeElement($xmlName, Type::getType($type)->convertToXmlValue($fieldValue), $prefix);
         }
