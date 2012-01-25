@@ -95,13 +95,22 @@ class WriterHelper
         }
     }
 
+    public function writeText($value)
+    {
+        if ($this->needsCdataWrapping($value)) {
+            $this->cursor->writeCdata($value);
+        } else {
+            $this->cursor->text($value);
+        }
+    }
+
     public function writeNamespace($url, $prefix = null)
     {
         $attributeName = 'xmlns';
         if ($prefix) {
             $attributeName .= ":$prefix";
         }
-        
+
         $this->cursor->writeAttribute($attributeName, $url);
     }
 
