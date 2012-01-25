@@ -273,7 +273,16 @@ class XmlMarshaller implements Marshaller
                     continue;
                 }
 
-                if ($classMetadata->hasXmlField($cursor->localName)) {
+                if (($cursor->nodeType === XMLReader::CDATA || $cursor->nodeType === XMLReader::TEXT) && $classMetadata->hasXmlField('#text')) {
+                    $fieldName = $classMetadata->getFieldName('#text');
+                    $fieldMapping = $classMetadata->getFieldMapping($fieldName);
+                    $type = Type::getType($fieldMapping['type']);
+                    if ($classMetadata->isCollection($fieldName)) {
+                        $collectionElements[$fieldName][] = $type->convertToPHPValue($cursor->value);
+                    } else {
+                        $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
+                    }
+                } elseif ($classMetadata->hasXmlField($cursor->localName)) {
                     $fieldName = $classMetadata->getFieldName($cursor->localName);
 
                     // Check for mapped entity as child, add recursively
@@ -288,9 +297,7 @@ class XmlMarshaller implements Marshaller
                         }
                     } else {
                         // assume text element (dangerous?)
-                        if ($cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {
-                            $cursor->read();
-                        }
+                        $cursor->read();
 
                         if (!$cursor->isEmptyElement && $cursor->nodeType !== XMLReader::END_ELEMENT) {
                             if ($cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {

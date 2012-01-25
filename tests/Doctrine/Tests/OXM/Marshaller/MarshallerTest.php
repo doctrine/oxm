@@ -341,6 +341,37 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    public function itShouldUnmarshalCdataElementsWithAttributes()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><role is-active="true"><![CDATA[Man&ager]]></role>';
+
+        $role = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertTrue($role->isActive);
+        $this->assertEquals('Man&ager', $role->name);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldMarshalCdataElementsWithAttributes()
+    {
+        $role = new Role();
+        $role->isActive = true;
+        $role->name = 'Man&ager';
+
+        $xml = $this->marshaller->marshalToString($role);
+
+        $expectedXml = '<?xml version="1.0" encoding="UTF-8"?>
+<role is-active="true"><![CDATA[Man&ager]]></role>
+';
+
+        $this->assertEquals($expectedXml, $xml);
+    }
+
+    /**
+     * @test
+     */
     public function itShouldHandleCircularReferences()
     {
         $article = new Article();
