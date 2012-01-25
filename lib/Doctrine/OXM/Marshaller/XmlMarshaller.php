@@ -268,7 +268,7 @@ class XmlMarshaller implements Marshaller
                     break;
                 }
 
-                if ($cursor->nodeType !== XMLReader::ELEMENT && $cursor->nodeType !== XMLReader::CDATA) {
+                if ($cursor->nodeType !== XMLReader::ELEMENT && $cursor->nodeType !== XMLReader::CDATA && $cursor->nodeType !== XMLReader::TEXT) {
                     // skip insignificant elements
                     continue;
                 }
@@ -288,7 +288,9 @@ class XmlMarshaller implements Marshaller
                         }
                     } else {
                         // assume text element (dangerous?)
-                        $cursor->read();
+                        if ($cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {
+                            $cursor->read();
+                        }
 
                         if (!$cursor->isEmptyElement && $cursor->nodeType !== XMLReader::END_ELEMENT) {
                             if ($cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {

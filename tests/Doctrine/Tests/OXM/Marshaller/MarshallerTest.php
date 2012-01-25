@@ -36,7 +36,8 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\Tests\OXM\Entities\Tag,
     \Doctrine\Tests\OXM\Entities\Bar,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
-    \Doctrine\Tests\OXM\Entities\Address;
+    \Doctrine\Tests\OXM\Entities\Address,
+    \Doctrine\Tests\OXM\Entities\Role;
 
 /**
  * @ErrorHandlerSettings false
@@ -304,6 +305,20 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $obj2 = $this->marshaller->unmarshalFromString($xml);
         $this->assertEquals('', $obj2->baz);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldSupportElementsWithBothAttributesAndText()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <role is-active="true">Manager</role>';
+
+        $role = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertTrue($role->isActive);
+        $this->assertEquals('Manager', $role->name);
     }
 
     /**
