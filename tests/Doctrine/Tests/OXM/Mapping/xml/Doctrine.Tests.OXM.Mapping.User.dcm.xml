@@ -22,6 +22,7 @@
         <field name="id" type="string" node="ATTRIBUTE" identifier="true" />
         <field name="name" type="string" node="TEXT" required="true" get-method="getUsername" set-method="setUsername" />
         <field name="comments" xml-name="comment" collection="true" type="string" node="TEXT" wrapper="comments" />
+        <field name="roles" xml-name="role" collection="true" type="Role" node="VALUE" />
     </entity>
 
 </doctrine-mapping>

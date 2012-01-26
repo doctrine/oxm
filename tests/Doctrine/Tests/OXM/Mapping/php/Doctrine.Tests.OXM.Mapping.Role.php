@@ -19,47 +19,14 @@
 
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
 
-$metadata->setXmlName('cms-user');
-$metadata->isRoot = true;
-
-$metadata->setXmlNamespaces(array(
-    array('url' => 'http://www.schema.com/foo', 'prefix' => 'foo'),
-    array('url' => 'http://www.schema.com/bar', 'prefix' => 'bar')
-));
-
-$metadata->addLifecycleCallback('doStuffOnPrePersist', 'prePersist');
-$metadata->addLifecycleCallback('doOtherStuffOnPrePersistToo', 'prePersist');
-$metadata->addLifecycleCallback('doStuffOnPostPersist', 'postPersist');
-$metadata->addLifecycleCallback('doStuffOnPreMarshal', 'preMarshal');
-
 $metadata->mapField(array(
-    'fieldName' => 'id',
-    'id' => true,
-    'type' => 'string',
+    'name' => 'is-active',
+    'fieldName' => 'isActive',
+    'type' => 'boolean',
     'node' => 'attribute'
 ));
 $metadata->mapField(array(
     'fieldName' => 'name',
     'type' => 'string',
-    'node' => 'text',
-    'required' => true,
-    'setMethod' => 'setUsername',
-    'getMethod' => 'getUsername'
-));
-
-$metadata->mapField(array(
-    'fieldName' => 'comments',
-    'type' => 'string',
-    'node' => 'text',
-    'collection' => true,
-    'wrapper' => 'comments',
-    'name' => 'comment',
-));
-
-$metadata->mapField(array(
-    'fieldName' => 'roles',
-    'type' => 'Role',
-    'node' => 'value',
-    'collection' => true,
-    'name' => 'role',
+    'node' => 'value'
 ));

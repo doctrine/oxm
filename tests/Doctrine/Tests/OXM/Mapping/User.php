@@ -39,6 +39,11 @@ class User
     public $comments;
 
     /**
+     * @XmlElement(type="Doctrine\Tests\OXM\Mapping\Role", collection=true, name="role")
+     */
+    public $roles;
+
+    /**
      * @PrePersist
      */
     public function doStuffOnPrePersist()
@@ -115,6 +120,13 @@ class User
             'collection' => true,
             'wrapper' => 'comments',
             'name' => 'comment',
+        ));
+        $metadata->mapField(array(
+            'fieldName' => 'roles',
+            'type' => 'Role',
+            'node' => 'value',
+            'collection' => true,
+            'name' => 'role',
         ));
     }
 }
