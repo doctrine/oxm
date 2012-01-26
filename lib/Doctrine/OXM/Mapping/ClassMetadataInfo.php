@@ -39,12 +39,14 @@ class ClassMetadataInfo implements BaseClassMetadata
     const XML_ELEMENT   = 'element';
     const XML_ATTRIBUTE = 'attribute';
     const XML_TEXT      = 'text';
+    const XML_VALUE     = 'value';
 
     /** The map of supported xml node types. */
     private static $nodeTypes = array(
         self::XML_TEXT,
         self::XML_ATTRIBUTE,
         self::XML_ELEMENT,
+        self::XML_VALUE
     );
 
     /* The Id generator types. */

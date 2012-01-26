@@ -19,40 +19,44 @@
 
 namespace Doctrine\Tests\OXM\Mapping;
 
-use Doctrine\OXM\Mapping\ClassMetadata;
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
-use Doctrine\OXM\Mapping\Driver\XmlDriver;
 
-class XmlMappingDriverTest extends AbstractMappingDriverTest
+/**
+ * @XmlEntity
+ */
+class Role
 {
     /**
-     * @return \Doctrine\OXM\Mapping\Driver\Driver
+     * @var boolean
+     *
+     * @XmlAttribute(type="boolean")
      */
-    protected function _loadDriver()
-    {
-        return new XmlDriver(__DIR__ . DIRECTORY_SEPARATOR . 'xml');
-    }
+    public $isActive;
 
     /**
-     * @param string $xmlMappingFile
-     * @dataProvider dataValidSchema
+     * @var string
+     *
+     * @XmlValue(type="string")
      */
-    public function testValidateXmlSchema($xmlMappingFile)
-    {
-        $xsdSchemaFile = __DIR__ . "/../../../../../doctrine-mapping.xsd";
+    public $name;
 
-        $dom = new \DOMDocument('UTF-8');
-        $dom->load($xmlMappingFile);
-        $this->assertTrue($dom->schemaValidate($xsdSchemaFile));
-    }
-
-    static public function dataValidSchema()
+    /**
+     * @param Doctrine\OXM\Mapping\ClassMetadataInfo
+     *
+     * @return null
+     */
+    public static function loadMetadata(ClassMetadataInfo $metadata)
     {
-        return array(
-//            array(__DIR__ . "/xml/Doctrine.Tests.OXM.Mapping.CTI.dcm.xml"),
-            array(__DIR__ . "/xml/Doctrine.Tests.OXM.Mapping.User.dcm.xml"),
-            array(__DIR__ . "/xml/Doctrine.Tests.OXM.Mapping.Role.dcm.xml"),
-//            array(__DIR__ . "/xml/CatNoId.dcm.xml"),
-        );
+        $metadata->mapField(array(
+            'name' => 'is-active',
+            'fieldName' => 'isActive',
+            'type' => 'boolean',
+            'node' => 'attribute'
+        ));
+        $metadata->mapField(array(
+            'fieldName' => 'name',
+            'type' => 'string',
+            'node' => 'value'
+        ));
     }
 }

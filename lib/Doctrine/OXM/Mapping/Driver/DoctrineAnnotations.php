@@ -88,6 +88,11 @@ final class XmlText extends XmlField {
 }
 
 /** @Annotation */
+final class XmlValue extends XmlField {
+    public $node = "value";
+}
+
+/** @Annotation */
 final class XmlReferences extends Annotation {
     public $entityName;
 }

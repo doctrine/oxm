@@ -113,10 +113,11 @@ abstract class AbstractMappingDriverTest extends \Doctrine\Tests\OxmTestCase
      */
     public function testFieldMappings($class)
     {
-        $this->assertEquals(3, count($class->fieldMappings));
+        $this->assertEquals(4, count($class->fieldMappings));
         $this->assertTrue(isset($class->fieldMappings['id']));
         $this->assertTrue(isset($class->fieldMappings['name']));
         $this->assertTrue(isset($class->fieldMappings['comments']));
+        $this->assertTrue(isset($class->fieldMappings['roles']));
 
         return $class;
     }
@@ -165,10 +166,14 @@ abstract class AbstractMappingDriverTest extends \Doctrine\Tests\OxmTestCase
     {
         $this->assertFalse($class->fieldMappings['id']['collection']);
         $this->assertTrue($class->fieldMappings['comments']['collection']);
+        $this->assertTrue($class->fieldMappings['roles']['collection']);
 
         $this->assertEquals('comments', $class->fieldMappings['comments']['wrapper']);
         $this->assertEquals('comment', $class->fieldMappings['comments']['name']);
         $this->assertEquals('comments', $class->fieldMappings['comments']['fieldName']);
+
+        $this->assertEquals('role', $class->fieldMappings['roles']['name']);
+        $this->assertEquals('roles', $class->fieldMappings['roles']['fieldName']);
 
         return $class;
     }
@@ -194,6 +199,31 @@ abstract class AbstractMappingDriverTest extends \Doctrine\Tests\OxmTestCase
     {
         $this->assertEquals('id', $class->identifier);
 //        $this->assertEquals(ClassMetadata::GENERATOR_TYPE_AUTO, $class->generatorType, "ID-Generator is not ClassMetadata::GENERATOR_TYPE_AUTO");
+
+        return $class;
+    }
+
+    public function testValueMapping()
+    {
+        $entityClassName = 'Doctrine\Tests\OXM\Mapping\Role';
+        return $this->createClassMetadata($entityClassName);
+    }
+
+    /**
+     * @depends testValueMapping
+     * @param \Doctrine\OXM\Mapping\ClassMetadata $class
+     */
+    public function testValue($class)
+    {
+        $this->assertEquals('is-active', $class->fieldMappings['isActive']['name']);
+        $this->assertEquals('isActive', $class->fieldMappings['isActive']['fieldName']);
+        $this->assertEquals('boolean', $class->fieldMappings['isActive']['type']);
+        $this->assertEquals('attribute', $class->fieldMappings['isActive']['node']);
+
+        $this->assertEquals('name', $class->fieldMappings['name']['name']);
+        $this->assertEquals('name', $class->fieldMappings['name']['fieldName']);
+        $this->assertEquals('string', $class->fieldMappings['name']['type']);
+        $this->assertEquals('value', $class->fieldMappings['name']['node']);
 
         return $class;
     }

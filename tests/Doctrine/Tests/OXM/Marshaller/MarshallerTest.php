@@ -36,7 +36,8 @@ use \Doctrine\OXM\Mapping\ClassMetadataFactory,
     \Doctrine\Tests\OXM\Entities\Tag,
     \Doctrine\Tests\OXM\Entities\Bar,
     \Doctrine\Tests\OXM\Entities\CustomerContact,
-    \Doctrine\Tests\OXM\Entities\Address;
+    \Doctrine\Tests\OXM\Entities\Address,
+    \Doctrine\Tests\OXM\Entities\Role;
 
 /**
  * @ErrorHandlerSettings false
@@ -304,6 +305,68 @@ class MarshallerTest extends \PHPUnit_Framework_TestCase
 
         $obj2 = $this->marshaller->unmarshalFromString($xml);
         $this->assertEquals('', $obj2->baz);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldUnmarshalTextElementsWithAttributes()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><role is-active="true">Manager</role>';
+
+        $role = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertTrue($role->isActive);
+        $this->assertEquals('Manager', $role->name);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldMarshalTextElementsWithAttributes()
+    {
+        $role = new Role();
+        $role->isActive = true;
+        $role->name = 'Manager';
+
+        $xml = $this->marshaller->marshalToString($role);
+
+        $expectedXml = '<?xml version="1.0" encoding="UTF-8"?>
+<role is-active="true">Manager</role>
+';
+
+        $this->assertEquals($expectedXml, $xml);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldUnmarshalCdataElementsWithAttributes()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><role is-active="true"><![CDATA[Man&ager]]></role>';
+
+        $role = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertTrue($role->isActive);
+        $this->assertEquals('Man&ager', $role->name);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldMarshalCdataElementsWithAttributes()
+    {
+        $role = new Role();
+        $role->isActive = true;
+        $role->name = 'Man&ager';
+
+        $xml = $this->marshaller->marshalToString($role);
+
+        $expectedXml = '<?xml version="1.0" encoding="UTF-8"?>
+<role is-active="true"><![CDATA[Man&ager]]></role>
+';
+
+        $this->assertEquals($expectedXml, $xml);
     }
 
     /**

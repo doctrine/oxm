@@ -268,7 +268,7 @@ class XmlMarshaller implements Marshaller
                     break;
                 }
 
-                if ($cursor->nodeType !== XMLReader::ELEMENT && $cursor->nodeType !== XMLReader::CDATA) {
+                if ($cursor->nodeType !== XMLReader::ELEMENT && $cursor->nodeType !== XMLReader::TEXT && $cursor->nodeType !== XMLReader::CDATA) {
                     // skip insignificant elements
                     continue;
                 }
@@ -303,6 +303,14 @@ class XmlMarshaller implements Marshaller
                             }
 
                             $cursor->read();
+                        }
+                    }
+                } elseif ($cursor->nodeType === XMLReader::TEXT || $cursor->nodeType === XMLReader::CDATA) {
+                    foreach ($classMetadata->getFieldNames() as $fieldName) {
+                        if (ClassMetadata::XML_VALUE === $classMetadata->getFieldXmlNode($fieldName)) {
+                            $fieldMapping = $classMetadata->getFieldMapping($fieldName);
+                            $type = Type::getType($fieldMapping['type']);
+                            $classMetadata->setFieldValue($mappedObject, $fieldName, $type->convertToPHPValue($cursor->value));
                         }
                     }
                 } elseif (in_array($cursor->name, $knownMappedNodes)) {  // look for inherited child directly
@@ -476,6 +484,24 @@ class XmlMarshaller implements Marshaller
 
                 if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
                     $this->writeElement($writer, $classMetadata, $fieldName,  $fieldValue);   
+                }
+            }
+        }
+
+        // do value
+        if (array_key_exists(ClassMetadata::XML_VALUE, $orderedMap)) {
+            foreach ($orderedMap[ClassMetadata::XML_VALUE] as $fieldMapping) {
+
+                $fieldName = $fieldMapping['fieldName'];
+                $fieldValue = $classMetadata->getFieldValue($mappedObject, $fieldName);
+
+                if ($classMetadata->isRequired($fieldName) && $fieldValue === null) {
+                    throw MarshallerException::fieldRequired($className, $fieldName);
+                }
+
+                if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
+                    $type = $classMetadata->getTypeOfField($fieldName);
+                    $writer->writeValue(Type::getType($type)->convertToXmlValue($fieldValue));
                 }
             }
         }

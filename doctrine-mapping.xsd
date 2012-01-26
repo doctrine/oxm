@@ -91,6 +91,7 @@
       <xs:enumeration value="ATTRIBUTE"/>
       <xs:enumeration value="ELEMENT"/>
       <xs:enumeration value="TEXT"/> 
+      <xs:enumeration value="VALUE"/> 
     </xs:restriction>
   </xs:simpleType>
 

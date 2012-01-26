@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/oxm/doctrine-mapping"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://doctrine-project.org/schemas/oxm/doctrine-mapping
+                          http://www.doctrine-project.org/schemas/oxm/doctrine-mapping.xsd">
+
+    <entity class="Doctrine\Tests\OXM\Mapping\Role">
+        <field name="isActive" type="boolean" node="ATTRIBUTE" />
+        <field name="name" type="string" node="VALUE" />
+    </entity>
+
+</doctrine-mapping>
