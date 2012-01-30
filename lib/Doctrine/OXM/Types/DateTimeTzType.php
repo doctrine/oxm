@@ -31,30 +31,15 @@ namespace Doctrine\OXM\Types;
  * @author      Jonathan Wage <jonwage@gmail.com>
  * @author      Roman Borschel <roman@code-factory.org>
  */
-class DateTimeTzType extends Type
+class DateTimeTzType extends DateTimeType
 {
-    const FORMAT = "Y-m-d G:i:sO";
+    const DEFAULT_FORMAT = "Y-m-d G:i:sO";
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return Type::DATETIMETZ;
-    }
-
-    public function convertToXmlValue($value)
-    {
-        return ($value !== null) ? $value->format(static::FORMAT) : null;
-    }
-
-    public function convertToPHPValue($value)
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        $val = \DateTime::createFromFormat(static::FORMAT, $value);
-        if (!$val) {
-            throw ConversionException::conversionFailed($value, $this->getName());
-        }
-        return $val;
     }
 }

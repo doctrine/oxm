@@ -24,30 +24,28 @@ namespace Doctrine\OXM\Types;
  *
  * @since 2.0
  */
-class DateType extends Type
+class DateType extends DateTimeType
 {
-    const FORMAT = "Y-m-d";
+    const DEFAULT_FORMAT = "Y-m-d";
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return Type::DATE;
     }
-    public function convertToXmlValue($value)
-    {
-        return ($value !== null) 
-            ? $value->format(static::FORMAT) : null;
-    }
-    
-    public function convertToPHPValue($value)
-    {
-        if ($value === null) {
-            return null;
-        }
 
-        $val = \DateTime::createFromFormat('!'.static::FORMAT, $value);
-        if (!$val) {
-            throw ConversionException::conversionFailed($value, $this->getName());
-        }
-        return $val;
+    /**
+     * @param string $value
+     * @param array  $parameters
+     * @return \DateTime
+     */
+    public function convertToPHPValue($value, array $parameters = array())
+    {
+        $format = array_key_exists('format', $parameters) ? $parameters['format'] : static::DEFAULT_FORMAT;
+        $parameters['format'] = '!'.$format;
+
+        return parent::convertToPHPValue($value, $parameters);
     }
 }

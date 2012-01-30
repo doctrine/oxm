@@ -24,35 +24,15 @@ namespace Doctrine\OXM\Types;
  *
  * @since 2.0
  */
-class TimeType extends Type
+class TimeType extends DateTimeType
 {
-    const FORMAT = "G:i:s";
+    const DEFAULT_FORMAT = "G:i:s";
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return Type::TIME;
-    }
-    /**
-     * {@inheritdoc}
-     */
-    public function convertToXmlValue($value)
-    {
-        return ($value !== null) ? $value->format(static::FORMAT) : null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function convertToPHPValue($value)
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        $val = \DateTime::createFromFormat(static::FORMAT, $value);
-        if (!$val) {
-            throw ConversionException::conversionFailed($value, $this->getName());
-        }
-        return $val;
     }
 }

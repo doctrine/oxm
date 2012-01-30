@@ -71,10 +71,11 @@ abstract class Type
      * Converts a value from its PHP representation to its XML representation
      * of this type.
      *
-     * @param mixed $value The value to convert.
+     * @param mixed $value      The value to convert.
+     * @param array $parameters Type convertion options
      * @return mixed The XML representation of the value.
      */
-    public function convertToXmlValue($value)
+    public function convertToXmlValue($value, array $parameters = array())
     {
         return $value;
     }
@@ -83,10 +84,11 @@ abstract class Type
      * Converts a value from its database representation to its PHP representation
      * of this type.
      *
-     * @param mixed $value The value to convert.
+     * @param mixed $value      The value to convert.
+     * @param array $parameters Type convertion options
      * @return mixed The PHP representation of the value.
      */
-    public function convertToPHPValue($value)
+    public function convertToPHPValue($value, array $parameters = array())
     {
         return $value;
     }
