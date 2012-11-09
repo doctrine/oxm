@@ -99,6 +99,13 @@ class ClassMetadataInfo implements BaseClassMetadata
     public $name;
 
     /**
+     * The namespace of the class
+     *
+     * @var string
+     */
+    public $namespace;
+
+    /**
      * The xml node name to map this class to
      *
      * @var string
@@ -128,6 +135,20 @@ class ClassMetadataInfo implements BaseClassMetadata
      * @var \ReflectionClass
      */
     public $reflClass;
+
+    /**
+     * The ReflectionProperty instances of the mapped class.
+     *
+     * @var \ReflectionProperty[]
+     */
+    public $reflFields = array();
+
+    /**
+     * The prototype from which new instances of the mapped class are created.
+     *
+     * @var object
+     */
+    private $prototype;
 
     /**
      * READ-ONLY: The Id generator type used by the class.
@@ -264,7 +285,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      */
     public function __construct($entityName)
     {
-        $this->name = $entityName;
+        $this->name              = $entityName;
         $this->rootXmlEntityName = $entityName;
     }
 
@@ -487,7 +508,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     /**
      * Sets the ID generator used to generate IDs for instances of this class.
      *
-     * @param AbstractIdGenerator $generator
+     * @param \Doctrine\OXM\Id\AbstractIdGenerator $generator
      */
     public function setIdGenerator($generator)
     {
@@ -512,6 +533,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     public function setParentClasses(array $classNames)
     {
         $this->parentClasses = $classNames;
+
         if (count($classNames) > 0) {
             $this->rootXmlEntityName = array_pop($classNames);
         }
@@ -527,7 +549,7 @@ class ClassMetadataInfo implements BaseClassMetadata
 
     /**
      * @param array
-     * @return void
+     * @return array
      */
     public function mapField(array $mapping)
     {
@@ -619,8 +641,9 @@ class ClassMetadataInfo implements BaseClassMetadata
             $this->identifier = $mapping['fieldName'];
         }
 
-        $this->xmlFieldMap[$mapping['name']] = $mapping['fieldName'];
+        $this->xmlFieldMap[$mapping['name']]        = $mapping['fieldName'];
         $this->fieldMappings[$mapping['fieldName']] = $mapping;
+
         return $mapping;
     }
 
@@ -943,4 +966,250 @@ class ClassMetadataInfo implements BaseClassMetadata
         return $this->xmlNamespaces;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    function getIdentifierFieldNames()
+    {
+        return array($this->identifier);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    function isAssociationInverseSide($assocName)
+    {
+        throw new \BadMethodCallException('Not implemented');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    function getAssociationMappedByTargetField($assocName)
+    {
+        throw new \BadMethodCallException('Not implemented');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    function getIdentifierValues($object)
+    {
+        $values = array();
+
+        foreach ($this->getIdentifierFieldNames() as $idField) {
+            $values[$idField] = $this->reflFields[$idField]->getValue($object);
+        }
+
+        return $values;
+    }
+
+    /**
+     * Gets the ReflectionPropertys of the mapped class.
+     *
+     * @return \ReflectionProperty[] An array of ReflectionProperty instances.
+     */
+    public function getReflectionProperties()
+    {
+        return $this->reflFields;
+    }
+
+    /**
+     * Gets a ReflectionProperty for a specific field of the mapped class.
+     *
+     * @param string $name
+     * @return \ReflectionProperty
+     */
+    public function getReflectionProperty($name)
+    {
+        return $this->reflFields[$name];
+    }
+
+    /**
+     * Sets the specified field to the specified value on the given entity.
+     *
+     * @param object $entity
+     * @param string $fieldName
+     * @param mixed $value
+     */
+    public function setFieldValue($entity, $fieldName, $value)
+    {
+        if ($this->fieldMappings[$fieldName]['direct']) {
+            $this->reflFields[$fieldName]->setValue($entity, $value);
+        } else {
+            if (!array_key_exists('setMethod', $this->fieldMappings[$fieldName])) {
+                $this->fieldMappings[$fieldName]['setMethod'] = $this->inferSetter($fieldName);
+            }
+            $setter = $this->fieldMappings[$fieldName]['setMethod'];
+
+            if ($this->reflClass->hasMethod($setter)) {
+                return call_user_func(array($entity, $setter), $value);
+            } else {
+                throw MappingException::fieldSetMethodDoesNotExist($this->name, $fieldName, $setter);
+            }
+        }
+    }
+
+    /**
+     * Populates the entity identifier of an entity.
+     *
+     * @param object $xmlEntity
+     * @param mixed $id
+     * @todo Rename to assignIdentifier()
+     */
+    public function setIdentifierValue($xmlEntity, array $id)
+    {
+        foreach ($id as $idField => $idValue) {
+            $this->reflFields[$idField]->setValue($xmlEntity, $idValue);
+        }
+    }
+
+    /**
+     * Gets the document identifier.
+     *
+     * @param object $xmlEntity
+     * @return string $id
+     */
+    public function getIdentifierValue($xmlEntity)
+    {
+        return (string) $this->reflFields[$this->identifier]->getValue($xmlEntity);
+    }
+
+    /**
+     * Gets the specified field's value off the given entity.
+     *
+     * @param object $entity
+     * @param string $fieldName
+     */
+    public function getFieldValue($entity, $fieldName)
+    {
+        if ($this->fieldMappings[$fieldName]['direct']) {
+            return $this->reflFields[$fieldName]->getValue($entity);
+        } else {
+            if (!array_key_exists('getMethod', $this->fieldMappings[$fieldName])) {
+                $this->fieldMappings[$fieldName]['getMethod'] = $this->inferGetter($fieldName);
+            }
+            $getter = $this->fieldMappings[$fieldName]['getMethod'];
+
+            if ($this->reflClass->hasMethod($getter)) {
+                return call_user_func(array($entity, $getter));
+            } else {
+                throw MappingException::fieldGetMethodDoesNotExist($this->name, $fieldName, $getter);
+            }
+        }
+    }
+
+    /**
+     * Determines which fields get serialized.
+     *
+     * It is only serialized what is necessary for best unserialization performance.
+     * That means any metadata properties that are not set or empty or simply have
+     * their default value are NOT serialized.
+     *
+     * Parts that are also NOT serialized because they can not be properly unserialized:
+     *      - reflClass (ReflectionClass)
+     *      - reflFields (ReflectionProperty array)
+     *
+     * @return array The names of all the fields that should be serialized.
+     */
+    public function __sleep()
+    {
+        // This metadata is always serialized/cached.
+        $serialized = array(
+            'fieldMappings',
+            'xmlFieldMap', //TODO: Not really needed. Can use fieldMappings[$fieldName]['name']
+            'identifier',
+            'name',
+            'namespace',
+            'isRoot',
+            'xmlName',
+            'generatorType',
+            'idGenerator'
+        );
+
+        // The rest of the metadata is only serialized if necessary.
+        if ($this->lifecycleCallbacks) {
+            $serialized[] = 'lifecycleCallbacks';
+        }
+        if ($this->changeTrackingPolicy != self::CHANGETRACKING_DEFERRED_IMPLICIT) {
+            $serialized[] = 'changeTrackingPolicy';
+        }
+
+        if ($this->customRepositoryClassName) {
+            $serialized[] = 'customRepositoryClassName';
+        }
+        if ($this->isMappedSuperclass) {
+            $serialized[] = 'isMappedSuperclass';
+        }
+        if ($this->xmlNamespaces) {
+            $serialized[] = 'xmlNamespaces';
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * Restores some state that can not be serialized/unserialized.
+     *
+     * @return void
+     */
+    public function __wakeup()
+    {
+        // Restore ReflectionClass and properties
+        $this->reflClass = new \ReflectionClass($this->name);
+
+        foreach ($this->fieldMappings as $field => $mapping) {
+            $reflField = $this->reflClass->getProperty($field);
+            $reflField->setAccessible(true);
+            $this->reflFields[$field] = $reflField;
+        }
+    }
+
+    /**
+     * Creates a new instance of the mapped class, without invoking the constructor.
+     *
+     * @return object
+     */
+    public function newInstance()
+    {
+        if ($this->prototype === null) {
+            $this->prototype = unserialize(sprintf('O:%d:"%s":0:{}', strlen($this->name), $this->name));
+        }
+        return clone $this->prototype;
+    }
+
+    /**
+     * Restores some state that can not be serialized/unserialized.
+     *
+     * @param \Doctrine\Common\Persistence\Mapping\ReflectionService $reflService
+     * @return void
+     */
+    public function wakeupReflection($reflService)
+    {
+        // Restore ReflectionClass and properties
+        $this->reflClass = $reflService->getClass($this->name);
+
+        foreach ($this->fieldMappings as $field => $mapping) {
+            $this->reflFields[$field] = isset($mapping['declared'])
+                ? $reflService->getAccessibleProperty($mapping['declared'], $field)
+                : $reflService->getAccessibleProperty($this->name, $field);
+        }
+    }
+
+    /**
+     * Initializes a new ClassMetadata instance that will hold the object-relational mapping
+     * metadata of the class with the given name.
+     *
+     * @param \Doctrine\Common\Persistence\Mapping\ReflectionService $reflService The reflection service.
+     */
+    public function initializeReflection($reflService)
+    {
+        $this->reflClass = $reflService->getClass($this->name);
+        $this->namespace = $reflService->getClassNamespace($this->name);
+        $this->xmlName   = Inflector::xmlize($this->reflClass->getShortName());
+
+        if ($this->reflClass) {
+            $this->name = $this->rootXmlEntityName = $this->reflClass->getName();
+        }
+    }
 }

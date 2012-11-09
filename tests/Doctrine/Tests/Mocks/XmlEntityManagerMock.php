@@ -27,7 +27,6 @@ namespace Doctrine\Tests\Mocks;
 class XmlEntityManagerMock extends \Doctrine\OXM\XmlEntityManager
 {
     private $_uowMock;
-    private $_proxyFactoryMock;
     private $_idGenerators = array();
 
     /**

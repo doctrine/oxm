@@ -5,7 +5,8 @@ namespace Doctrine\OXM\Tests\Tools;
 use Doctrine\OXM\Tools\SchemaTool,
     Doctrine\OXM\Tools\XmlEntityGenerator,
     Doctrine\OXM\Mapping\ClassMetadataInfo,
-    Doctrine\Tests\OxmTestCase;
+    Doctrine\Tests\OxmTestCase,
+    Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 
 class XmlEntityGeneratorTest extends OxmTestCase
 {
@@ -61,7 +62,7 @@ class XmlEntityGeneratorTest extends OxmTestCase
      */
     public function newInstance($metadata)
     {
-        $path = $this->tmpDir . '/'. $this->namespace . '/XmlEntityGeneratorBook.php'; 
+        $path = $this->tmpDir . '/'. $this->namespace . '/XmlEntityGeneratorBook.php';
         $this->assertFileExists($path);
         require_once $path;
 

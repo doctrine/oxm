@@ -225,6 +225,8 @@ class XmlMarshaller implements Marshaller
         if (!in_array($elementName, $knownMappedNodes)) {
             throw MappingException::invalidMapping($elementName);
         }
+
+        /* @var $classMetadata ClassMetadata */
         $classMetadata = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$elementName]);
         $mappedObject = $classMetadata->newInstance();
 

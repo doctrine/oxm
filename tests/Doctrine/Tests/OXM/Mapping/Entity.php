@@ -17,14 +17,11 @@
  * <http://www.doctrine-project.org>.
  */
 
-namespace Doctrine\OXM\Proxy;
+namespace Doctrine\Tests\OXM\Mapping;
 
 /**
- * XmlEntity Proxy interface.
- *
- * @license     http://www.opensource.org/licenses/lgpl-license.php LGPL
- * @link        www.doctrine-project.com
- * @since       1.0
- * @author      Igor Golovanov <igor.golovanov@gmail.com>
+ * Test asset without properties
  */
-interface Proxy {}
+class Entity
+{
+}

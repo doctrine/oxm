@@ -19,20 +19,33 @@
 
 namespace Doctrine\Tests\OXM\Mapping;
 
-use \Doctrine\Tests\OxmTestCase,
-    \Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\Tests\OxmTestCase;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 
 
 class ClassMetadataInfoTest extends OxmTestCase
 {
+    /**
+     * @var ClassMetadataInfo
+     */
+    protected $class;
+
+    public function setUp()
+    {
+        $this->class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
+        $reflService = new RuntimeReflectionService();
+        $this->class->initializeReflection($reflService);
+        $this->class->wakeupReflection($reflService);
+    }
+
     /**
      * @test
      * @expectedException Doctrine\OXM\Mapping\MappingException
      */
     public function itShouldThrowExceptionsOnRequiredFieldName()
     {
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-        $class->mapField(array());
+        $this->class->mapField(array());
     }
     
     /**
@@ -41,8 +54,7 @@ class ClassMetadataInfoTest extends OxmTestCase
      */
     public function itShouldThrowExceptionsOnRequiredType()
     {
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-        $class->mapField(array('fieldName' => 'squibble'));
+        $this->class->mapField(array('fieldName' => 'squibble'));
     }
 
     /**
@@ -51,9 +63,8 @@ class ClassMetadataInfoTest extends OxmTestCase
      */
     public function itShouldThrowExceptionsOnDuplicateFieldNames()
     {
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-        $class->mapField(array('fieldName' => 'squibble', 'type' => 'string'));
-        $class->mapField(array('fieldName' => 'squibble', 'type' => 'string'));
+        $this->class->mapField(array('fieldName' => 'squibble', 'type' => 'string'));
+        $this->class->mapField(array('fieldName' => 'squibble', 'type' => 'string'));
     }
     /**
      * @test
@@ -61,8 +72,7 @@ class ClassMetadataInfoTest extends OxmTestCase
      */
     public function itShouldThrowExceptionsOnUnknownNodeType()
     {
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-        $class->mapField(array('fieldName' => 'squibble', 'type' => 'string', 'node' => 'fleet'));
+        $this->class->mapField(array('fieldName' => 'squibble', 'type' => 'string', 'node' => 'fleet'));
     }
 
     /**
@@ -71,17 +81,15 @@ class ClassMetadataInfoTest extends OxmTestCase
      */
     public function itShouldThrowExceptionsOnDuplicateXmlFieldNames()
     {
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-        $class->mapField(array('fieldName' => 'squibbleMe', 'type' => 'string', 'name' => 'this'));
-        $class->mapField(array('fieldName' => 'squibbleYou', 'type' => 'string', 'name' => 'this'));
+        $this->class->mapField(array('fieldName' => 'squibbleMe', 'type' => 'string', 'name' => 'this'));
+        $this->class->mapField(array('fieldName' => 'squibbleYou', 'type' => 'string', 'name' => 'this'));
     }
 
     public function itShouldInferGettersProperly()
     {
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-        $class->mapField(array('fieldName' => 'squibble', 'type' => 'string'));
+        $this->class->mapField(array('fieldName' => 'squibble', 'type' => 'string'));
 
-        $mapping = $class->getFieldMapping('squibble'); // todo - don't like relying on internal implementation
+        $mapping = $this->class->getFieldMapping('squibble'); // todo - don't like relying on internal implementation
         $this->assertEquals('getSquibble', $mapping['getMethod']);
         $this->assertEquals('setSquibble', $mapping['setMethod']);
     }
@@ -91,17 +99,16 @@ class ClassMetadataInfoTest extends OxmTestCase
      */
     public function itShouldIdentifyIdentifiers()
     {
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-        $class->mapField(array(
+        $this->class->mapField(array(
             'fieldName' => 'squibble',
             'type' => 'string',
             'id' => true,
         ));
 
-        $this->assertEquals('squibble', $class->identifier);
-        $this->assertEquals('squibble', $class->getIdentifier());
-        $this->assertTrue($class->isIdentifier('squibble'));
-        $this->assertFalse($class->isIdentifier('not_squibble'));
+        $this->assertEquals('squibble', $this->class->identifier);
+        $this->assertEquals('squibble', $this->class->getIdentifier());
+        $this->assertTrue($this->class->isIdentifier('squibble'));
+        $this->assertFalse($this->class->isIdentifier('not_squibble'));
     }
 
     /**
@@ -109,12 +116,9 @@ class ClassMetadataInfoTest extends OxmTestCase
      */
     public function itShouldMapProperly()
     {
+        $this->assertEquals('Doctrine\Tests\OXM\Mapping\Entity', $this->class->getName());
 
-        $class = new ClassMetadataInfo('Doctrine\Tests\OXM\Mapping\Entity');
-
-        $this->assertEquals('Doctrine\Tests\OXM\Mapping\Entity', $class->getName());
-
-        $class->mapField(array(
+        $this->class->mapField(array(
             'fieldName' => 'squibble',
             'type' => 'string',
             'required' => true,
@@ -126,11 +130,11 @@ class ClassMetadataInfoTest extends OxmTestCase
             'setMethod' => 'setSquibble',
         ));
 
-        $this->assertTrue($class->hasField('squibble'));
-        $this->assertEquals('string', $class->getTypeOfField('squibble'));
-        $this->assertTrue($class->isRequired('squibble'));
-        $this->assertTrue($class->isDirect('squibble'));
-        $this->assertFalse($class->isCollection('squibble'));
-        $this->assertFalse($class->isNullable('squibble'));
+        $this->assertTrue($this->class->hasField('squibble'));
+        $this->assertEquals('string', $this->class->getTypeOfField('squibble'));
+        $this->assertTrue($this->class->isRequired('squibble'));
+        $this->assertTrue($this->class->isDirect('squibble'));
+        $this->assertFalse($this->class->isCollection('squibble'));
+        $this->assertFalse($this->class->isNullable('squibble'));
     }
 }

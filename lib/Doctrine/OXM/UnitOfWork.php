@@ -26,7 +26,6 @@ use Doctrine\Common\NotifyPropertyChanged;
 use Doctrine\Common\PropertyChangedListener;
 use Doctrine\OXM\Mapping\ClassMetadata;
 use Doctrine\OXM\Event;
-use Doctrine\OXM\Proxy\Proxy;
 
 /**
  * The UnitOfWork is responsible for tracking changes to objects during an
@@ -297,7 +296,7 @@ class UnitOfWork implements PropertyChangedListener
 
 
         foreach ($this->entityDeletions as $oid => $xmlEntity) {
-            if (get_class($xmlEntity) == $className || $xmlEntity instanceof Proxy && $xmlEntity instanceof $className) {
+            if (get_class($xmlEntity) == $className && $xmlEntity instanceof $className) {
 //                if ( ! $class->isEmbeddedDocument) {
                 $persister->delete($xmlEntity, $options);
 //                }
@@ -350,7 +349,7 @@ class UnitOfWork implements PropertyChangedListener
         $hasPostUpdateListeners = $this->evm->hasListeners(Events::postUpdate);
 
         foreach ($this->entityUpdates as $oid => $xmlEntity) {
-            if (get_class($xmlEntity) == $className || $xmlEntity  instanceof Proxy && $xmlEntity instanceof $className) {
+            if (get_class($xmlEntity) == $className && $xmlEntity instanceof $className) {
 //                if ( ! $class->isEmbeddedDocument) {
                 if ($hasPreUpdateLifecycleCallbacks) {
                     $class->invokeLifecycleCallbacks(Events::preUpdate, $xmlEntity);

@@ -22,6 +22,7 @@ namespace Doctrine\Tests\OXM\Mapping;
 use Doctrine\OXM\Mapping\ClassMetadata;
 use Doctrine\OXM\Mapping\ClassMetadataInfo;
 use Doctrine\OXM\Mapping\Driver\Driver;
+use Doctrine\Common\Persistence\Mapping\RuntimeReflectionService;
 
 abstract class AbstractMappingDriverTest extends \Doctrine\Tests\OxmTestCase
 {
@@ -35,6 +36,9 @@ abstract class AbstractMappingDriverTest extends \Doctrine\Tests\OxmTestCase
         $mappingDriver = $this->_loadDriver();
 
         $class = new ClassMetadata($entityClassName);
+        $reflService = new RuntimeReflectionService();
+        $class->initializeReflection($reflService);
+        $class->wakeupReflection($reflService);
         $mappingDriver->loadMetadataForClass($entityClassName, $class);
 
         return $class;

@@ -23,6 +23,7 @@ use Doctrine\Common\Cache\Cache;
 use Doctrine\OXM\Mapping\Driver\Driver;
 use Doctrine\OXM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\Cache\ArrayCache;
 
@@ -121,72 +122,6 @@ class Configuration
 //        return isset($this->attributes['storagePath']) ?
 //                $this->attributes['storagePath'] : null;
 //    }
-    
-    /**
-     * Sets the directory where Doctrine generates any necessary proxy class files.
-     *
-     * @param string $dir
-     */
-    public function setProxyDir($dir)
-    {
-        $this->attributes['proxyDir'] = $dir;
-    }
-
-    /**
-     * Gets the directory where Doctrine generates any necessary proxy class files.
-     *
-     * @return string
-     */
-    public function getProxyDir()
-    {
-        return isset($this->attributes['proxyDir']) ?
-                $this->attributes['proxyDir'] : null;
-    }
-
-    /**
-     * Gets a boolean flag that indicates whether proxy classes should always be regenerated
-     * during each script execution.
-     *
-     * @return boolean
-     */
-    public function getAutoGenerateProxyClasses()
-    {
-        return isset($this->attributes['autoGenerateProxyClasses']) ?
-                $this->attributes['autoGenerateProxyClasses'] : true;
-    }
-
-    /**
-     * Sets a boolean flag that indicates whether proxy classes should always be regenerated
-     * during each script execution.
-     *
-     * @param boolean $bool
-     */
-    public function setAutoGenerateProxyClasses($bool)
-    {
-        $this->attributes['autoGenerateProxyClasses'] = $bool;
-    }
-
-    /**
-     * Gets the namespace where proxy classes reside.
-     * 
-     * @return string
-     */
-    public function getProxyNamespace()
-    {
-        return isset($this->attributes['proxyNamespace']) ?
-                $this->attributes['proxyNamespace'] : null;
-    }
-
-    /**
-     * Sets the namespace where proxy classes reside.
-     * 
-     * @param string $ns
-     */
-    public function setProxyNamespace($ns)
-    {
-        $this->attributes['proxyNamespace'] = $ns;
-    }
-
 
     /**
      * Add a new default annotation driver with a correctly configured annotation reader.
@@ -206,17 +141,16 @@ class Configuration
             // Register the ORM Annotations in the AnnotationRegistry
             AnnotationRegistry::registerFile(__DIR__ . '/Mapping/Driver/DoctrineAnnotations.php');
 
-            $reader = new AnnotationReader();
-            $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
-            $reader->setIgnoreNotImportedAnnotations(true);
-            $reader->setEnableParsePhpImports(false);
+            $reader = new SimpleAnnotationReader();
+            $reader->addNamespace('Doctrine\OXM\Mapping');
             $reader = new \Doctrine\Common\Annotations\CachedReader(
                 new \Doctrine\Common\Annotations\IndexedReader($reader), new ArrayCache()
             );
         } else {
-            $reader = new AnnotationReader();
-            $reader->setDefaultAnnotationNamespace('Doctrine\OXM\Mapping\\');
+            $reader = new SimpleAnnotationReader();
+            $reader->addNamespace('Doctrine\OXM\Mapping');
         }
+
         return new AnnotationDriver($reader, (array)$paths);
     }
 
@@ -225,7 +159,7 @@ class Configuration
      *
      * @param string $entityNamespaceAlias
      * @return string
-     * @throws MappingException
+     * @throws OXMException
      */
     public function getEntityNamespace($entityNamespaceAlias)
     {
