@@ -263,7 +263,7 @@ class XmlMarshaller implements Marshaller
             $collectionElements = array();
 
             while ($cursor->read()) {
-                if ($cursor->nodeType === XMLReader::END_ELEMENT && $cursor->name === $elementName) {
+                if ($cursor->nodeType === XMLReader::END_ELEMENT && $cursor->localName === $elementName) {
                     // we're at the original element closing node, bug out
                     break;
                 }
@@ -399,7 +399,7 @@ class XmlMarshaller implements Marshaller
      * @param WriterHelper $writer
      * @return void
      */
-    private function doMarshal($mappedObject, WriterHelper $writer)
+    private function doMarshal($mappedObject, WriterHelper $writer, $prefix = null)
     {
         $className = get_class($mappedObject);
         $classMetadata = $this->classMetadataFactory->getMetadataFor($className);
@@ -419,7 +419,7 @@ class XmlMarshaller implements Marshaller
 
         $this->visited[spl_object_hash($mappedObject)] = true;
 
-        $writer->startElement($classMetadata->getXmlName());
+        $writer->startElement($classMetadata->getXmlName(), $prefix);
 
         $namespaces = $classMetadata->getXmlNamespaces();
         if (!empty($namespaces)) {
@@ -592,7 +592,7 @@ class XmlMarshaller implements Marshaller
                     $writer->endElement();
                 }
             } else {
-                $this->doMarshal($fieldValue, $writer);
+                $this->doMarshal($fieldValue, $writer, $prefix);
             }
         }
     }

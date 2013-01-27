@@ -20,7 +20,9 @@
 namespace Doctrine\Tests\OXM\Marshaller;
 
 use \Doctrine\Tests\OxmTestCase,
-    \Doctrine\Tests\OXM\Entities\NamespaceEntities\Foo;
+    \Doctrine\Tests\OXM\Entities\NamespaceEntities\Foo,
+    \Doctrine\Tests\OXM\Entities\NamespaceEntities\Qux,
+    \Doctrine\Tests\OXM\Entities\NamespaceEntities\Baz;
 
 class NamespacesTest extends OxmTestCase
 {
@@ -51,5 +53,44 @@ class NamespacesTest extends OxmTestCase
 
         $this->assertEquals(1, $otherRequest->id);
         $this->assertEquals("bar", $otherRequest->bo);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldMarshalNamespacedNode()
+    {
+        $qux = new Qux();
+        $qux->baz = new Baz();
+        $qux->baz->title = "Baz";
+        $qux->bas = "Bas";
+
+        $xml = $this->marshaller->marshalToString($qux);
+
+        $expectedXml = '<?xml version="1.0" encoding="UTF-8"?>
+            <qux xmlns="http://www.foobar.com/schema" xmlns:bat="http://www.foobaz.com/schema">
+                <bas>Bas</bas>
+                <bat:baz>Baz</bat:baz>
+            </qux>';
+
+        $this->assertXmlStringEqualsXmlString($expectedXml, $xml);
+    }
+
+    /**
+     * @test
+     */
+    public function itShouldUnmarshalNonNamespacedNodePresentAfterNamespacedNode()
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>
+            <qux xmlns="http://www.foobar.com/schema" xmlns:bat="http://www.foobaz.com/schema">
+                <bat:baz>Baz</bat:baz>
+                <bas>Bas</bas>
+            </qux>';
+
+        $qux = $this->marshaller->unmarshalFromString($xml);
+
+        $this->assertInstanceOf('Doctrine\Tests\OXM\Entities\NamespaceEntities\Baz', $qux->baz);
+        $this->assertEquals('Baz', $qux->baz->title);
+        $this->assertEquals('Bas', $qux->bas);
     }
 }
