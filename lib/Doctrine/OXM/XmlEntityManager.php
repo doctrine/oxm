@@ -76,7 +76,7 @@ class XmlEntityManager implements ObjectManager
      * @var array
      */
     private $repositories = array();
-    
+
     /**
      * @var Proxy\ProxyFactory
      */
@@ -107,15 +107,15 @@ class XmlEntityManager implements ObjectManager
         $this->marshaller = new $marshallerClassName($this->metadataFactory);
 
         $this->unitOfWork = new UnitOfWork($this);
-        
+
         $this->proxyFactory = new ProxyFactory($this,
                 $this->config->getProxyDir(),
                 $this->config->getProxyNamespace(),
                 $this->config->getAutoGenerateProxyClasses()
         );
     }
-    
-    
+
+
     /**
      * Gets the proxy factory used by the XmlEntityManager to create xml-entity proxies.
      *
@@ -416,4 +416,16 @@ class XmlEntityManager implements ObjectManager
     }
 
 
+    public function initializeObject($objectt)
+    {
+        $this->unitOfWork->initializeObject($object);
+    }
+
+    public function contains($entity)
+    {
+        return $this->unitOfWork->isScheduledForInsert($entity)
+            || $this->unitOfWork->isInIdentityMap($entity)
+            && ! $this->unitOfWork->isScheduledForDelete($entity)
+        ;
+    }
 }

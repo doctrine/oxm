@@ -143,7 +143,7 @@ class UnitOfWork implements PropertyChangedListener
      * @var array
      */
     private $entityDeletions = array();
-    
+
     /**
      * The XmlEntityManager that "owns" this UnitOfWork instance.
      *
@@ -177,7 +177,7 @@ class UnitOfWork implements PropertyChangedListener
         $this->xem = $xem;
         $this->evm = $xem->getEventManager();
     }
-    
+
     /**
      * Gets the EntityPersister for an Entity.
      *
@@ -382,7 +382,7 @@ class UnitOfWork implements PropertyChangedListener
         $visited = array();
         $this->doRefresh($xmlEntity, $visited);
     }
-    
+
     /**
      * Executes a refresh operation on an xml-entity.
      *
@@ -418,7 +418,7 @@ class UnitOfWork implements PropertyChangedListener
         $visited = array();
         $this->doDetach($xmlEntity, $visited);
     }
-    
+
     /**
      * Executes a detach operation on the given xml-entity.
      *
@@ -458,9 +458,9 @@ class UnitOfWork implements PropertyChangedListener
      */
     public function merge($xmlEntity)
     {
-        
+
     }
-    
+
 
 
     public function remove($xmlEntity)
@@ -580,7 +580,7 @@ class UnitOfWork implements PropertyChangedListener
 
         return false;
     }
-    
+
     /**
      * Persists an xml entity as part of the current unit of work.
      *
@@ -723,7 +723,7 @@ class UnitOfWork implements PropertyChangedListener
             $this->addToIdentityMap($xmlEntity);
         }
     }
-    
+
     /**
      * Checks whether an entity is scheduled for insertion.
      *
@@ -758,7 +758,7 @@ class UnitOfWork implements PropertyChangedListener
         if (isset($this->identityMap[$className][$id])) {
             return false;
         }
-        
+
         $this->identityMap[$className][$id] = $xmlEntity;
         if ($xmlEntity instanceof NotifyPropertyChanged) {
             $xmlEntity->addPropertyChangedListener($this);
@@ -851,6 +851,26 @@ class UnitOfWork implements PropertyChangedListener
         $this->entityChangeSets[$oid][$propertyName] = array($oldValue, $newValue);
         if ( ! isset($this->scheduledForDirtyCheck[$class->rootXmlEntityName][$oid])) {
             $this->scheduleForDirtyCheck($entity);
+        }
+    }
+
+    /**
+     * Helper method to initialize a lazy loading proxy or persistent collection.
+     *
+     * @param object $obj
+     *
+     * @return void
+     */
+    public function initializeObject($obj)
+    {
+        if ($obj instanceof Proxy) {
+            $obj->__load();
+
+            return;
+        }
+
+        if ($obj instanceof PersistentCollection) {
+            $obj->initialize();
         }
     }
 }

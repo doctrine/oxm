@@ -46,7 +46,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      * @var \Doctrine\OXM\Configuration
      */
     private $configuration;
-    
+
     /**
      * @var \Doctrine\OXM\Mapping\Driver\Driver
      */
@@ -118,11 +118,11 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     {
         return $this->loadedMetadata;
     }
-    
+
     /**
      * Forces the factory to load the metadata of all classes known to the underlying
      * mapping driver.
-     * 
+     *
      * @return array The ClassMetadata instances of all mapped classes.
      */
     public function getAllMetadata()
@@ -149,7 +149,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         if (!$this->initialized) {
             $this->initialize();
         }
-        
+
         // Load all metadata
         $this->getAllMetadata();
 
@@ -168,7 +168,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         if (null === $this->evm) {
             $this->evm = new EventManager();
         }
-        
+
         $this->initialized = true;
     }
 
@@ -225,7 +225,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
 
     /**
      * Checks whether the factory has the metadata for a class loaded already.
-     * 
+     *
      * @param string $className
      * @return boolean TRUE if the metadata of the class in question is already loaded, FALSE otherwise.
      */
@@ -236,7 +236,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
 
     /**
      * Sets the metadata descriptor for a specific class.
-     * 
+     *
      * NOTE: This is only useful in very special cases, like when generating proxy classes.
      *
      * @param string $className
@@ -442,5 +442,23 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     protected function newClassMetadataInstance($className)
     {
         return new ClassMetadata($className);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function isTransient($class)
+    {
+        if ( ! $this->initialized) {
+            $this->initialize();
+        }
+
+        // Check for namespace alias
+        if (strpos($class, ':') !== false) {
+            list($namespaceAlias, $simpleClassName) = explode(':', $class);
+            $class = $this->getFqcnFromAlias($namespaceAlias, $simpleClassName);
+        }
+
+        return $this->getDriver()->isTransient($class);
     }
 }
