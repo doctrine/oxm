@@ -22,8 +22,9 @@ namespace Doctrine\OXM\Mapping\Driver;
 
 use SimpleXMLElement;
 use Doctrine\OXM\Mapping\MappingException;
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
 use Doctrine\OXM\Util\Inflector;
+use Doctrine\Common\Persistence\Mapping\Driver\FileDriver;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 
 /**
  *
@@ -33,20 +34,25 @@ use Doctrine\OXM\Util\Inflector;
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class XmlDriver extends AbstractFileDriver
+class XmlDriver extends FileDriver implements Driver
 {
+    const DEFAULT_FILE_EXTENSION = '.dcm.xml';
+
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    protected $fileExtension = '.dcm.xml';
+    public function __construct($locator, $fileExtension = self::DEFAULT_FILE_EXTENSION)
+    {
+        parent::__construct($locator, $fileExtension);
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
+    public function loadMetadataForClass($className, ClassMetadata $metadata)
     {
         $xmlRoot = $this->getElement($className);
-        
+
         if ($xmlRoot->getName() == 'entity') {
             if (isset($xmlRoot['root']) && $xmlRoot['root'] == "true") {
                 $metadata->isRoot = true;

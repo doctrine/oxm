@@ -135,7 +135,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      * @var int
      */
     public $generatorType = self::GENERATOR_TYPE_NONE;
-    
+
     /**
      * READ-ONLY: The ID generator used for generating IDs for this class.
      *
@@ -248,7 +248,7 @@ class ClassMetadataInfo implements BaseClassMetadata
      * @var boolean
      */
     public $isMappedSuperclass = false;
-    
+
     /**
      * READ-ONLY: The names of the parent classes (ancestors).
      *
@@ -535,7 +535,7 @@ class ClassMetadataInfo implements BaseClassMetadata
         if (!isset($mapping['fieldName']) || strlen($mapping['fieldName']) == 0) {
             throw MappingException::missingFieldName($this->name);
         }
-        
+
         if (isset($this->fieldMappings[$mapping['fieldName']])) {
             $existingMapping = $this->fieldMappings[$mapping['fieldName']];
 
@@ -600,7 +600,7 @@ class ClassMetadataInfo implements BaseClassMetadata
         if (!isset($mapping['container'])) {
             $mapping['container'] = false;
         }
-        
+
         if (!isset($mapping['collection'])) {
             $mapping['collection'] = false;
         }
@@ -717,7 +717,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     {
         return false;
     }
-    
+
     /**
      * Checks whether the class has a mapped reference or embed for the specified field and
      * is a single valued association.
@@ -779,7 +779,7 @@ class ClassMetadataInfo implements BaseClassMetadata
     }
 
     /**
-     * 
+     *
      */
     public function getFieldXmlName($fieldName)
     {
@@ -943,4 +943,51 @@ class ClassMetadataInfo implements BaseClassMetadata
         return $this->xmlNamespaces;
     }
 
+    public function getIdentifierFieldNames()
+    {
+        return $this->getIdentifier();
+    }
+
+    public function isAssociationInverseSide($assocName)
+    {
+        return true;
+    }
+
+    public function getAssociationMappedByTargetField($assocName)
+    {
+    }
+
+    public function getIdentifierValues($entity)
+    {
+        $id = $this->identifier;
+        $value = $this->reflFields[$id]->getValue($entity);
+
+        if (null === $value) {
+            return array();
+        }
+
+        return array($id => $value);
+    }
+
+    public function initializeReflection($reflService)
+    {
+        $this->reflClass = $reflService->getClass($this->name);
+        $this->namespace = $reflService->getClassNamespace($this->name);
+
+        if ($this->reflClass) {
+            $this->name = $this->rootEntityName = $this->reflClass->getName();
+        }
+    }
+
+    public function wakeupReflection($reflService)
+    {
+        // Restore ReflectionClass and properties
+        $this->reflClass = $reflService->getClass($this->name);
+
+        foreach ($this->fieldMappings as $field => $mapping) {
+            $this->reflFields[$field] = isset($mapping['declared'])
+                ? $reflService->getAccessibleProperty($mapping['declared'], $field)
+                : $reflService->getAccessibleProperty($this->name, $field);
+        }
+    }
 }

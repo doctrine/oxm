@@ -20,7 +20,7 @@
 namespace Doctrine\OXM\Mapping\Driver;
 
 use Doctrine\OXM\Mapping\Driver\Driver;
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\OXM\Mapping\MappingException;
 
 /**
@@ -69,7 +69,7 @@ class DriverChain implements Driver
      * @param string $className
      * @param ClassMetadataInfo $metadata
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $metadata)
+    public function loadMetadataForClass($className, ClassMetadata $metadata)
     {
         foreach ($this->drivers as $namespace => $driver) {
             if (strpos($className, $namespace) === 0) {

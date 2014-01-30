@@ -26,8 +26,13 @@ use Doctrine\Common\Util\Debug;
 use Doctrine\OXM\Events;
 use Doctrine\Common\Cache\Cache;
 use Doctrine\Common\EventManager;
-use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory as BaseClassMetadataFactory;
+use Doctrine\Common\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\OXM\Types\Type;
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+use Doctrine\Common\Persistence\Mapping\ReflectionService;
+use Doctrine\OXM\XmlEntityManager;
+use Doctrine\OXM\Mapping\ClassMetadataInfo;
+use Doctrine\OXM\Mapping\ClassMetadata as ClassMetadataImpl;
 
 /**
  * The ClassMetadataFactory is used to create Mapping objects that contain all the
@@ -40,12 +45,12 @@ use Doctrine\OXM\Types\Type;
  * @version $Revision$
  * @author  Richard Fullmer <richard.fullmer@opensoftdev.com>
  */
-class ClassMetadataFactory implements BaseClassMetadataFactory
+class ClassMetadataFactory extends AbstractClassMetadataFactory
 {
     /**
-     * @var \Doctrine\OXM\Configuration
+     * @var \Doctrine\OXM\XmlEntityManager
      */
-    private $configuration;
+    private $xem;
 
     /**
      * @var \Doctrine\OXM\Mapping\Driver\Driver
@@ -58,86 +63,12 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     private $evm;
 
     /**
-     * @var \Doctrine\Common\Cache\Cache
-     */
-    private $cacheDriver;
-
-    /**
-     * @var \Doctrine\OXM\Mapping\ClassMetadata[]
-     */
-    private $loadedMetadata = array();
-
-    /**
      * Keys are mapped xml node names
      *
      * @var array
      */
     private $xmlToClassMap = array();
 
-    /**
-     * @var bool
-     */
-    private $initialized = false;
-
-    /**
-     * @param Configuration $configuration
-     * @param EventManager|null $evm
-     * @return null
-     */
-    public function __construct(Configuration $configuration, EventManager $evm = null)
-    {
-        $this->configuration = $configuration;
-        $this->evm = $evm;
-    }
-
-
-    /**
-     * Sets the cache driver used by the factory to cache Mapping instances.
-     *
-     * @param \Doctrine\Common\Cache\Cache $cacheDriver
-     */
-    public function setCacheDriver(Cache $cacheDriver)
-    {
-        $this->cacheDriver = $cacheDriver;
-    }
-
-    /**
-     * Gets the cache driver used by the factory to cache ClassMetadata instances.
-     *
-     * @return Doctrine\Common\Cache\Cache
-     */
-    public function getCacheDriver()
-    {
-        return $this->cacheDriver;
-    }
-
-    /**
-     * @return array
-     */
-    public function getLoadedMetadata()
-    {
-        return $this->loadedMetadata;
-    }
-
-    /**
-     * Forces the factory to load the metadata of all classes known to the underlying
-     * mapping driver.
-     *
-     * @return array The ClassMetadata instances of all mapped classes.
-     */
-    public function getAllMetadata()
-    {
-        if (!$this->initialized) {
-            $this->initialize();
-        }
-
-        $mappings = array();
-        foreach ($this->driver->getAllClassNames() as $className) {
-            $mappings[] = $this->getMetadataFor($className);
-        }
-
-        return $mappings;
-    }
 
     /**
      * Preloads all metadata and returns an array of all known mapped node types
@@ -156,205 +87,25 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
         return $this->xmlToClassMap;
     }
 
+    public function setXmlEntityManager(XmlEntityManager $xem)
+    {
+        $this->xem = $xem;
+    }
+
     /**
      * Lazy initialization of this stuff, especially the metadata driver,
      * since these are not needed at all when a metadata cache is active.
      */
-    private function initialize()
+    protected function initialize()
     {
-        $this->cacheDriver = $this->configuration->getMetadataCacheImpl();
-        $this->driver = $this->configuration->getMetadataDriverImpl();
+        $this->cacheDriver = $this->xem->getConfiguration()->getMetadataCacheImpl();
+        $this->driver = $this->xem->getConfiguration()->getMetadataDriverImpl();
 
         if (null === $this->evm) {
             $this->evm = new EventManager();
         }
 
         $this->initialized = true;
-    }
-
-    /**
-     * Gets the class metadata descriptor for a class.
-     *
-     * @param string $className The name of the class.
-     * @return \Doctrine\OXM\Mapping\ClassMetadata
-     */
-    public function getMetadataFor($className)
-    {
-        if ( ! isset($this->loadedMetadata[$className])) {
-//            print_r('loading class ' . $className . "\n");
-            $realClassName = $className;
-
-            // Check for namespace alias
-            if (strpos($className, ':') !== false) {
-                list($namespaceAlias, $simpleClassName) = explode(':', $className);
-                $realClassName = $this->configuration->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
-
-                if (isset($this->loadedMetadata[$realClassName])) {
-                    // We do not have the alias name in the map, include it
-                    $this->loadedMetadata[$className] = $this->loadedMetadata[$realClassName];
-
-                    return $this->loadedMetadata[$realClassName];
-                }
-            }
-
-            if ($this->cacheDriver) {
-                if (($cached = $this->cacheDriver->fetch("$realClassName\$XMLCLASSMETADATA")) !== false) {
-                    $this->loadedMetadata[$realClassName] = $cached;
-                    if (!$cached->isMappedSuperclass) {
-                        $this->xmlToClassMap[$cached->getXmlName()] = $realClassName;
-                    }
-                } else {
-                    foreach ($this->loadMetadata($realClassName) as $loadedClassName) {
-                        $this->cacheDriver->save(
-                            "$loadedClassName\$XMLCLASSMETADATA", $this->loadedMetadata[$loadedClassName], null
-                        );
-                    }
-                }
-            } else {
-                $this->loadMetadata($realClassName);
-            }
-
-            if ($className != $realClassName) {
-                // We do not have the alias name in the map, include it
-                $this->loadedMetadata[$className] = $this->loadedMetadata[$realClassName];
-            }
-        }
-
-        return $this->loadedMetadata[$className];
-    }
-
-    /**
-     * Checks whether the factory has the metadata for a class loaded already.
-     *
-     * @param string $className
-     * @return boolean TRUE if the metadata of the class in question is already loaded, FALSE otherwise.
-     */
-    public function hasMetadataFor($className)
-    {
-        return isset($this->loadedMetadata[$className]);
-    }
-
-    /**
-     * Sets the metadata descriptor for a specific class.
-     *
-     * NOTE: This is only useful in very special cases, like when generating proxy classes.
-     *
-     * @param string $className
-     * @param ClassMapping $class
-     */
-    public function setMetadataFor($className, $class)
-    {
-        $this->loadedMetadata[$className] = $class;
-    }
-
-    /**
-     * Get array of parent classes for the given entity class
-     *
-     * @param string $name
-     * @return array $parentClasses
-     */
-    protected function getParentClasses($name)
-    {
-        // Collect parent classes, ignoring transient (not-mapped) classes.
-        $parentClasses = array();
-        foreach (array_reverse(class_parents($name)) as $parentClass) {
-            if (!$this->driver->isTransient($parentClass)) {
-                $parentClasses[] = $parentClass;
-            }
-        }
-        return $parentClasses;
-    }
-
-    /**
-     * Loads the metadata of the class in question and all it's ancestors whose metadata
-     * is still not loaded.
-     *
-     * @param string $name The name of the class for which the metadata should get loaded.
-     * @param array  $tables The metadata collection to which the loaded metadata is added.
-     */
-    protected function loadMetadata($name)
-    {
-        if (!$this->initialized) {
-            $this->initialize();
-        }
-
-        $loaded = array();
-
-        $parentClasses = $this->getParentClasses($name);
-        $parentClasses[] = $name;
-
-        // Move down the hierarchy of parent classes, starting from the topmost class
-        $parent = null;
-        $visited = array();
-        foreach ($parentClasses as $className) {
-            if (isset($this->loadedMetadata[$className])) {
-                $parent = $this->loadedMetadata[$className];
-                if ( $parent->isMappedSuperclass) {
-                    array_unshift($visited, $className);
-                }
-                continue;
-            }
-
-            $class = $this->newClassMetadataInstance($className);
-
-            if ($parent) {
-                $class->setIdGeneratorType($parent->generatorType);
-                $this->addInheritedFields($class, $parent);
-
-                $class->setXmlNamespaces($parent->xmlNamespaces);
-                $class->setIdentifier($parent->identifier);
-                $class->setLifecycleCallbacks($parent->lifecycleCallbacks);
-                $class->setChangeTrackingPolicy($parent->changeTrackingPolicy);
-            }
-
-            // Invoke driver
-            try {
-                $this->driver->loadMetadataForClass($className, $class);
-            } catch (ReflectionException $e) {
-                throw MappingException::reflectionFailure($className, $e);
-            }
-
-            if ( ! $class->isMappedSuperclass && in_array($class->getXmlName(), array_keys($this->xmlToClassMap))) {
-                throw MappingException::duplicateXmlNameBinding($className, $class->getXmlName());
-            }
-
-            if ($parent && ! $parent->isMappedSuperclass) {
-                if ($parent->generatorType) {
-                    $class->setIdGeneratorType($parent->generatorType);
-                }
-                if ($parent->idGenerator) {
-                    $class->setIdGenerator($parent->idGenerator);
-                }
-            } else {
-                $this->completeIdGeneratorMapping($class);
-            }
-
-            $class->setParentClasses($visited);
-
-            // Todo - ensure that root elements have an ID mapped
-
-            if ($this->evm->hasListeners(Events::loadClassMetadata)) {
-                $eventArgs = new \Doctrine\OXM\Event\LoadClassMetadataEventArgs($class, $this);
-                $this->evm->dispatchEvent(Events::loadClassMetadata, $eventArgs);
-            }
-
-            $this->loadedMetadata[$className] = $class;
-            $this->completeMappingTypeValidation($className, $class);
-
-            if ( ! $class->isMappedSuperclass) {
-                $this->xmlToClassMap[$class->getXmlName()] = $className;
-            }
-
-            $parent = $class;
-
-            if ( $class->isMappedSuperclass) {
-                array_unshift($visited, $className);
-            }
-
-            $loaded[] = $className;
-        }
-
-        return $loaded;
     }
 
     /**
@@ -413,7 +164,7 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
     private function completeIdGeneratorMapping(ClassMetadataInfo $class)
     {
         $idGenType = $class->generatorType;
-        if ($idGenType == ClassMetadata::GENERATOR_TYPE_AUTO) {
+        if ($idGenType == ClassMetadataInfo::GENERATOR_TYPE_AUTO) {
             $class->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_NONE);
         }
 
@@ -441,24 +192,94 @@ class ClassMetadataFactory implements BaseClassMetadataFactory
      */
     protected function newClassMetadataInstance($className)
     {
-        return new ClassMetadata($className);
+        return new ClassMetadataImpl($className);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function isTransient($class)
+    protected function getFqcnFromAlias($namespaceAlias, $simpleClassName)
     {
-        if ( ! $this->initialized) {
-            $this->initialize();
+        return $this->em->getConfiguration()->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getDriver()
+    {
+        return $this->driver;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function isEntity(ClassMetadata $class)
+    {
+        return isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
+    }
+
+    protected function wakeupReflection(ClassMetadata $class, ReflectionService $reflService)
+    {
+        /* @var $class ClassMetadata */
+        $class->wakeupReflection($reflService);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function initializeReflection(ClassMetadata $class, ReflectionService $reflService)
+    {
+        /* @var $class ClassMetadata */
+        $class->initializeReflection($reflService);
+    }
+
+    protected function doLoadMetadata($class, $parent, $rootEntityFound, array $nonSuperclassParents)
+    {
+        if ($parent) {
+            $class->setIdGeneratorType($parent->generatorType);
+            $this->addInheritedFields($class, $parent);
+
+            $class->setXmlNamespaces($parent->xmlNamespaces);
+            $class->setIdentifier($parent->identifier);
+            $class->setLifecycleCallbacks($parent->lifecycleCallbacks);
+            $class->setChangeTrackingPolicy($parent->changeTrackingPolicy);
         }
 
-        // Check for namespace alias
-        if (strpos($class, ':') !== false) {
-            list($namespaceAlias, $simpleClassName) = explode(':', $class);
-            $class = $this->getFqcnFromAlias($namespaceAlias, $simpleClassName);
+        // Invoke driver
+        try {
+            $this->driver->loadMetadataForClass($class->getName(), $class);
+        } catch (ReflectionException $e) {
+            throw MappingException::reflectionFailure($class->getName(), $e);
         }
 
-        return $this->getDriver()->isTransient($class);
+        if ( ! $class->isMappedSuperclass && in_array($class->getXmlName(), array_keys($this->xmlToClassMap))) {
+            throw MappingException::duplicateXmlNameBinding($class->getName(), $class->getXmlName());
+        }
+
+        if ($parent && ! $parent->isMappedSuperclass) {
+            if ($parent->generatorType) {
+                $class->setIdGeneratorType($parent->generatorType);
+            }
+            if ($parent->idGenerator) {
+                $class->setIdGenerator($parent->idGenerator);
+            }
+        } else {
+            $this->completeIdGeneratorMapping($class);
+        }
+
+        // Todo - ensure that root elements have an ID mapped
+
+        if ($this->evm->hasListeners(Events::loadClassMetadata)) {
+            $eventArgs = new \Doctrine\OXM\Event\LoadClassMetadataEventArgs($class, $this);
+            $this->evm->dispatchEvent(Events::loadClassMetadata, $eventArgs);
+        }
+
+        $this->loadedMetadata[$class->getName()] = $class;
+        $this->completeMappingTypeValidation($class->getName(), $class);
+
+        if ( ! $class->isMappedSuperclass) {
+            $this->xmlToClassMap[$class->getXmlName()] = $class->getName();
+        }
     }
 }

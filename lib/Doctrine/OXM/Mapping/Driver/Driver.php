@@ -19,8 +19,8 @@
 
 namespace Doctrine\OXM\Mapping\Driver;
 
-use Doctrine\OXM\Mapping\ClassMetadataInfo;
-    
+use Doctrine\Common\Persistence\Mapping\ClassMetadata;
+
 /**
  *
  * @license http://www.opensource.org/licenses/lgpl-license.php LGPL
@@ -38,7 +38,7 @@ interface Driver
      * @param string $className
      * @param Mapping $metadata
      */
-    public function loadMetadataForClass($className, ClassMetadataInfo $metadata);
+    public function loadMetadataForClass($className, ClassMetadata $metadata);
 
     /**
      * Gets the names of all mapped classes known to this driver.

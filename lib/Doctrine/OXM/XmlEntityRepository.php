@@ -131,4 +131,8 @@ class XmlEntityRepository implements ObjectRepository
         }
     }
 
+    public function getClassName()
+    {
+        return $this->entityName;
+    }
 }

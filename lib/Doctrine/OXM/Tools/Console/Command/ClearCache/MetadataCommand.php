@@ -67,12 +67,8 @@ EOT
 
         $output->write('Clearing ALL Metadata cache entries' . PHP_EOL);
 
-        $cacheIds = $cacheDriver->deleteAll();
-
-        if ($cacheIds) {
-            foreach ($cacheIds as $cacheId) {
-                $output->write(' - ' . $cacheId . PHP_EOL);
-            }
+        if ($cacheDriver->deleteAll()) {
+            $output->write('Entries deleted.' . PHP_EOL);
         } else {
             $output->write('No entries to be deleted.' . PHP_EOL);
         }

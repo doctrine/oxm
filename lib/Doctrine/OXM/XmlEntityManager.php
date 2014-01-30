@@ -102,6 +102,7 @@ class XmlEntityManager implements ObjectManager
         $metadataFactoryClassName = $config->getClassMetadataFactoryName();
         $this->metadataFactory = new $metadataFactoryClassName($config, $this->eventManager);
         $this->metadataFactory->setCacheDriver($this->config->getMetadataCacheImpl());
+        $this->metadataFactory->setXmlEntityManager($this);
 
         $marshallerClassName = $config->getMarshallerClassName();
         $this->marshaller = new $marshallerClassName($this->metadataFactory);
