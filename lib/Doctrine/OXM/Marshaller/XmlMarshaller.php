@@ -26,9 +26,10 @@ use Doctrine\OXM\Marshaller\Helper\ReaderHelper;
 use Doctrine\OXM\Marshaller\Helper\WriterHelper;
 use Doctrine\OXM\Types\Type;
 use Doctrine\OXM\Events;
-    
+use Doctrine\Common\Collections\ArrayCollection;
+
 use XMLReader, XMLWriter;
-    
+
 /**
  * A marshaller class which uses Xml Writer and Xml Reader php libraries.
  *
@@ -125,7 +126,7 @@ class XmlMarshaller implements Marshaller
     /**
      * @param string $encoding
      * @return void
-     * 
+     *
      * @todo check for valid encoding from http://www.w3.org/TR/REC-xml/#charencoding
      */
     public function setEncoding($encoding)
@@ -317,7 +318,7 @@ class XmlMarshaller implements Marshaller
                     $childClassMetadata = $this->classMetadataFactory->getMetadataFor($allMappedXmlNodes[$cursor->name]);
 
                     // todo: ensure this potential child inherits from parent correctly
-                    
+
                     $fieldName = null;
                     foreach ($classMetadata->getFieldMappings() as $fieldMapping) {
                         if ($fieldMapping['type'] == $allMappedXmlNodes[$cursor->name]) {
@@ -344,7 +345,7 @@ class XmlMarshaller implements Marshaller
 
             if (!empty($collectionElements)) {
                 foreach ($collectionElements as $fieldName => $elements) {
-                    $classMetadata->setFieldValue($mappedObject, $fieldName, $elements);
+                    $classMetadata->setFieldValue($mappedObject, $fieldName, new ArrayCollection($elements));
                 }
             }
         }
@@ -483,7 +484,7 @@ class XmlMarshaller implements Marshaller
                 }
 
                 if ($fieldValue !== null || $classMetadata->isNullable($fieldName)) {
-                    $this->writeElement($writer, $classMetadata, $fieldName,  $fieldValue);   
+                    $this->writeElement($writer, $classMetadata, $fieldName,  $fieldValue);
                 }
             }
         }
